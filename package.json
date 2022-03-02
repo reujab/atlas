@@ -1,0 +1,28 @@
+{
+  "name": "pi-es",
+  "version": "0.0.0",
+  "description": "Pi Entertainment System",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reujab/pi-es.git"
+  },
+  "author": "reujab",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/reujab/pi-es/issues"
+  },
+  "homepage": "https://github.com/reujab/pi-es#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^10.2.4",
+    "eslint": "^8.10.0",
+    "html-minimizer-webpack-plugin": "^3.5.0",
+    "svelte": "^3.46.4",
+    "svelte-loader": "^3.1.2",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2"
+  }
+}
