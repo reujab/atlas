@@ -31,14 +31,18 @@ module.exports = {
 			],
 		}),
 	],
-	optimization: {
-		minimize: true,
-		minimizer: [
-			new HtmlMinimizerPlugin(),
-		],
-	},
 	resolve: {
 		extensions: ["...", ".svelte"],
 		mainFields: ["svelte", "browser", "module", "main"],
+	},
+	devServer: {
+		static: { directory: __dirname + "/dist" },
+		port: 8000,
+	},
+	optimization: {
+		minimizer: [
+			"...",
+			new HtmlMinimizerPlugin(),
+		],
 	},
 }

@@ -4,7 +4,10 @@
   "description": "Pi Entertainment System",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "watch": "webpack serve -c webpack.dev",
+    "build": "webpack build -c webpack.prod",
+    "start": "npm i && npm run build && cargo run --release"
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,7 @@
     "svelte": "^3.46.4",
     "svelte-loader": "^3.1.2",
     "webpack": "^5.69.1",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
   }
 }
