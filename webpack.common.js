@@ -28,6 +28,10 @@ module.exports = {
 					context: __dirname + "/http",
 					from: "*.html",
 				},
+				{
+					context: __dirname + "/http",
+					from: "textures/*/*.jpg",
+				},
 			],
 		}),
 	],
