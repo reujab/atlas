@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "webpack serve -c webpack.dev",
-    "build": "webpack build -c webpack.prod",
+    "watch": "webpack serve -c webpack.dev & tailwindcss -o dist/index.css -w & wait",
+    "build": "webpack build -c webpack.prod & tailwindcss -o dist/index.css -m & wait",
     "start": "npm i && npm run build && cargo run --release"
   },
   "repository": {
@@ -25,6 +25,7 @@
     "html-minimizer-webpack-plugin": "^3.5.0",
     "svelte": "^3.46.4",
     "svelte-loader": "^3.1.2",
+    "tailwindcss": "^3.0.23",
     "webpack": "^5.69.1",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.7.4"

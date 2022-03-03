@@ -1,12 +1,14 @@
 const CopyPlugin = require("copy-webpack-plugin")
 const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin")
+const dist = __dirname + "/dist"
+const http = __dirname + "/http"
 
 module.exports = {
 	entry: {
 		index: "./http/index.js",
 	},
 	output: {
-		path: __dirname + "/dist",
+		path: dist,
 		filename: "[name].js",
 	},
 	module: {
@@ -25,11 +27,11 @@ module.exports = {
 		new CopyPlugin({
 			patterns: [
 				{
-					context: __dirname + "/http",
+					context: http,
 					from: "*.html",
 				},
 				{
-					context: __dirname + "/http",
+					context: http,
 					from: "textures/*/*.jpg",
 				},
 			],
@@ -40,7 +42,7 @@ module.exports = {
 		mainFields: ["svelte", "browser", "module", "main"],
 	},
 	devServer: {
-		static: { directory: __dirname + "/dist" },
+		static: { directory: dist },
 		port: 8000,
 	},
 	optimization: {
