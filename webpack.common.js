@@ -48,7 +48,14 @@ module.exports = {
 	optimization: {
 		minimizer: [
 			"...",
-			new HtmlMinimizerPlugin(),
+			new HtmlMinimizerPlugin({
+				minimizerOptions: {
+					collapseBooleanAttributes: true,
+					collapseInlineTagWhitespace: true,
+					conservativeCollapse: false,
+					keepClosingSlash: false,
+				},
+			}),
 		],
 	},
 }
