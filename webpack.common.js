@@ -32,7 +32,7 @@ module.exports = {
 				},
 				{
 					context: http,
-					from: "textures/*/*.jpg",
+					from: "backgrounds/*/*.webp",
 				},
 			],
 		}),
