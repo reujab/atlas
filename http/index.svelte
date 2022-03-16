@@ -8,16 +8,32 @@
 	const index = Math.floor(Math.random() * (timeOfDay === "day" ? 4 : 23));
 	console.log("random number =", index);
 	const img = `url(./backgrounds/${timeOfDay}/${index}.webp)`;
+
+	const tiles = [
+		{ title: "Movies", icon: FaFilm, iconClass: "text-indigo-700" },
+		{ title: "TV Shows", icon: FaTv, iconClass: "text-lime-700" },
+	];
+
+	let activeTile = 0
+
+	function onGamepadConnect() {
+		activeTile = 1
+	}
 </script>
 
+<svelte:window on:gamepadconnected={onGamepadConnect} />
 <div id="main" class="h-screen px-48" style="background-image: {img}">
 	<div
-		class="overflow-x-scroll flex flex-col gap-48 justify-center content-start flex-wrap h-full"
+		class="flex flex-col gap-48 justify-center content-start flex-wrap h-full"
 	>
-		<HomeTile title="Movies" icon={FaFilm} iconClass="text-indigo-700" />
-		<HomeTile title="TV Shows" icon={FaTv} iconClass="text-lime-700" />
-		<HomeTile title="App #1" icon={FaFilm} iconClass="text-indigo-700" />
-		<HomeTile title="App #2" icon={FaTv} iconClass="text-lime-700" />
+		{#each tiles as tile, i}
+			<HomeTile
+				title={tile.title}
+				icon={tile.icon}
+				iconClass={tile.iconClass}
+				active={activeTile === i}
+			/>
+		{/each}
 	</div>
 </div>
 

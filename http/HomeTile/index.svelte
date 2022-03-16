@@ -1,11 +1,11 @@
 <script>
-	export let icon;
-	export let title;
-	export let iconClass;
+	export let title, icon, iconClass, active;
 </script>
 
 <div
-	class="w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl"
+	class="tile w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl {active
+		? 'active'
+		: ''}"
 >
 	<div class="p-2 w-40 h-40 flex justify-center items-center {iconClass}">
 		<svelte:component this={icon} />
@@ -15,3 +15,14 @@
 		{title}
 	</div>
 </div>
+
+<style>
+	.tile {
+		transition: transform 100ms ease-in-out;
+	}
+
+	.tile.active,
+	.tile:hover {
+		transform: scale(1.1);
+	}
+</style>
