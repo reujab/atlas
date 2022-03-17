@@ -31,6 +31,7 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
+    "@tauri-apps/api": "^1.0.0-rc.2",
     "gamepad.js": "^1.0.4",
     "svelte-hash-router": "^1.0.1",
     "svelte-icons": "^2.1.0"
