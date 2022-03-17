@@ -49,19 +49,12 @@
 </script>
 
 <div
-	id="main"
 	class="h-screen px-48 rounded-[25px] bg-cover flex items-center"
 	style="background-image: {img}"
 >
-	<div class="flex flex-col gap-48 flex-wrap tile">
+	<div class="flex flex-col gap-48 flex-wrap h-[44rem]">
 		{#each tiles as tile, i}
 			<HomeTile {tile} active={activeTile === i} />
 		{/each}
 	</div>
 </div>
-
-<style>
-	.tile {
-		height: calc(100vh - 12rem);
-	}
-</style>
