@@ -1,7 +1,12 @@
-import Index from "./index.svelte"
+import HomeScreen from "./HomeScreen"
+import Movies from "./Movies"
+import Router, { routes } from "svelte-hash-router"
 
-const index = new Index({
-	target: document.body,
+routes.set({
+	"/": HomeScreen,
+	"/movies": Movies,
 })
 
-export default index
+export default new Router({
+	target: document.body,
+})

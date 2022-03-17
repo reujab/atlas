@@ -10,8 +10,18 @@
 	const img = `url(./backgrounds/${timeOfDay}/${index}.webp)`;
 
 	const tiles = [
-		{ title: "Movies", icon: FaFilm, iconClass: "text-indigo-700" },
-		{ title: "TV Shows", icon: FaTv, iconClass: "text-lime-700" },
+		{
+			title: "Movies",
+			path: "/movies",
+			icon: FaFilm,
+			iconClass: "text-indigo-700",
+		},
+		{
+			title: "TV Shows",
+			path: "/shows",
+			icon: FaTv,
+			iconClass: "text-lime-700",
+		},
 	];
 	let activeTile = 0;
 
@@ -23,31 +33,24 @@
 			activeTile = Number(!activeTile);
 		}
 	});
+
+	function mouseMove() {
+		activeTile = -1;
+		removeEventListener("mousemove", mouseMove);
+	}
+	addEventListener("mousemove", mouseMove);
 </script>
 
-<div id="main" class="h-screen px-48" style="background-image: {img}">
+<div
+	id="main"
+	class="h-screen px-48 rounded-[25px] bg-cover"
+	style="background-image: {img}"
+>
 	<div
 		class="flex flex-col gap-48 justify-center content-start flex-wrap h-full"
 	>
 		{#each tiles as tile, i}
-			<HomeTile
-				title={tile.title}
-				icon={tile.icon}
-				iconClass={tile.iconClass}
-				active={activeTile === i}
-			/>
+			<HomeTile {tile} active={activeTile === i} />
 		{/each}
 	</div>
 </div>
-
-<style>
-	:global(body) {
-		background: black;
-	}
-
-	#main {
-		background-size: cover;
-		font-family: Cantarell;
-		border-radius: 25px;
-	}
-</style>
