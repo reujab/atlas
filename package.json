@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
     "dev": "webpack serve -c webpack.dev & tailwindcss -o dist/index.css -w & cargo tauri dev & wait",
-    "build": "webpack build -c webpack.prod & tailwindcss -o dist/index.css -m & cargo build --release & wait",
+    "build": "webpack build -c webpack.prod & tailwindcss -o dist/index.css -m & wait && cargo build --release",
     "start": "npm i && npm run build && ./target/release/pi-es"
   },
   "repository": {
