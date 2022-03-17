@@ -31,6 +31,7 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
+    "gamepad.js": "^1.0.4",
     "svelte-icons": "^2.1.0"
   }
 }
