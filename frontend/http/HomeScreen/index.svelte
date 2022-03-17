@@ -2,6 +2,7 @@
 	import HomeTile from "./HomeTile";
 	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 	import FaTv from "svelte-icons/fa/FaTv.svelte";
+	import FaPhotoVideo from "svelte-icons/fa/FaPhotoVideo.svelte";
 	import { GamepadListener } from "gamepad.js";
 
 	const hour = new Date().getHours();
@@ -21,6 +22,12 @@
 			path: "/shows",
 			icon: FaTv,
 			iconClass: "text-lime-700",
+		},
+		{
+			title: "Pictures",
+			path: "/pictures",
+			icon: FaPhotoVideo,
+			iconClass: "text-amber-700",
 		},
 	];
 	let activeTile = 0;
@@ -43,14 +50,18 @@
 
 <div
 	id="main"
-	class="h-screen px-48 rounded-[25px] bg-cover"
+	class="h-screen px-48 rounded-[25px] bg-cover flex items-center"
 	style="background-image: {img}"
 >
-	<div
-		class="flex flex-col gap-48 justify-center content-start flex-wrap h-full"
-	>
+	<div class="flex flex-col gap-48 flex-wrap tile">
 		{#each tiles as tile, i}
 			<HomeTile {tile} active={activeTile === i} />
 		{/each}
 	</div>
 </div>
+
+<style>
+	.tile {
+		height: calc(100vh - 12rem);
+	}
+</style>
