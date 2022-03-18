@@ -22,6 +22,6 @@
 	});
 </script>
 
-<div class="h-screen flex items-center content-center" on:click={getNewImage}>
+<div class="h-screen flex items-center justify-center" on:click={getNewImage}>
 	<img {src} alt="" class="max-h-screen" />
 </div>
