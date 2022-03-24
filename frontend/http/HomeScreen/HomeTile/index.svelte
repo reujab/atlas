@@ -2,31 +2,27 @@
 	export let tile, active;
 </script>
 
-<a href="#{tile.path}">
+<a
+	href="#{tile.path}"
+	class="tile w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl {active
+		? 'active'
+		: ''}"
+>
 	<div
-		class="tile w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl {active
-			? 'active'
-			: ''}"
+		class="p-2 w-40 h-40 flex justify-center items-center {tile.iconClass}"
 	>
-		<div
-			class="p-2 w-40 h-40 flex justify-center items-center {tile.iconClass}"
-		>
-			<svelte:component this={tile.icon} />
-		</div>
-		<div class="grow" />
-		<div class="text-5xl">
-			{tile.title}
-		</div>
+		<svelte:component this={tile.icon} />
+	</div>
+	<div class="grow" />
+	<div class="text-5xl">
+		{tile.title}
 	</div>
 </a>
 
 <style>
-	.tile {
-		transition: transform 100ms ease-in-out;
-	}
-
 	.tile.active,
 	.tile:hover {
-		transform: scale(1.1);
+		border: 0.5rem solid black;
+		padding: 0;
 	}
 </style>
