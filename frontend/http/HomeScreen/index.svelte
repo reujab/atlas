@@ -2,7 +2,6 @@
 	import HomeTile from "./HomeTile";
 	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 	import FaTv from "svelte-icons/fa/FaTv.svelte";
-	import FaPhotoVideo from "svelte-icons/fa/FaPhotoVideo.svelte";
 	import { GamepadListener } from "gamepad.js";
 
 	// set background based on time of day
@@ -24,12 +23,6 @@
 			path: "/shows",
 			icon: FaTv,
 			iconClass: "text-lime-700",
-		},
-		{
-			title: "Pictures",
-			path: "/pictures",
-			icon: FaPhotoVideo,
-			iconClass: "text-amber-700",
 		},
 	];
 	let activeTile = 0;
