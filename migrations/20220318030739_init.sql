@@ -16,7 +16,8 @@ CREATE TABLE titles (
 	overview TEXT,
 	popularity FLOAT,
 	released DATE,
-	score SMALLINT
+	score SMALLINT,
+	votes INT
 );
 
 CREATE TABLE movies (

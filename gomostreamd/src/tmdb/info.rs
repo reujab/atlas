@@ -19,6 +19,8 @@ struct Result {
     release_date: Option<String>,
     #[serde(rename = "vote_average")]
     score: f64,
+    #[serde(rename = "vote_count")]
+    votes: i32,
     #[serde(alias = "name")]
     title: String,
     #[serde(rename = "genre_ids")]
@@ -89,8 +91,8 @@ async fn fetch(conn: &mut sqlx::pool::PoolConnection<sqlx::Postgres>, id: String
                 r#"
                     UPDATE titles
                     SET ts = now(), title = $1, genres = $2, language = $3, overview = $4,
-                        popularity = $5, released = {released}, score = $7
-                    WHERE id = $8
+                        popularity = $5, released = {released}, score = $7, votes = $8
+                    WHERE id = $9
                 "#
             ))
             .bind(&result.title)
@@ -100,6 +102,7 @@ async fn fetch(conn: &mut sqlx::pool::PoolConnection<sqlx::Postgres>, id: String
             .bind(&result.popularity)
             .bind(&result.release_date)
             .bind(result.score * 10.0)
+            .bind(&result.votes)
             .bind(id)
             .execute(&mut *conn)
             .await
