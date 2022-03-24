@@ -5,11 +5,13 @@
 	import FaPhotoVideo from "svelte-icons/fa/FaPhotoVideo.svelte";
 	import { GamepadListener } from "gamepad.js";
 
+	// set background based on time of day
 	const hour = new Date().getHours();
 	const timeOfDay = hour >= 7 && hour <= 17 ? "day" : "night";
 	const index = Math.floor(Math.random() * (timeOfDay === "day" ? 4 : 23));
 	const img = `url(./backgrounds/${timeOfDay}/${index}.webp)`;
 
+	// home tiles
 	const tiles = [
 		{
 			title: "Movies",
@@ -32,6 +34,7 @@
 	];
 	let activeTile = 0;
 
+	// gamepad handler
 	const listener = new GamepadListener();
 	listener.start();
 	listener.on("gamepad:button", (e) => {
@@ -64,6 +67,7 @@
 		}
 	});
 
+	// disable controller when the mouse is moved
 	function mouseMove() {
 		activeTile = -1;
 		removeEventListener("mousemove", mouseMove);
