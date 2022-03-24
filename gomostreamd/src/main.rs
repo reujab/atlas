@@ -7,7 +7,8 @@ mod tmdb;
 
 use env_logger::Env;
 use sqlx::postgres::PgPoolOptions;
-use std::env;
+use std::{env, time::Duration};
+use tokio::time::sleep;
 
 #[tokio::main]
 async fn main() {
@@ -38,10 +39,11 @@ async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
         match reqwest::get(url).await {
             Ok(res) => break Ok(res),
             Err(err) => {
-                if i >= 2 {
+                if i >= 4 {
                     break Err(err);
                 } else {
                     error!("Error getting {url}: {err}");
+                    sleep(Duration::from_secs(1)).await;
                 }
             }
         }

@@ -16,7 +16,7 @@ struct Result {
     poster_path: Option<String>,
     overview: String,
     #[serde(alias = "first_air_date")]
-    release_date: String,
+    release_date: Option<String>,
     #[serde(rename = "vote_average")]
     score: f64,
     #[serde(alias = "name")]
@@ -74,10 +74,15 @@ async fn fetch(conn: &mut sqlx::pool::PoolConnection<sqlx::Postgres>, id: String
                 info!("Downloaded poster to file://{path}");
             }
 
-            let released = if result.release_date.is_empty() {
-                "NULL"
-            } else {
-                "$6::date"
+            let released = match &result.release_date {
+                None => "NULL",
+                Some(date) => {
+                    if date.is_empty() {
+                        "NULL"
+                    } else {
+                        "$6::date"
+                    }
+                }
             };
 
             sqlx::query(&format!(
