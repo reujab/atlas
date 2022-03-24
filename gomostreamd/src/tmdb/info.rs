@@ -99,7 +99,7 @@ async fn fetch(conn: &mut sqlx::pool::PoolConnection<sqlx::Postgres>, id: String
             .bind(&result.overview)
             .bind(&result.popularity)
             .bind(&result.release_date)
-            .bind(&result.score)
+            .bind(result.score * 10.0)
             .bind(id)
             .execute(&mut *conn)
             .await
