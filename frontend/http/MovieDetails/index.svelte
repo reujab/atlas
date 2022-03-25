@@ -6,6 +6,7 @@
 	import Header from "../Header";
 	import { cache, genres } from "../db";
 	import { params } from "svelte-hash-router";
+	import { invoke } from "@tauri-apps/api/tauri";
 
 	const title = cache[$params.id];
 	console.log(title);
@@ -17,6 +18,11 @@
 		month: "long",
 		year: "numeric",
 	});
+
+	async function play() {
+		const url = await invoke("get_video_url", { slug: title.slug });
+		console.log(url);
+	}
 </script>
 
 <div class="h-screen px-48 bg-white flex flex-col">
@@ -37,7 +43,7 @@
 	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
-		<Button icon={FaPlay} text="Play" />
+		<Button icon={FaPlay} text="Play" onClick={play} />
 		<Button icon={FaDownload} text="Download" />
 		<Button icon={FaPlus} text="Add to watchlist" />
 	</div>
