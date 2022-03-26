@@ -20,7 +20,7 @@ pub async fn insert(pool: &sqlx::Pool<sqlx::Postgres>) {
     insert_category(&mut trans, "movie").await;
     insert_category(&mut trans, "tv").await;
 
-    info!("Comitting transaction");
+    info!("Committing transaction");
     trans.commit().await.unwrap();
 }
 

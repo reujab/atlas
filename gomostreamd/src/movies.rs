@@ -42,7 +42,7 @@ pub async fn start(pool: &sqlx::Pool<sqlx::Postgres>) {
             .unwrap();
         }
 
-        info!("Comitting transaction");
+        info!("Committing transaction");
         trans.commit().await.unwrap();
     }
 }
