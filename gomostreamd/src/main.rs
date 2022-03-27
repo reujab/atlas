@@ -39,7 +39,7 @@ async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
         match reqwest::get(url).await {
             Ok(res) => break Ok(res),
             Err(err) => {
-                if i >= 4 {
+                if i >= 10 {
                     break Err(err);
                 } else {
                     error!("Error getting {url}: {err}");

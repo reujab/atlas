@@ -117,13 +117,14 @@ async fn get_video_url(slug: String) -> String {
             .to_owned()
     };
     println!("decoded: {decoded}");
-    let src_regex = Regex::new(r"https://n\d{2}\.gomoplayer\.com/.*/v\.mp4").unwrap();
+    let src_regex = Regex::new(r"https://\w\d+\.gomoplayer\.com/.*/v\.mp4").unwrap();
     let src = src_regex
         .captures(&decoded)
         .unwrap()
         .get(0)
         .unwrap()
         .as_str();
+    println!("src: {src}");
 
     src.to_owned()
 }

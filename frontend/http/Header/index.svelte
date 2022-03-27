@@ -7,9 +7,12 @@
 
 <h1 class="text-8xl font-light pt-10 flex items-center mb-10">
 	{#if back}
-		<a href="#{back}" class="w-16 h-16 mr-6 drop-shadow-md">
+		<div
+			class="w-16 h-16 mr-6 drop-shadow-md pointer-cursor"
+			on:click={history.back.bind(history)}
+		>
 			<FaArrowLeft />
-		</a>
+		</div>
 	{/if}
 	{title}
 	<div class="grow" />

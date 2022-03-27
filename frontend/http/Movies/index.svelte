@@ -16,7 +16,7 @@
 </script>
 
 <div class="h-screen px-48 bg-white">
-	<Header title="Movies" back="/" search="/movies/search" />
+	<Header title="Movies" back search="/movies/search" />
 
 	{#each rows as row}
 		<h2 class="text-7xl mb-10">{row.name}</h2>

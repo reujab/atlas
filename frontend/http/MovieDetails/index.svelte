@@ -11,8 +11,6 @@
 	const title = cache[$params.id];
 	console.log(title);
 
-	console.log(genres);
-
 	const releaseDate = new Date(title.released).toLocaleDateString(undefined, {
 		day: "numeric",
 		month: "long",
@@ -26,7 +24,7 @@
 </script>
 
 <div class="h-screen px-48 bg-white flex flex-col">
-	<Header title={title.title} back="/movies" />
+	<Header title={title.title} back />
 
 	<div class="min-h-[450px]">
 		<img src="posters/{title.id}" alt="Poster" class="float-left mr-4" />
@@ -43,7 +41,9 @@
 	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
-		<Button icon={FaPlay} text="Play" onClick={play} />
+		<a href="#/movies/watch/{title.id}">
+			<Button icon={FaPlay} text="Play" />
+		</a>
 		<Button icon={FaDownload} text="Download" />
 		<Button icon={FaPlus} text="Add to watchlist" />
 	</div>
