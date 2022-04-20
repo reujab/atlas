@@ -35,15 +35,16 @@ async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, cate
         .unwrap()
         .genres;
 
+    let table = category.replace("_series", "");
     for genre in genres {
-        sqlx::query(
+        sqlx::query(&format!(
             r#"
-                INSERT INTO genres (id, name)
+                INSERT INTO genres_{table} (id, name)
                 VALUES ($1, $2)
                 ON CONFLICT (id)
                 DO NOTHING
-            "#,
-        )
+            "#
+        ))
         .bind(genre.id)
         .bind(genre.name)
         .execute(&mut *trans)

@@ -3,12 +3,16 @@ CREATE TABLE genres (
 	name TEXT NOT NULL
 );
 
+CREATE TABLE genres_movie (
+	id SMALLINT PRIMARY KEY
+) INHERITS (genres);
+
+CREATE TABLE genres_tv (
+	id SMALLINT PRIMARY KEY
+) INHERITS (genres);
+
 CREATE TABLE titles (
-	-- IMDb id
-	id TEXT PRIMARY KEY,
-	-- gomostream slug
-	slug TEXT NOT NULL,
-	title TEXT,
+	id INT PRIMARY KEY,
 	ts TIMESTAMP,
 
 	genres SMALLINT[],
@@ -16,22 +20,26 @@ CREATE TABLE titles (
 	overview TEXT,
 	popularity FLOAT,
 	released DATE,
+	runtime SMALLINT,
+	tagline TEXT,
+	title TEXT,
 	score SMALLINT,
 	votes INT
 );
 
 CREATE TABLE movies (
-	id TEXT PRIMARY KEY,
-	quality SMALLINT NOT NULL
+	id INT PRIMARY KEY
 ) INHERITS (titles);
 
 CREATE TABLE series (
-	id TEXT PRIMARY KEY
+	id INT PRIMARY KEY
 ) INHERITS (titles);
 
-CREATE TABLE episodes (
-	id TEXT REFERENCES series,
-	season INT NOT NULL,
-	episode INT NOT NULL,
-	PRIMARY KEY (id, season, episode)
+CREATE TABLE seasons (
+	id INT REFERENCES series,
+	season SMALLINT,
+	episodes SMALLINT,
+	name TEXT,
+	overview TEXT,
+	PRIMARY KEY (id, season, episodes)
 );

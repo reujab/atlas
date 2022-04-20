@@ -26,7 +26,7 @@ export const genres = {};
 export async function getTrending() {
 	if (!trending) {
 		trending = await db.select(`
-			SELECT id, slug, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
+			SELECT id::bigint, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
 			ORDER BY popularity DESC NULLS LAST
 			LIMIT 100
 		`);
@@ -43,7 +43,7 @@ export async function getTrending() {
 export async function getTopRated() {
 	if (!topRated) {
 		topRated = await db.select(`
-			SELECT id, slug, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
+			SELECT id::bigint, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
 			WHERE votes >= 200
 			ORDER BY score DESC NULLS LAST
 			LIMIT 100

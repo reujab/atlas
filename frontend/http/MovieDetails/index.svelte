@@ -16,11 +16,6 @@
 		month: "long",
 		year: "numeric",
 	});
-
-	async function play() {
-		const url = await invoke("get_video_url", { slug: title.slug });
-		console.log(url);
-	}
 </script>
 
 <div class="h-screen px-48 bg-white flex flex-col">
