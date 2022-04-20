@@ -23,6 +23,7 @@ CREATE TABLE titles (
 	runtime SMALLINT,
 	tagline TEXT,
 	title TEXT,
+	trailer VARCHAR(16),
 	score SMALLINT,
 	votes INT
 );
