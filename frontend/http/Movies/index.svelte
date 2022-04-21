@@ -28,7 +28,7 @@
 				<a
 					key={title.id}
 					href="#/movies/details/{title.id}"
-					class="shrink-0 w-64"
+					class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
 				>
 					<img src="posters/{title.id}" alt={title.title} />
 				</a>
@@ -36,3 +36,9 @@
 		</div>
 	{/each}
 </div>
+
+<style>
+	.poster:hover {
+		border-color: black;
+	}
+</style>
