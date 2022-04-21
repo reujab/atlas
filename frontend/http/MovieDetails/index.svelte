@@ -6,7 +6,6 @@
 	import Header from "../Header";
 	import { cache, genres } from "../db";
 	import { params } from "svelte-hash-router";
-	import { invoke } from "@tauri-apps/api/tauri";
 
 	const title = cache[$params.id];
 	console.log(title);
@@ -36,7 +35,7 @@
 	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
-		<a href="#/movies/watch/{title.id}">
+		<a href="#/search/{encodeURIComponent(title.title)}">
 			<Button icon={FaPlay} text="Play" />
 		</a>
 		<Button icon={FaDownload} text="Download" />

@@ -3,13 +3,13 @@ import HomeScreen from "./HomeScreen"
 import MovieDetails from "./MovieDetails"
 import Movies from "./Movies"
 import Router, { routes } from "svelte-hash-router"
-import WatchMovie from "./WatchMovie"
+import SearchResults from "./SearchResults"
 
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,
 	"/movies/details/:id": MovieDetails,
-	"/movies/watch/:id": WatchMovie,
+	"/search/:query": SearchResults,
 })
 
 export default new Router({

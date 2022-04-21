@@ -4,7 +4,7 @@
 	import { getTrending, getTopRated } from "../db";
 
 	let rows = [new Row("Trending"), new Row("Top rated")];
-	const cols = 5;
+	const cols = 6;
 
 	getTrending().then((trending) => {
 		rows[0].titles = trending;
