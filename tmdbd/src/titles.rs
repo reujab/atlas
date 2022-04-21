@@ -82,24 +82,33 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, table: &str) {
                 "series" => "tv",
                 _ => panic!(),
             };
-            fetch(&pool, next.get::<i32, _>(0), endpoint).await;
+            fetch(&pool, next.get::<i32, _>(0), endpoint, table).await;
         }
 
         sleep(Duration::from_secs(1)).await;
     }
 }
 
-async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str) {
+async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
     let mut conn = pool.acquire().await.unwrap();
     let key = env::var("TMDB_KEY").unwrap();
     let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}");
-    let title = get(&url).await.unwrap().json::<Title>().await.unwrap();
-
-    let trailer = if title.video.unwrap_or(true) {
-        get_trailer(id, endpoint).await
-    } else {
-        None
-    };
+    let res = get(&url).await.unwrap();
+    if res.status() != 200 {
+        sqlx::query(&format!(
+            r#"
+                UPDATE {table}
+                SET ts = now()
+                WHERE id = $1
+            "#
+        ))
+        .bind(id)
+        .execute(&mut conn)
+        .await
+        .unwrap();
+        return;
+    }
+    let title = res.json::<Title>().await.unwrap();
 
     if let Some(poster_path) = &title.poster_path {
         let url = format!(
@@ -126,6 +135,18 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str) {
         }
     };
 
+    let trailer = if title.video.unwrap_or(true) {
+        get_trailer(id, endpoint).await
+    } else {
+        None
+    };
+
+    let runtime = title.runtime.or_else(|| {
+        title
+            .episode_run_time
+            .and_then(|ert| if ert.is_empty() { None } else { Some(ert[0]) })
+    });
+
     if let Some(seasons) = title.seasons {
         for season in seasons {
             sqlx::query(
@@ -146,14 +167,10 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str) {
             .unwrap();
         }
     }
-    let runtime = title.runtime.or_else(|| {
-        title
-            .episode_run_time
-            .and_then(|ert| if ert.is_empty() { None } else { Some(ert[0]) })
-    });
+
     sqlx::query(&format!(
         r#"
-            UPDATE titles
+            UPDATE {table}
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
                 released = {released}, runtime = $6, tagline = $7, title = $8, trailer = $9,
                 score = $10, votes = $11

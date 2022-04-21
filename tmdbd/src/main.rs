@@ -34,11 +34,16 @@ async fn main() {
 }
 
 async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
-    info!("Getting {url}");
     let mut i = 0;
     loop {
+        info!("Getting {url}");
         match reqwest::get(url).await {
-            Ok(res) => break Ok(res),
+            Ok(res) => {
+                if res.status() != 200 {
+                    error!("{url} returned {}", res.status());
+                }
+                break Ok(res);
+            }
             Err(err) => {
                 if i >= 10 {
                     break Err(err);
