@@ -31,29 +31,31 @@
 	const listener = new GamepadListener();
 	listener.start();
 	listener.on("gamepad:button", (e) => {
-		console.log(e);
 		if (e.detail.pressed) {
+			console.log(e.detail.button);
 			switch (e.detail.button) {
 				case 0: // A button
 					location.hash = `#${tiles[activeTile].path}`;
 					break;
-				case 12: // pad left
+				case 12: // pad up
 					if (activeTile % 2 == 1) {
 						activeTile -= 1;
 					}
 					break;
-				case 13: // pad right
+				case 13: // pad down
 					if (activeTile % 2 == 0) {
 						activeTile += 1;
 					}
 					break;
-				case 14: // pad up
+				case 14: // pad left
 					if (activeTile >= 2) {
 						activeTile -= 2;
 					}
 					break;
-				case 15: // pad down
-					activeTile += 2;
+				case 15: // pad right
+					if (activeTile + 2 < tiles.length) {
+						activeTile += 2;
+					}
 					break;
 			}
 			activeTile = Math.max(0, Math.min(tiles.length - 1, activeTile));
