@@ -12,7 +12,7 @@ CREATE TABLE genres_tv (
 ) INHERITS (genres);
 
 CREATE TABLE titles (
-	id INT PRIMARY KEY,
+	id INT,
 	ts TIMESTAMP,
 
 	genres SMALLINT[],
