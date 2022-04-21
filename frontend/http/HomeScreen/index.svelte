@@ -2,7 +2,8 @@
 	import HomeTile from "./HomeTile";
 	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 	import FaTv from "svelte-icons/fa/FaTv.svelte";
-	import { GamepadListener } from "gamepad.js";
+	import listener from "../gamepad";
+	import { onDestroy } from "svelte";
 
 	// set background based on time of day
 	const hour = new Date().getHours();
@@ -27,10 +28,7 @@
 	];
 	let activeTile = 0;
 
-	// gamepad handler
-	const listener = new GamepadListener();
-	listener.start();
-	listener.on("gamepad:button", (e) => {
+	function gamepadHandler(e) {
 		if (e.detail.pressed) {
 			console.log(e.detail.button);
 			switch (e.detail.button) {
@@ -60,7 +58,9 @@
 			}
 			activeTile = Math.max(0, Math.min(tiles.length - 1, activeTile));
 		}
-	});
+	}
+
+	listener.on("gamepad:button", gamepadHandler);
 
 	// disable controller when the mouse is moved
 	function mouseMove() {
@@ -68,6 +68,11 @@
 		removeEventListener("mousemove", mouseMove);
 	}
 	addEventListener("mousemove", mouseMove);
+
+	onDestroy(() => {
+		listener.off("gamepad:button", gamepadHandler);
+		removeEventListener("mousemove", mouseMove);
+	});
 </script>
 
 <div
