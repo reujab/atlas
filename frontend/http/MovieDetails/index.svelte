@@ -40,7 +40,7 @@
 
 	<div class="flex justify-around mb-16">
 		<!-- svelte-ignore missing-declaration -->
-		<a href="#/search/{escape(title.title.replace(/\./g, '%2E'))}">
+		<a href="#/search/{escape(title.title).replace(/\./g, '%2E')}">
 			<Button icon={FaPlay} text="Play" />
 		</a>
 		<Button icon={FaDownload} text="Download" />
