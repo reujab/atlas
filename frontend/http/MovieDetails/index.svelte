@@ -35,7 +35,8 @@
 	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
-		<a href="#/search/{encodeURIComponent(title.title)}">
+		<!-- svelte-ignore missing-declaration -->
+		<a href="#/search/{escape(title.title)}">
 			<Button icon={FaPlay} text="Play" />
 		</a>
 		<Button icon={FaDownload} text="Download" />

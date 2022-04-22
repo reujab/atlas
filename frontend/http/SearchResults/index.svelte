@@ -5,11 +5,11 @@
 	import { params } from "svelte-hash-router";
 	import { Circle2 } from "svelte-loading-spinners";
 
-	const query = $params.query;
+	const query = unescape($params.query);
 
 	let sources = [];
 	invoke("get_sources", {
-		query: query,
+		query: encodeURIComponent(query.replace(/['"]/g, "")),
 	}).then((res) => {
 		sources = res;
 	});
@@ -23,7 +23,7 @@
 </script>
 
 <div class="h-screen px-48 bg-white flex flex-col">
-	<Header title={decodeURIComponent(query)} back />
+	<Header title={query} back />
 
 	{#if sources.length}
 		<div class="flex gap-8 flex-col text-2xl">
