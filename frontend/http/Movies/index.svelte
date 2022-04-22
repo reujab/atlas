@@ -29,6 +29,9 @@
 				case 0: // A button
 					location.hash = `#/movies/details/${title.id}`;
 					break;
+				case 1:
+					history.back();
+					break;
 				case 12: // pad up
 					activeRow = (rows.length + activeRow - 1) % rows.length;
 					break;
