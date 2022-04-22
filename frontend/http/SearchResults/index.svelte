@@ -9,7 +9,7 @@
 
 	let sources = [];
 	invoke("get_sources", {
-		query: encodeURIComponent(query.replace(/['"]/g, "")),
+		query: encodeURIComponent(query.replace(/['".]/g, "")),
 	}).then((res) => {
 		sources = res;
 	});

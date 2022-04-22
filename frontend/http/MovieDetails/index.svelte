@@ -21,7 +21,11 @@
 	<Header title={title.title} back />
 
 	<div class="min-h-[450px]">
-		<img src="posters/{title.id}" alt="Poster" class="float-left mr-4" />
+		<img
+			src="posters/movies/{title.id}"
+			alt="Poster"
+			class="float-left mr-4"
+		/>
 
 		<h3 class="text-5xl mb-8">
 			{title.genres.map((genre) => genres[genre]).join(" • ")}
@@ -36,7 +40,7 @@
 
 	<div class="flex justify-around mb-16">
 		<!-- svelte-ignore missing-declaration -->
-		<a href="#/search/{escape(title.title)}">
+		<a href="#/search/{escape(title.title.replace(/\./g, '%2E'))}">
 			<Button icon={FaPlay} text="Play" />
 		</a>
 		<Button icon={FaDownload} text="Download" />
