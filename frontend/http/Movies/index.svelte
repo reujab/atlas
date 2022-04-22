@@ -30,7 +30,7 @@
 					href="#/movies/details/{title.id}"
 					class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
 				>
-					<img src="posters/{title.id}" alt={title.title} />
+					<img src="posters/movies/{title.id}" alt={title.title} />
 				</a>
 			{/each}
 		</div>

@@ -115,7 +115,7 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
             "https://www.themoviedb.org/t/p/w300_and_h450_bestv2{}",
             poster_path
         );
-        let path = format!("{}/{}", env::var("POSTERS_PATH").unwrap(), id);
+        let path = format!("{}/{table}/{id}", env::var("POSTERS_PATH").unwrap());
         let mut file = File::create(&path).await.unwrap();
         let mut stream = get(&url).await.unwrap().bytes_stream();
         while let Some(chunk) = stream.next().await {
