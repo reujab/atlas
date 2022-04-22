@@ -5,7 +5,7 @@
 	import FaSearch from "svelte-icons/fa/FaSearch.svelte";
 </script>
 
-<h1 class="text-8xl font-light pt-10 flex items-center mb-10">
+<h1 class="text-8xl font-light pt-10 flex items-center mb-2">
 	{#if back}
 		<div class="icon mr-6 cursor-pointer">
 			<div

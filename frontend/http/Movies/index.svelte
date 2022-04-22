@@ -2,13 +2,15 @@
 	import Header from "../Header";
 	import Row from "./Row";
 	import listener from "../gamepad";
-	import { getTrending, getTopRated } from "../db";
+	import { getTrending, getTopRated, genres } from "../db";
 	import { onDestroy } from "svelte";
 
 	const rows = [new Row("Trending"), new Row("Top rated")];
 	const cols = 6;
 
 	let activeRow = 0;
+
+	$: activeTitle = rows[activeRow].titles[rows[activeRow].activeCol];
 
 	getTrending().then((trending) => {
 		rows[0].titles = trending;
@@ -23,7 +25,6 @@
 			console.log(e.detail.button);
 			const row = rows[activeRow];
 			const title = row.titles[row.activeCol];
-			console.log(activeRow, row.activeCol);
 			switch (e.detail.button) {
 				case 0: // A button
 					location.hash = `#/movies/details/${title.id}`;
@@ -47,8 +48,6 @@
 					rows = rows;
 					break;
 			}
-			console.log(activeRow, row.activeCol);
-			console.log("-------------------");
 		}
 	}
 
@@ -61,12 +60,24 @@
 <div class="h-screen px-48 bg-white">
 	<Header title="Movies" back search="/movies/search" />
 
+	<div class="h-[9rem] flex flex-col mb-2">
+		{#if activeTitle}
+			<h3 class="text-xl mb-2">
+				{activeTitle.genres.map((genre) => genres[genre]).join(" • ")}
+			</h3>
+
+			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
+				{activeTitle.overview}
+			</div>
+		{/if}
+	</div>
+
 	{#each rows
 		// wrap around
 		.concat(rows[0])
 		.slice(activeRow, activeRow + 2) as row, rowIndex}
-		<h2 class="text-7xl mb-10">{row.name}</h2>
-		<div class="flex justify-between mb-10">
+		<h2 class="text-7xl mb-4">{row.name}</h2>
+		<div class="flex justify-between mb-8">
 			{#each row.titles
 				// wrap around
 				.concat(row.titles.slice(0, cols))
@@ -88,5 +99,11 @@
 	.poster.active,
 	.poster:hover {
 		border-color: black;
+	}
+
+	.clamp-3 {
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
 	}
 </style>
