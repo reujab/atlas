@@ -3,7 +3,7 @@ export default class Row {
 
 	titles = []
 
-	index = 0
+	activeCol = 0
 
 	constructor(name) {
 		this.name = name
