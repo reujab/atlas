@@ -52,10 +52,15 @@ async fn get(url: &str) -> reqwest::Result<reqwest::Response> {
     let mut tries = 0;
     loop {
         tries += 1;
+        println!("Getting {url}");
         match reqwest::get(url).await {
             Ok(res) => {
                 if res.status() != 200 {
                     eprintln!("{url}: {}", res.status());
+
+                    if res.status().as_u16() >= 500 && tries <= 10 {
+                        continue;
+                    }
                 }
                 break Ok(res);
             },
