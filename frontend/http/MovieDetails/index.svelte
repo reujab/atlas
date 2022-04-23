@@ -20,18 +20,20 @@
 <div class="h-screen px-48 bg-white flex flex-col">
 	<Header title={title.title} back />
 
-	<div class="min-h-[450px]">
+	<div class="min-h-[450px] mt-4">
 		<img
 			src="posters/movies/{title.id}"
 			alt="Poster"
 			class="float-left mr-4"
 		/>
 
-		<h3 class="text-5xl mb-8">
+		<h3 class="text-3xl mb-8">
 			{title.genres.map((genre) => genres[genre]).join(" • ")}
 		</h3>
 
-		<h3 class="text-5xl">{title.overview}</h3>
+		<h3 class="text-4xl">
+			{title.overview}
+		</h3>
 
 		<h3 class="text-3xl mt-8">{releaseDate}</h3>
 	</div>

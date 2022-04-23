@@ -29,7 +29,7 @@
 				case 0: // A button
 					location.hash = `#/movies/details/${title.id}`;
 					break;
-				case 1:
+				case 1: // B button
 					history.back();
 					break;
 				case 12: // pad up
