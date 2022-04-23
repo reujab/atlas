@@ -2,7 +2,7 @@
 	import HomeTile from "./HomeTile";
 	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 	import FaTv from "svelte-icons/fa/FaTv.svelte";
-	import listener from "../gamepad";
+	import { subscribe, unsubscribe } from "../gamepad";
 	import { onDestroy } from "svelte";
 
 	// set background based on time of day
@@ -28,39 +28,36 @@
 	];
 	let activeTile = 0;
 
-	function gamepadHandler(e) {
-		if (e.detail.pressed) {
-			console.log(e.detail.button);
-			switch (e.detail.button) {
-				case 0: // A button
-					location.hash = `#${tiles[activeTile].path}`;
-					break;
-				case 12: // pad up
-					if (activeTile % 2 == 1) {
-						activeTile -= 1;
-					}
-					break;
-				case 13: // pad down
-					if (activeTile % 2 == 0) {
-						activeTile += 1;
-					}
-					break;
-				case 14: // pad left
-					if (activeTile >= 2) {
-						activeTile -= 2;
-					}
-					break;
-				case 15: // pad right
-					if (activeTile + 2 < tiles.length) {
-						activeTile += 2;
-					}
-					break;
-			}
-			activeTile = Math.max(0, Math.min(tiles.length - 1, activeTile));
+	function gamepadHandler(button) {
+		switch (button) {
+			case "A":
+				location.hash = `#${tiles[activeTile].path}`;
+				break;
+			case "up":
+				if (activeTile % 2 == 1) {
+					activeTile -= 1;
+				}
+				break;
+			case "down":
+				if (activeTile % 2 == 0) {
+					activeTile += 1;
+				}
+				break;
+			case "left":
+				if (activeTile >= 2) {
+					activeTile -= 2;
+				}
+				break;
+			case "right":
+				if (activeTile + 2 < tiles.length) {
+					activeTile += 2;
+				}
+				break;
 		}
+		activeTile = Math.max(0, Math.min(tiles.length - 1, activeTile));
 	}
 
-	listener.on("gamepad:button", gamepadHandler);
+	subscribe(gamepadHandler);
 
 	// disable controller when the mouse is moved
 	function mouseMove() {
@@ -70,7 +67,7 @@
 	addEventListener("mousemove", mouseMove);
 
 	onDestroy(() => {
-		listener.off("gamepad:button", gamepadHandler);
+		unsubscribe(gamepadHandler);
 		removeEventListener("mousemove", mouseMove);
 	});
 </script>

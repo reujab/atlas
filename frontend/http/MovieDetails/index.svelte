@@ -6,14 +6,49 @@
 	import Header from "../Header";
 	import { cache, genres } from "../db";
 	import { params } from "svelte-hash-router";
+	import { subscribe, unsubscribe } from "../gamepad.js";
+	import { onDestroy } from "svelte";
 
 	const title = cache[$params.id];
 	console.log(title);
+	const playHref = `#/search/${escape(title.title).replace(/\./g, "%2E")}`;
+
+	let activeButton = 0;
 
 	const releaseDate = new Date(title.released).toLocaleDateString(undefined, {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
+	});
+
+	function gamepadHandler(button) {
+		switch (button) {
+			case "A":
+				switch (activeButton) {
+					case 0:
+						location.href = playHref;
+						break;
+				}
+				break;
+			case "B":
+				history.back();
+				break;
+			case "left":
+				if (activeButton > 0) {
+					activeButton--;
+				}
+				break;
+			case "right":
+				if (activeButton < 2) {
+					activeButton++;
+				}
+				break;
+		}
+	}
+
+	subscribe(gamepadHandler);
+	onDestroy(() => {
+		unsubscribe(gamepadHandler);
 	});
 </script>
 
@@ -42,10 +77,14 @@
 
 	<div class="flex justify-around mb-16">
 		<!-- svelte-ignore missing-declaration -->
-		<a href="#/search/{escape(title.title).replace(/\./g, '%2E')}">
-			<Button icon={FaPlay} text="Play" />
+		<a href={playHref}>
+			<Button icon={FaPlay} text="Play" active={activeButton === 0} />
 		</a>
-		<Button icon={FaDownload} text="Download" />
-		<Button icon={FaPlus} text="Add to watchlist" />
+		<Button icon={FaDownload} text="Download" active={activeButton === 1} />
+		<Button
+			icon={FaPlus}
+			text="Add to watchlist"
+			active={activeButton === 2}
+		/>
 	</div>
 </div>

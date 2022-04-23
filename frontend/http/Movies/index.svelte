@@ -1,7 +1,7 @@
 <script>
 	import Header from "../Header";
 	import Row from "./Row";
-	import listener from "../gamepad";
+	import { subscribe, unsubscribe } from "../gamepad";
 	import { getTrending, getTopRated, genres } from "../db";
 	import { onDestroy } from "svelte";
 
@@ -20,43 +20,38 @@
 		rows[1].titles = topRated;
 	});
 
-	function gamepadHandler(e) {
-		if (e.detail.pressed) {
-			console.log(e.detail.button);
-			const row = rows[activeRow];
-			const title = row.titles[row.activeCol];
-			switch (e.detail.button) {
-				case 0: // A button
-					location.hash = `#/movies/details/${title.id}`;
-					break;
-				case 1: // B button
-					history.back();
-					break;
-				case 12: // pad up
-					activeRow = (rows.length + activeRow - 1) % rows.length;
-					break;
-				case 13: // pad down
-					activeRow = (rows.length + activeRow + 1) % rows.length;
-					break;
-				case 14: // pad left
-					row.activeCol =
-						(row.titles.length + row.activeCol - 1) %
-						row.titles.length;
-					rows = rows;
-					break;
-				case 15: // pad right
-					row.activeCol =
-						(row.titles.length + row.activeCol + 1) %
-						row.titles.length;
-					rows = rows;
-					break;
-			}
+	function gamepadHandler(button) {
+		const row = rows[activeRow];
+		const title = row.titles[row.activeCol];
+		switch (button) {
+			case "A":
+				location.hash = `#/movies/details/${title.id}`;
+				break;
+			case "B":
+				history.back();
+				break;
+			case "up":
+				activeRow = (rows.length + activeRow - 1) % rows.length;
+				break;
+			case "down":
+				activeRow = (rows.length + activeRow + 1) % rows.length;
+				break;
+			case "left":
+				row.activeCol =
+					(row.titles.length + row.activeCol - 1) % row.titles.length;
+				rows = rows;
+				break;
+			case "right":
+				row.activeCol =
+					(row.titles.length + row.activeCol + 1) % row.titles.length;
+				rows = rows;
+				break;
 		}
 	}
 
-	listener.on("gamepad:button", gamepadHandler);
+	subscribe(gamepadHandler);
 	onDestroy(() => {
-		listener.off("gamepad:button", gamepadHandler);
+		unsubscribe(gamepadHandler);
 	});
 </script>
 
