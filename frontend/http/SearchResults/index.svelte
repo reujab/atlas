@@ -39,9 +39,6 @@
 			case "A":
 				play(sources[activeSource]);
 				break;
-			case "B":
-				history.back();
-				break;
 			case "up":
 				if (activeSource > 0) {
 					activeSource--;
