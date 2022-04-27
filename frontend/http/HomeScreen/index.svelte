@@ -58,17 +58,8 @@
 	}
 
 	subscribe(gamepadHandler);
-
-	// disable controller when the mouse is moved
-	function mouseMove() {
-		activeTile = -1;
-		removeEventListener("mousemove", mouseMove);
-	}
-	addEventListener("mousemove", mouseMove);
-
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
-		removeEventListener("mousemove", mouseMove);
 	});
 </script>
 
