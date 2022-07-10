@@ -44,7 +44,8 @@ async fn insert_category(pool: &crate::Pool, category: &str) {
                 INSERT INTO {table} (id, title, popularity)
                 VALUES ($1, $2, $3)
                 ON CONFLICT (id)
-                DO NOTHING
+                DO UPDATE
+                SET popularity = $3
             "#
         ))
         .bind(title.id)
