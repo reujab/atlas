@@ -4,12 +4,14 @@ import MovieDetails from "./MovieDetails";
 import Movies from "./Movies";
 import Router, { routes } from "svelte-hash-router";
 import SearchResults from "./SearchResults";
+import Watch from "./Watch"
 
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,
 	"/movies/details/:id": MovieDetails,
 	"/search/:query": SearchResults,
+	"/watch": Watch,
 });
 
 export default new Router({
