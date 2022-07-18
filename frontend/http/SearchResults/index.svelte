@@ -22,9 +22,10 @@
 		invoke("play", {
 			hash: source.info_hash,
 			name: encodeURIComponent(source.name),
-		}).then((url) => {
-			location.href = `#/watch?src=${encodeURIComponent(url)}`;
+		}).then(() => {
+			history.back();
 		});
+		sources = [];
 	}
 
 	function gamepadHandler(button) {

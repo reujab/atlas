@@ -1,0 +1,41 @@
+window {
+	background: transparent;
+}
+
+revealer {
+	padding-bottom: 0;
+	padding: 2em;
+	margin: 0 4em;
+}
+
+.container {
+	margin-bottom: -5em;
+	background: #222;
+	border-radius: 3em;
+	box-shadow: 0 -0.5em 1.5em #222;
+	color: white;
+	font-family: monospace;
+	font-weight: 100;
+	margin-top: 3em;
+	padding: 0 1.5em 3em 1.5em;
+}
+
+label {
+	font-size: 7em;
+}
+
+image {
+	margin-right: 2em;
+}
+
+.progress-bar {
+	background: gray;
+	border-radius: 2em;
+	min-height: 48px;
+	min-width: 600px;
+}
+
+.progress {
+	background: tomato;
+	border-radius: 2rem;
+}

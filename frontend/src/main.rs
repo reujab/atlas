@@ -4,8 +4,7 @@
 )]
 
 use serde::{Deserialize, Serialize};
-use std::{env, thread, process::Stdio};
-use tokio::{io::{BufReader, AsyncBufReadExt}, process::{Command}};
+use std::{env, process::Command};
 
 #[derive(Serialize, Deserialize)]
 struct Torrent {
@@ -20,7 +19,7 @@ fn main() {
     dotenv::dotenv().unwrap();
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::TauriSql::default())
-        .invoke_handler(tauri::generate_handler![get_db_url, get_sources, play, click])
+        .invoke_handler(tauri::generate_handler![get_db_url, get_sources, play])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -41,37 +40,32 @@ async fn get_sources(query: String) -> Vec<Torrent> {
 }
 
 #[tauri::command]
-async fn play(hash: String, name: String) -> String {
+fn play(hash: String, name: String) {
     let magnet = format!("magnet:?xt=urn:btih:{hash}&dn={name}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce");
-    let cmd = Command::new("webtorrent")
-        .args(["download", &magnet, "--keep-seeding"])
-        .stdout(Stdio::piped())
+    Command::new("webtorrent")
+        .args([
+            "download",
+            &magnet,
+            "--vlc",
+            "--player-args=--no-osd -I dummy",
+        ])
         .spawn()
         .unwrap();
-    let mut reader = BufReader::new(cmd.stdout.unwrap());
+
     loop {
-        let mut line = String::new();
-        reader.read_line(&mut line).await.unwrap();
-        print!("{}", line);
-        let split = line.split("Server running at:").collect::<Vec<_>>();
-        if split.len() > 1 {
-            let server = split.last().unwrap().trim().to_owned();
-            tokio::spawn(async move {
-                loop {
-                    let mut line = String::new();
-                    reader.read_line(&mut line).await.unwrap();
-                }
-            });
-            return server;
+        let output = Command::new("playerctl").arg("position").output().unwrap();
+        let position = match String::from_utf8(output.stdout).unwrap().trim().parse::<f32>() {
+            Ok(position) => position,
+            Err(_) => continue,
+        };
+        if position >= 0.1 {
+            break;
         }
     }
+    Command::new("../overlay/target/release/overlay")
+        .output()
+        .unwrap();
 }
-
-#[tauri::command]
-fn click() {
-    std::process::Command::new("ydotool").args(&["click", "0xc0"]).output().unwrap();
-}
-
 
 async fn get(url: &str) -> reqwest::Result<reqwest::Response> {
     let mut tries = 0;
@@ -88,7 +82,7 @@ async fn get(url: &str) -> reqwest::Result<reqwest::Response> {
                     }
                 }
                 break Ok(res);
-            },
+            }
             Err(err) => {
                 eprintln!("{url}: {err}");
                 if tries >= 10 {
