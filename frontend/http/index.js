@@ -6,6 +6,8 @@ import Router, { routes } from "svelte-hash-router";
 import SearchResults from "./SearchResults";
 import Watch from "./Watch"
 
+requestAnimationFrame = setTimeout;
+
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,

@@ -32,6 +32,7 @@ impl Widgets<State, ()> for AppWidgets {
     view! {
         main_window = ApplicationWindow {
             set_maximized: true,
+            set_decorated: false,
             set_child = Some(&Box) {
                 set_orientation: Orientation::Vertical,
                 set_valign: Align::End,
@@ -89,6 +90,7 @@ impl Widgets<State, ()> for AppWidgets {
 
     fn post_view() {
         println!("post_view");
+        self.main_window.fullscreen();
         self.revealer
             .set_reveal_child(model.status == Status::Paused);
         self.position.set_label(&format_secs(model.position));
