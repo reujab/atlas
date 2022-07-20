@@ -15,7 +15,7 @@ pub fn handle_gamepad() {
                             .unwrap();
                     }
                     Button::East => {
-                        Command::new("killall").arg("vlc").output().unwrap();
+                        Command::new("killall").arg("mpv").output().unwrap();
                         std::process::exit(0);
                     }
                     _ => {}

@@ -46,8 +46,8 @@ fn play(hash: String, name: String) {
         .args([
             "download",
             &magnet,
-            "--vlc",
-            "--player-args=--no-osd -I dummy",
+            "--mpv",
+            // "--player-args=--no-osd -I dummy",
         ])
         .spawn()
         .unwrap();

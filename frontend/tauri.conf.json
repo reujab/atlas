@@ -58,7 +58,7 @@
         "width": 1920,
         "height": 1080,
         "resizable": true,
-        "fullscreen": true,
+        "fullscreen": false,
         "decorations": false
       }
     ],

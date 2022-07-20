@@ -90,7 +90,7 @@ impl Widgets<State, ()> for AppWidgets {
 
     fn post_view() {
         println!("post_view");
-        self.main_window.fullscreen();
+        // self.main_window.fullscreen();
         self.revealer
             .set_reveal_child(model.status == Status::Paused);
         self.position.set_label(&format_secs(model.position));

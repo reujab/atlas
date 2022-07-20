@@ -6,14 +6,15 @@ pub fn update_position(sender: Sender<super::Msg>) {
     let duration = String::from_utf8(output.stdout)
         .unwrap()
         .split('\n')
-        .find(|line| line.contains("vlc:time"))
+        .find(|line| line.contains("mpris:length"))
         .expect("time not found in metadata")
         .split(' ')
         .last()
         .unwrap()
-        .parse::<u32>()
-        .unwrap();
-    send!(sender, super::Msg::UpdateDuration(duration));
+        .parse::<u64>()
+        .unwrap()
+        / 1000000;
+    send!(sender, super::Msg::UpdateDuration(duration as u32));
 
     loop {
         let output = Command::new("playerctl").arg("position").output().unwrap();
