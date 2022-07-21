@@ -1,26 +1,18 @@
 {
-  "name": "pi-es",
+  "name": "frontend",
   "version": "0.0.0",
-  "description": "Pi Entertainment System",
-  "main": "index.js",
+  "description": "",
+  "main": "main.js",
   "scripts": {
-    "lint": "eslint . --ext .ts,.tsx",
-    "dev": "webpack serve -c webpack.dev & tailwindcss -o dist/index.css -w & cargo tauri dev & wait",
-    "build": "webpack build -c webpack.prod & tailwindcss -o dist/index.css -m & wait && cargo build --release",
-    "start": "npm i && npm run build && ./target/release/pi-es"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reujab/pi-es.git"
+    "dev": "webpack watch -c webpack.dev & tailwindcss -o dist/index.css -w & sleep 3; electron .; kill %1 %2",
+    "build": "webpack build -c webpack.prod & tailwindcss -o dist/index.css -m & wait && ln -sf /data/posters dist/posters",
+    "start": "npm i && npm run build && electron ."
   },
   "author": "reujab",
   "license": "Unlicense",
-  "bugs": {
-    "url": "https://github.com/reujab/pi-es/issues"
-  },
-  "homepage": "https://github.com/reujab/pi-es#readme",
   "devDependencies": {
     "copy-webpack-plugin": "^10.2.4",
+    "electron": "^19.0.8",
     "eslint": "^8.10.0",
     "html-minimizer-webpack-plugin": "^3.5.0",
     "svelte": "^3.46.4",
@@ -31,12 +23,11 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0-rc.2",
     "gamepad.js": "^1.0.4",
+    "postgres": "^3.2.4",
     "pretty-bytes": "^6.0.0",
     "svelte-hash-router": "^1.0.1",
     "svelte-icons": "^2.1.0",
-    "svelte-loading-spinners": "^0.1.7",
-    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql"
+    "svelte-loading-spinners": "^0.1.7"
   }
 }

@@ -1,31 +1,53 @@
 <script>
 	import Header from "../Header";
 	import prettyBytes from "pretty-bytes";
-	import { invoke } from "@tauri-apps/api";
 	import { params } from "svelte-hash-router";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { subscribe, unsubscribe } from "../gamepad.js";
 	import { onDestroy } from "svelte";
+	import child_process from "child_process";
 
 	const query = unescape($params.query);
 
 	let sources = [];
-	invoke("get_sources", {
-		query: encodeURIComponent(query.replace(/['".]/g, "")),
-	}).then((res) => {
-		sources = res;
+	fetch(
+		`https://apibay.org/q.php?q=${encodeURIComponent(
+			query.replace(/['".]/g, "")
+		)}&cat=200`
+	).then((res) => {
+		res.json().then((res) => {
+			sources = res;
+		});
 	});
 
 	let activeSource = 0;
 
 	function play(source) {
-		invoke("play", {
-			hash: source.info_hash,
-			name: encodeURIComponent(source.name),
-		}).then(() => {
-			history.back();
-		});
 		sources = [];
+
+		const magnet = `magnet:?xt=urn:btih:${
+			source.info_hash
+		}&dn=${encodeURIComponent(
+			source.name
+		)}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce`;
+
+		const webtorrent = child_process.spawn("webtorrent", [
+			"download",
+			magnet,
+			"--mpv",
+		]);
+
+		while (true) {
+			const position = child_process
+				.spawnSync("playerctl", ["position"])
+				.stdout.toString();
+			if (Number(position) > 0.1) {
+				break;
+			}
+		}
+
+		child_process.spawnSync("../overlay/target/release/overlay");
+		webtorrent.kill();
 	}
 
 	function gamepadHandler(button) {

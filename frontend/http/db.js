@@ -1,19 +1,17 @@
-import Database from "tauri-plugin-sql-api";
-import { invoke } from "@tauri-apps/api";
+const postgres = require("postgres");
 
-let db, trending, topRated;
-
-invoke("get_db_url").then((db_url) => {
-	Database.load(db_url).then((database) => {
-		db = database;
-		getGenres();
-		getTrending();
-		getTopRated();
-	});
+const sql = postgres({
+	database: "pi-es",
+	username: "reujab",
 });
+let trending, topRated;
+
+getGenres();
+getTrending();
+getTopRated();
 
 async function getGenres() {
-	const rows = await db.select(`SELECT id::bigint, name FROM genres`);
+	const rows = await sql`SELECT id::bigint, name FROM genres`;
 	for (const row of rows) {
 		genres[row.id] = row.name;
 	}
@@ -25,11 +23,11 @@ export const genres = {};
 
 export async function getTrending() {
 	if (!trending) {
-		trending = await db.select(`
+		trending = await sql`
 			SELECT id::bigint, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
 			ORDER BY popularity DESC NULLS LAST
 			LIMIT 100
-		`);
+		`;
 
 		for (const title of trending) {
 			title.genres = title.genres?.split(",").map(Number);
@@ -42,12 +40,12 @@ export async function getTrending() {
 
 export async function getTopRated() {
 	if (!topRated) {
-		topRated = await db.select(`
+		topRated = await sql`
 			SELECT id::bigint, title, array_to_string(genres, ',') as genres, overview, released::text FROM movies
 			WHERE votes >= 1000
 			ORDER BY score DESC NULLS LAST
 			LIMIT 100
-		`);
+		`;
 
 		for (const title of topRated) {
 			title.genres = title.genres?.split(",").map(Number);

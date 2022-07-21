@@ -4,6 +4,7 @@ const dist = __dirname + "/dist"
 const http = __dirname + "/http"
 
 module.exports = {
+	target: "electron-renderer",
 	entry: {
 		index: "./http/index.js",
 	},
@@ -48,6 +49,7 @@ module.exports = {
 		liveReload: false,
 		magicHtml: false,
 	},
+	devtool: "source-map",
 	optimization: {
 		minimizer: [
 			"...",

@@ -36,6 +36,10 @@ impl Widgets<State, ()> for AppWidgets {
             set_child = Some(&Box) {
                 set_orientation: Orientation::Vertical,
                 set_valign: Align::End,
+                // append = &gtk::Video {
+                //     set_file: Some(&gtk::gio::File::for_uri("http://localhost:8000/3/The.Shawshank.Redemption.1994.1080p.x264.YIFY.mp4")),
+                //     set_autoplay: true,
+                // },
                 append = revealer = &Revealer {
                     set_transition_duration: 1000,
                     set_transition_type: gtk::RevealerTransitionType::SlideUp,

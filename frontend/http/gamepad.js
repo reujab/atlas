@@ -5,6 +5,24 @@ const handlers = [];
 
 listener.start();
 
+listener.on("gamepad:axis", (e) => {
+	e = e.detail;
+	console.log(e);
+	if (e.value === 0 || e.stick !== 0) {
+		return;
+	}
+
+	if (e.axis === 0 && e.value < 0) {
+		dispatch("left");
+	} else if (e.axis === 0 && e.value > 0) {
+		dispatch("right");
+	} else if (e.axis === 1 && e.value < 0) {
+		dispatch("up");
+	} else if (e.axis === 1 && e.value > 0) {
+		dispatch("down");
+	}
+});
+
 listener.on("gamepad:button", (e) => {
 	if (e.detail.pressed) {
 		console.log(e.detail.button)
