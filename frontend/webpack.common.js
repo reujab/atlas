@@ -1,12 +1,12 @@
 const CopyPlugin = require("copy-webpack-plugin")
 const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin")
-const dist = __dirname + "/dist"
-const http = __dirname + "/http"
+const dist = __dirname + "/http"
+const src = __dirname + "/src"
 
 module.exports = {
 	target: "electron-renderer",
 	entry: {
-		index: "./http/index.js",
+		index: "./src/index.js",
 	},
 	output: {
 		path: dist,
@@ -28,11 +28,11 @@ module.exports = {
 		new CopyPlugin({
 			patterns: [
 				{
-					context: http,
+					context: src,
 					from: "*.html",
 				},
 				{
-					context: http,
+					context: src,
 					from: "backgrounds/*/*.webp",
 				},
 			],

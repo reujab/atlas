@@ -9,7 +9,8 @@ app.whenReady().then(() => {
     },
   })
 
-  mainWindow.loadFile("dist/index.html")
+  mainWindow.setMenuBarVisibility(false)
+  mainWindow.loadFile("http/index.html")
 })
 
 app.on("window-all-closed", () => {

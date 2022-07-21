@@ -41,12 +41,13 @@
 			const position = child_process
 				.spawnSync("playerctl", ["position"])
 				.stdout.toString();
+			console.log(position);
 			if (Number(position) > 0.1) {
 				break;
 			}
 		}
 
-		child_process.spawnSync("../overlay/target/release/overlay");
+		child_process.spawnSync("overlay");
 		webtorrent.kill();
 	}
 
