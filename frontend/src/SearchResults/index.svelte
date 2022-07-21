@@ -12,7 +12,7 @@
 	let sources = [];
 	fetch(
 		`https://apibay.org/q.php?q=${encodeURIComponent(
-			query.replace(/['".]/g, "")
+			query.replace(/['"]/g, "").replace(/\./g, " ")
 		)}&cat=200`
 	).then((res) => {
 		res.json().then((res) => {

@@ -11,7 +11,9 @@
 
 	const title = cache[$params.id];
 	console.log(title);
-	const playHref = `#/search/${escape(title.title).replace(/\./g, "%2E")}`;
+	const playHref = `#/search/${escape(title.title)
+		.replace(/\./g, "%2E")
+		.replace(/\+/g, "%2B")}`;
 
 	let activeButton = 0;
 
@@ -76,7 +78,6 @@
 	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
-		<!-- svelte-ignore missing-declaration -->
 		<a href={playHref}>
 			<Button icon={FaPlay} text="Play" active={activeButton === 0} />
 		</a>
