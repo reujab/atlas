@@ -10,6 +10,7 @@ app.whenReady().then(() => {
   })
 
   mainWindow.setMenuBarVisibility(false)
+  mainWindow.maximize()
   mainWindow.loadFile("http/index.html")
 })
 
