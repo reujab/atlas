@@ -1,5 +1,5 @@
-<script>
-	export let title, back, search;
+<script lang="ts">
+	export let title: string, back: boolean, search: boolean;
 
 	import FaArrowLeft from "svelte-icons/fa/FaArrowLeft.svelte";
 	import FaSearch from "svelte-icons/fa/FaSearch.svelte";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Button from "./Button";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
@@ -6,7 +6,7 @@
 	import Header from "../Header";
 	import { cache, genres } from "../db";
 	import { params } from "svelte-hash-router";
-	import { subscribe, unsubscribe } from "../gamepad.js";
+	import { subscribe, unsubscribe } from "../gamepad";
 	import { onDestroy } from "svelte";
 
 	const title = cache[$params.id];
@@ -23,7 +23,7 @@
 		year: "numeric",
 	});
 
-	function gamepadHandler(button) {
+	function gamepadHandler(button: string) {
 		switch (button) {
 			case "A":
 				switch (activeButton) {

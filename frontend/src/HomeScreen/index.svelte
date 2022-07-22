@@ -1,9 +1,16 @@
-<script>
+<script lang="ts">
 	import HomeTile from "./HomeTile";
 	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
 	import FaTv from "svelte-icons/fa/FaTv.svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 	import { onDestroy } from "svelte";
+
+	interface Tile {
+		title: string;
+		path: string;
+		icon: any;
+		iconClass: string;
+	}
 
 	// set background based on time of day
 	const hour = new Date().getHours();
@@ -28,7 +35,7 @@
 	];
 	let activeTile = 0;
 
-	function gamepadHandler(button) {
+	function gamepadHandler(button: string) {
 		switch (button) {
 			case "A":
 				location.hash = `#${tiles[activeTile].path}`;

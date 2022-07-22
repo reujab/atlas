@@ -1,26 +1,40 @@
-<script>
+<script lang="ts">
 	import Header from "../Header";
 	import Row from "./Row";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import { getTrending, getTopRated, genres } from "../db";
+	import {
+		getTrending,
+		getTopRated,
+		genres,
+		sortedGenres,
+		getTitlesWithGenre,
+	} from "../db";
 	import { onDestroy } from "svelte";
 
-	const rows = [new Row("Trending"), new Row("Top rated")];
+	let rows = [new Row("Trending"), new Row("Top rated")];
 	const cols = 6;
 
 	let activeRow = 0;
 
 	$: activeTitle = rows[activeRow].titles[rows[activeRow].activeCol];
 
-	getTrending().then((trending) => {
+	getTrending("movies").then((trending) => {
 		rows[0].titles = trending;
 	});
 
-	getTopRated().then((topRated) => {
+	getTopRated("movies").then((topRated) => {
 		rows[1].titles = topRated;
 	});
 
-	function gamepadHandler(button) {
+	for (const genre of sortedGenres) {
+		const row = new Row(genre.name);
+		rows.push(row);
+		getTitlesWithGenre("movies", genre.id).then((movies) => {
+			row.titles = movies;
+		});
+	}
+
+	function gamepadHandler(button: button) {
 		const row = rows[activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {

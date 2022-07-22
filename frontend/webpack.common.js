@@ -1,5 +1,6 @@
 const CopyPlugin = require("copy-webpack-plugin")
 const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin")
+const SveltePreprocess = require("svelte-preprocess")
 const dist = __dirname + "/http"
 const src = __dirname + "/src"
 
@@ -20,7 +21,17 @@ module.exports = {
 			},
 			{
 				test: /\.(html|svelte)$/i,
-				use: "svelte-loader",
+				use: {
+					loader: "svelte-loader",
+					options: {
+						preprocess: SveltePreprocess(),
+					},
+				},
+			},
+			{
+				test: /\.ts$/,
+				use: "ts-loader",
+				exclude: /node_modules/,
 			},
 		],
 	},
@@ -39,7 +50,7 @@ module.exports = {
 		}),
 	],
 	resolve: {
-		extensions: ["...", ".svelte"],
+		extensions: ["...", ".svelte", ".ts"],
 		mainFields: ["svelte", "browser", "module", "main"],
 	},
 	devServer: {

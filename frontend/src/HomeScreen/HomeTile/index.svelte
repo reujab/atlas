@@ -1,5 +1,5 @@
-<script>
-	export let tile, active;
+<script lang="ts">
+	export let tile: any, active: boolean;
 </script>
 
 <a

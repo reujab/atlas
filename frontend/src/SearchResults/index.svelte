@@ -1,15 +1,24 @@
-<script>
+<script lang="ts">
 	import Header from "../Header";
 	import prettyBytes from "pretty-bytes";
 	import { params } from "svelte-hash-router";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { subscribe, unsubscribe } from "../gamepad.js";
+	import { subscribe, unsubscribe } from "../gamepad";
 	import { onDestroy } from "svelte";
 	import child_process from "child_process";
 
-	const query = unescape($params.query);
+	interface Source {
+		info_hash: string;
+		name: string;
+		seeders: number;
+		leechers: number;
+		size: number;
+	}
 
-	let sources = [];
+	const query = unescape($params.query);
+	console.log(query);
+
+	let sources: Source[] = [];
 	fetch(
 		`https://apibay.org/q.php?q=${encodeURIComponent(
 			query.replace(/['"]/g, "").replace(/\./g, " ")
@@ -22,7 +31,7 @@
 
 	let activeSource = 0;
 
-	function play(source) {
+	function play(source: Source) {
 		sources = [];
 
 		const magnet = `magnet:?xt=urn:btih:${
@@ -37,21 +46,35 @@
 			"--mpv",
 		]);
 
-		while (true) {
-			const position = child_process
-				.spawnSync("playerctl", ["position"])
-				.stdout.toString();
-			console.log(position);
-			if (Number(position) > 0.1) {
-				break;
-			}
+		let started = false;
+
+		async function checkPosition() {
+			const child = child_process.spawn("playerctl", ["position"]);
+			child.stdout.on("data", (data) => {
+				console.log(data.toString());
+				const position = Number(data.toString().trim());
+				if (position > 0.1) {
+					started = true;
+					const overlay = child_process.spawn("overlay", {
+						detached: true,
+						stdio: "ignore",
+					});
+					overlay.on("exit", () => {
+						webtorrent.kill();
+					});
+				}
+			});
+			child.on("exit", () => {
+				if (!started) {
+					checkPosition();
+				}
+			});
 		}
 
-		child_process.spawnSync("overlay");
-		webtorrent.kill();
+		checkPosition();
 	}
 
-	function gamepadHandler(button) {
+	function gamepadHandler(button: string) {
 		if (button === "B") {
 			history.back();
 			return;

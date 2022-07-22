@@ -1,5 +1,5 @@
-<script>
-	export let text, icon, active;
+<script lang="ts">
+	export let text: string, icon: any, active: boolean;
 </script>
 
 <div

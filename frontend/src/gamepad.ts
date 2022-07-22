@@ -1,11 +1,11 @@
-import { GamepadListener } from "gamepad.js";
+const GamepadListener = require("gamepad.js").GamepadListener;
 
 const listener = new GamepadListener();
-const handlers = [];
+const handlers: ((button: string) => void)[] = [];
 
 listener.start();
 
-listener.on("gamepad:axis", (e) => {
+listener.on("gamepad:axis", (e: any) => {
 	e = e.detail;
 	console.log(e);
 	if (e.value === 0 || e.stick !== 0) {
@@ -23,7 +23,7 @@ listener.on("gamepad:axis", (e) => {
 	}
 });
 
-listener.on("gamepad:button", (e) => {
+listener.on("gamepad:button", (e: any) => {
 	if (e.detail.pressed) {
 		console.log(e.detail.button)
 		switch (e.detail.button) {
@@ -55,17 +55,17 @@ listener.on("gamepad:button", (e) => {
 	}
 });
 
-function dispatch(e) {
+function dispatch(e: string) {
 	for (const cb of handlers) {
 		cb(e);
 	}
 }
 
-export function subscribe(cb) {
+export function subscribe(cb: (button: string) => void) {
 	handlers.push(cb);
 };
 
-export function unsubscribe(cb) {
+export function unsubscribe(cb: (button: string) => void) {
 	const index = handlers.indexOf(cb);
 	if (index === -1) {
 		throw new Error("cannot unsubscribe: handler not found");
