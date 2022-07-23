@@ -55,44 +55,47 @@ export const cache: { [id: number]: Title } = {};
 
 export const sortedGenres: Genre[] = [];
 
-export async function getTrending(table: "movies"): Promise<Title[]> {
-	if (!precache[table].trending) {
-		precache[table].trending = await sql`
-			SELECT id, title, genres, overview, released::text FROM ${table}
+export async function getTrending(type: "movies"): Promise<Title[]> {
+	if (!precache[type].trending.length) {
+		precache[type].trending = await sql`
+			SELECT id, title, genres, overview, released::text FROM titles
+			WHERE movie = ${type === "movies"}
 			ORDER BY popularity DESC NULLS LAST
 			LIMIT 100
 		` as unknown as Title[];
 
-		for (const title of precache[table].trending) {
+		for (const title of precache[type].trending) {
 			cache[title.id] = title;
 		}
 	}
 
-	return precache[table].trending;
+	return precache[type].trending;
 }
 
-export async function getTopRated(table: "movies"): Promise<Title[]> {
-	if (!precache[table].topRated) {
-		precache[table].topRated = await sql`
-			SELECT id, title, genres, overview, released::text FROM ${table}
-			WHERE votes >= 1000
+export async function getTopRated(type: "movies"): Promise<Title[]> {
+	if (!precache[type].topRated.length) {
+		precache[type].topRated = await sql`
+			SELECT id, title, genres, overview, released::text FROM titles
+			WHERE movie = ${type === "movies"}
+			AND votes >= 1000
 			ORDER BY score DESC NULLS LAST
 			LIMIT 200
 		` as unknown as Title[];
 
-		for (const title of precache[table].topRated) {
+		for (const title of precache[type].topRated) {
 			cache[title.id] = title;
 		}
 	}
 
-	return precache[table].topRated;
+	return precache[type].topRated;
 }
 
-export async function getTitlesWithGenre(table: string, genre: GenreID): Promise<Title[]> {
+export async function getTitlesWithGenre(type: "movies", genre: GenreID): Promise<Title[]> {
 	const rows = await sql`
 		SELECT id, title, genres, overview, released::text
-		FROM ${table}
-		WHERE ${genre} = ANY(genres)
+		FROM titles
+		WHERE movie = ${type === "movies"}
+		AND ${genre} = ANY(genres)
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	`;

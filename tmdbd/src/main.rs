@@ -12,6 +12,22 @@ use tokio::time::sleep;
 
 type Pool = sqlx::Pool<sqlx::Postgres>;
 
+#[derive(Clone, PartialEq)]
+pub enum TitleType {
+    Movie,
+    Series,
+}
+
+impl ToString for TitleType {
+    fn to_string(&self) -> String {
+        match self {
+            TitleType::Movie => "movie",
+            TitleType::Series => "series",
+        }
+        .to_owned()
+    }
+}
+
 #[tokio::main]
 async fn main() {
     env_logger::init_from_env(Env::default().default_filter_or("tmdbd=info"));
@@ -26,10 +42,11 @@ async fn main() {
         .unwrap();
 
     tokio::join!(genres::insert(&pool), ids::insert(&pool));
+    info!("Done");
 
     tokio::join!(
-        titles::update(&pool, "movies"),
-        titles::update(&pool, "series"),
+        titles::update(&pool, TitleType::Movie),
+        titles::update(&pool, TitleType::Series),
     );
 }
 

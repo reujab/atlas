@@ -3,7 +3,7 @@ mod position_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
 use relm4::{AppUpdate, Model, RelmApp, Sender, Widgets};
-use std::{thread, process::Command};
+use std::{process::Command, thread};
 
 const PROGRESS_BAR_WIDTH: i32 = 600;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
@@ -138,7 +138,10 @@ fn format_secs(secs: u32) -> String {
 }
 
 fn main() {
-    Command::new("killall").args(&["-STOP", "electron"]).output().unwrap();
+    Command::new("killall")
+        .args(&["-STOP", "electron"])
+        .output()
+        .unwrap();
     let state = State {
         status: Status::Loading,
         duration: 0,
@@ -146,5 +149,8 @@ fn main() {
     };
     let app = RelmApp::new(state);
     app.run();
-    sommand::new("killall").args(&["-CONT", "electron"]).output().unwrap();
+    Command::new("killall")
+        .args(&["-CONT", "electron"])
+        .output()
+        .unwrap();
 }

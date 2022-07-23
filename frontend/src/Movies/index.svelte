@@ -100,7 +100,7 @@
 					class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
 					class:active={rowIndex === 0 && colIndex === 0}
 				>
-					<img src="posters/movies/{title.id}" alt={title.title} />
+					<img src="posters/movie/{title.id}" alt={title.title} />
 				</a>
 			{/each}
 		</div>

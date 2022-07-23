@@ -1,18 +1,13 @@
 CREATE TABLE genres (
 	id SMALLINT PRIMARY KEY,
-	name TEXT NOT NULL
+	name TEXT NOT NULL,
+	movie BOOLEAN,
+	series BOOLEAN
 );
-
-CREATE TABLE genres_movie (
-	id SMALLINT PRIMARY KEY
-) INHERITS (genres);
-
-CREATE TABLE genres_tv (
-	id SMALLINT PRIMARY KEY
-) INHERITS (genres);
 
 CREATE TABLE titles (
 	id INT,
+	movie BOOLEAN,
 	ts TIMESTAMP,
 
 	genres SMALLINT[],
@@ -25,19 +20,13 @@ CREATE TABLE titles (
 	title TEXT,
 	trailer VARCHAR(16),
 	score SMALLINT,
-	votes INT
+	votes INT,
+
+	PRIMARY KEY (id, movie)
 );
 
-CREATE TABLE movies (
-	id INT PRIMARY KEY
-) INHERITS (titles);
-
-CREATE TABLE series (
-	id INT PRIMARY KEY
-) INHERITS (titles);
-
 CREATE TABLE seasons (
-	id INT REFERENCES series,
+	id INT,
 	season SMALLINT,
 	episodes SMALLINT,
 	name TEXT,

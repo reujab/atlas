@@ -1,4 +1,4 @@
-use crate::get;
+use crate::{get, TitleType};
 use futures::stream::StreamExt;
 use serde::Deserialize;
 use sqlx::Row;
@@ -47,7 +47,6 @@ struct Season {
     episodes: i16,
     name: String,
     overview: String,
-    poster_path: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -61,48 +60,51 @@ struct VideoResults {
     site: String,
 }
 
-pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, table: &str) {
+pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
     let mut conn = pool.acquire().await.unwrap();
 
     loop {
         let next = sqlx::query(&format!(
             r#"
-                SELECT id FROM {table}
+                SELECT id FROM titles
+                WHERE movie = $1
                 ORDER BY ts ASC NULLS FIRST, popularity DESC
                 LIMIT 1
             "#
         ))
+        .bind(title_type == TitleType::Movie)
         .fetch_optional(&mut conn)
         .await
         .unwrap();
 
         if let Some(next) = next {
-            let endpoint = match table {
-                "movies" => "movie",
-                "series" => "tv",
-                _ => panic!(),
-            };
-            fetch(&pool, next.get::<i32, _>(0), endpoint, table).await;
+            fetch(&pool, next.get::<i32, _>(0), title_type.clone()).await;
         }
 
         sleep(Duration::from_secs(1)).await;
     }
 }
 
-async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
+async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     let mut conn = pool.acquire().await.unwrap();
     let key = env::var("TMDB_KEY").unwrap();
+    let endpoint = match title_type {
+        TitleType::Movie => "movie",
+        TitleType::Series => "tv",
+    };
     let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}");
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
-        sqlx::query(&format!(
+        sqlx::query(
             r#"
-                UPDATE {table}
+                UPDATE titles
                 SET ts = now()
                 WHERE id = $1
-            "#
-        ))
+                AND movie = $2
+            "#,
+        )
         .bind(id)
+        .bind(title_type == TitleType::Movie)
         .execute(&mut conn)
         .await
         .unwrap();
@@ -115,7 +117,11 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
             "https://www.themoviedb.org/t/p/w300_and_h450_bestv2{}",
             poster_path
         );
-        let path = format!("{}/{table}/{id}", env::var("POSTERS_PATH").unwrap());
+        let path = format!(
+            "{}/{}/{id}",
+            env::var("POSTERS_PATH").unwrap(),
+            title_type.to_string()
+        );
         let mut file = File::create(&path).await.unwrap();
         let mut stream = get(&url).await.unwrap().bytes_stream();
         while let Some(chunk) = stream.next().await {
@@ -170,12 +176,13 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
 
     sqlx::query(&format!(
         r#"
-            UPDATE {table}
+            UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
                 released = {released}, runtime = $6, tagline = $7, title = $8, trailer = $9,
                 score = $10, votes = $11
             WHERE id = $12
-        "#
+            AND movie = $13
+        "#,
     ))
     .bind(&title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
     .bind(&title.language)
@@ -189,6 +196,7 @@ async fn fetch(pool: &crate::Pool, id: i32, endpoint: &str, table: &str) {
     .bind(title.score * 10.0)
     .bind(&title.votes)
     .bind(id)
+    .bind(title_type == TitleType::Movie)
     .execute(&mut *conn)
     .await
     .unwrap();

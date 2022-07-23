@@ -1,4 +1,4 @@
-use crate::get;
+use crate::{get, TitleType};
 use serde::Deserialize;
 use std::{env, time::Duration};
 use tokio::time::sleep;
@@ -17,16 +17,20 @@ struct Genre {
 pub async fn insert(pool: &sqlx::Pool<sqlx::Postgres>) {
     let mut trans = pool.begin().await.unwrap();
 
-    insert_category(&mut trans, "movie").await;
-    insert_category(&mut trans, "tv").await;
+    insert_category(&mut trans, TitleType::Movie).await;
+    insert_category(&mut trans, TitleType::Series).await;
 
     info!("Committing transaction");
     trans.commit().await.unwrap();
 }
 
-async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, category: &str) {
+async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, category: TitleType) {
     let key = env::var("TMDB_KEY").unwrap();
-    let url = format!("https://api.themoviedb.org/3/genre/{category}/list?api_key={key}");
+    let endpoint = match category {
+        TitleType::Movie => "movie",
+        TitleType::Series => "tv",
+    };
+    let url = format!("https://api.themoviedb.org/3/genre/{endpoint}/list?api_key={key}");
     let genres = get(&url)
         .await
         .unwrap()
@@ -35,18 +39,20 @@ async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, cate
         .unwrap()
         .genres;
 
-    let table = category.replace("_series", "");
     for genre in genres {
-        sqlx::query(&format!(
+        sqlx::query(
             r#"
-                INSERT INTO genres_{table} (id, name)
-                VALUES ($1, $2)
+                INSERT INTO genres (id, name, movie, series)
+                VALUES ($1, $2, $3, $4)
                 ON CONFLICT (id)
-                DO NOTHING
-            "#
-        ))
+                DO UPDATE
+                SET movie = GREATEST(genres.movie, $3), series = GREATEST(genres.series, $4)
+            "#,
+        )
         .bind(genre.id)
         .bind(genre.name)
+        .bind(category == TitleType::Movie)
+        .bind(category == TitleType::Series)
         .execute(&mut *trans)
         .await
         .unwrap();

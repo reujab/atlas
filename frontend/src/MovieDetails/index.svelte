@@ -59,7 +59,7 @@
 
 	<div class="min-h-[450px] mt-4">
 		<img
-			src="posters/movies/{title.id}"
+			src="posters/movie/{title.id}"
 			alt="Poster"
 			class="float-left mr-4"
 		/>
