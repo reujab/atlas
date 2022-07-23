@@ -32,6 +32,7 @@
 	let activeSource = 0;
 
 	function play(source: Source) {
+		// shows loading icon
 		sources = [];
 
 		const magnet = `magnet:?xt=urn:btih:${
@@ -43,11 +44,12 @@
 		const webtorrent = child_process.spawn("webtorrent", [
 			"download",
 			magnet,
+			// use mpv because it supports wayland
 			"--mpv",
 		]);
 
+		// once mpv has started, spawn the overlay
 		let started = false;
-
 		async function checkPosition() {
 			const child = child_process.spawn("playerctl", ["position"]);
 			child.stdout.on("data", (data) => {
@@ -70,7 +72,6 @@
 				}
 			});
 		}
-
 		checkPosition();
 	}
 
@@ -120,7 +121,7 @@
 				>
 					{source.name}
 					<div class="grow" />
-					{`${source.seeders}|${source.leechers}`}
+					{`${source.seeders} | ${source.leechers}`}
 					{" • "}
 					{prettyBytes(Number(source.size))}
 				</div>

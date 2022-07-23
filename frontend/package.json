@@ -8,7 +8,7 @@
     "dev": "webpack watch -c webpack.dev & tailwindcss -o http/index.css -w & sleep 5; electron .; kill %1 %2",
     "build": "webpack build -c webpack.prod & tailwindcss -o http/index.css -m & wait && ln -sfn /data/posters http/posters",
     "start": "electron . --enable-features=UseOzonePlatform --ozone-platform=wayland",
-    "package": "npm run build && electron-builder build -l pacman"
+    "package": "npm run build && electron-builder build -l deb"
   },
   "author": "reujab <reujab@gmail.com>",
   "license": "Unlicense",

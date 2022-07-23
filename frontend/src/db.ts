@@ -31,8 +31,6 @@ const precache: PreCache = {
 	},
 };
 
-console.log(precache);
-
 const sql = postgres({
 	database: "pi-es",
 	username: "reujab",
