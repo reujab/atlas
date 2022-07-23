@@ -32,7 +32,7 @@ const precache: PreCache = {
 };
 
 const sql = postgres({
-	database: "pi-es",
+	database: "atlas",
 	username: "reujab",
 });
 

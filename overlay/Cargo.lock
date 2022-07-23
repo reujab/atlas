@@ -9,6 +9,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb07d2053ccdbe10e2af2995a2f116c1330396493dc1269f6a91d0ae82e19704"
 
 [[package]]
+name = "atlas-overlay"
+version = "0.0.0"
+dependencies = [
+ "gilrs",
+ "gtk4",
+ "relm4",
+ "relm4-components",
+ "relm4-macros",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -541,17 +552,6 @@ name = "once_cell"
 version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
-
-[[package]]
-name = "overlay"
-version = "0.0.0"
-dependencies = [
- "gilrs",
- "gtk4",
- "relm4",
- "relm4-components",
- "relm4-macros",
-]
 
 [[package]]
 name = "pango"

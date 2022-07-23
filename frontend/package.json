@@ -1,9 +1,9 @@
 {
-  "name": "frontend",
+  "name": "atlas-frontend",
   "version": "0.0.0",
   "description": "",
   "main": "main.js",
-  "homepage": "https://github.com/reujab/pi-es",
+  "homepage": "https://github.com/reujab/atlas",
   "scripts": {
     "dev": "webpack watch -c webpack.dev & tailwindcss -o http/index.css -w & sleep 5; electron .; kill %1 %2",
     "build": "webpack build -c webpack.prod & tailwindcss -o http/index.css -m & wait && ln -sfn /data/posters http/posters",
