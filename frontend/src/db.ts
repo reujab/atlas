@@ -33,7 +33,7 @@ const precache: PreCache = {
 
 const sql = postgres({
 	database: "atlas",
-	username: "reujab",
+	username: "atlas",
 });
 
 cacheGenres();

@@ -57,7 +57,7 @@
 				const position = Number(data.toString().trim());
 				if (position > 0.1) {
 					started = true;
-					const overlay = child_process.spawn("overlay", {
+					const overlay = child_process.spawn("atlas-overlay", {
 						detached: true,
 						stdio: "ignore",
 					});
