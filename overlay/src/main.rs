@@ -139,7 +139,7 @@ fn format_secs(secs: u32) -> String {
 
 fn main() {
     Command::new("killall")
-        .args(&["-STOP", "electron"])
+        .args(&["-STOP", "atlas-frontend"])
         .output()
         .unwrap();
     let state = State {
@@ -150,7 +150,7 @@ fn main() {
     let app = RelmApp::new(state);
     app.run();
     Command::new("killall")
-        .args(&["-CONT", "electron"])
+        .args(&["-CONT", "atlas-frontend"])
         .output()
         .unwrap();
 }

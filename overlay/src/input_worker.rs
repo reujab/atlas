@@ -15,7 +15,10 @@ pub fn handle_gamepad() {
                             .unwrap();
                     }
                     Button::East => {
-                        Command::new("killall").args(&["-CONT", "electron"]).output().unwrap();
+                        Command::new("killall")
+                            .args(&["-CONT", "atlas-frontend"])
+                            .output()
+                            .unwrap();
                         Command::new("killall").arg("mpv").output().unwrap();
                         std::process::exit(0);
                     }
