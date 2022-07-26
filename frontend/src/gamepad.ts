@@ -1,3 +1,5 @@
+import { log } from "./log"
+
 const GamepadListener = require("gamepad.js").GamepadListener;
 
 const listener = new GamepadListener();
@@ -7,7 +9,7 @@ listener.start();
 
 listener.on("gamepad:axis", (e: any) => {
 	e = e.detail;
-	console.log(e);
+	log("%O", e);
 	if (e.value === 0 || e.stick !== 0) {
 		return;
 	}
@@ -25,7 +27,7 @@ listener.on("gamepad:axis", (e: any) => {
 
 listener.on("gamepad:button", (e: any) => {
 	if (e.detail.pressed) {
-		console.log(e.detail.button)
+		log("%O", e.detail.button)
 		switch (e.detail.button) {
 			case 0:
 				dispatch("A");

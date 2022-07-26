@@ -5,6 +5,7 @@
 	import prettyBytes from "pretty-bytes";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { SocksProxyAgent } from "socks-proxy-agent";
+	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -18,7 +19,7 @@
 	}
 
 	const query = unescape($params.query);
-	console.log(query);
+	log(query);
 
 	const agent = new SocksProxyAgent({
 		hostname: "localhost",
@@ -32,7 +33,7 @@
 		)}`,
 		{ agent },
 		(res) => {
-			console.log(res.headers);
+			log("%O", res.headers);
 
 			let data = "";
 			res.on("data", (chunk) => {
@@ -43,7 +44,7 @@
 					const json = JSON.parse(data);
 					sources = json;
 				} catch (err) {
-					console.error(err);
+					error("error parsing json: %O", err);
 				}
 			});
 		}
@@ -73,7 +74,7 @@
 		async function checkPosition() {
 			const child = child_process.spawn("playerctl", ["position"]);
 			child.stdout.on("data", (data) => {
-				console.log(data.toString());
+				log(data.toString());
 				const position = Number(data.toString().trim());
 				if (position > 0.1) {
 					started = true;

@@ -7,7 +7,7 @@ rm -f $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY*
 ubuntu-frame &
 
 until [[ -S $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]; do
-	true
+	sleep 0.05
 done
 
 atlas-frontend --enable-features=UseOzonePlatform --ozone-platform=wayland

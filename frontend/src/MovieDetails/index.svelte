@@ -5,12 +5,13 @@
 	import FaPlus from "svelte-icons/fa/FaPlus.svelte";
 	import Header from "../Header";
 	import { cache, genres } from "../db";
+	import { log } from "../log";
+	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import { onDestroy } from "svelte";
 
 	const title = cache[$params.id];
-	console.log(title);
+	log("%O", title);
 	const playHref = `#/search/${escape(title.title)
 		.replace(/\./g, "%2E")
 		.replace(/\+/g, "%2B")}`;
