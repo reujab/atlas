@@ -9,13 +9,13 @@ revealer {
 }
 
 .container {
-	margin-bottom: -5em;
 	background: #222;
 	border-radius: 3em;
 	box-shadow: 0 -0.5em 1.5em #222;
 	color: white;
 	font-family: monospace;
 	font-weight: 100;
+	margin-bottom: -5em;
 	margin-top: 3em;
 	padding: 0 1.5em 3em 1.5em;
 }

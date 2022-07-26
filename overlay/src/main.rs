@@ -16,7 +16,6 @@ struct State {
 
 #[derive(PartialEq)]
 pub enum Status {
-    Loading,
     Playing,
     Paused,
 }
@@ -89,7 +88,6 @@ impl Widgets<State, ()> for AppWidgets {
     }
 
     fn post_view() {
-        println!("post_view");
         self.revealer
             .set_reveal_child(model.status == Status::Paused);
         self.position.set_label(&format_secs(model.position));
@@ -143,7 +141,7 @@ fn main() {
         .output()
         .unwrap();
     let state = State {
-        status: Status::Loading,
+        status: Status::Playing,
         duration: 0,
         position: 0,
     };
