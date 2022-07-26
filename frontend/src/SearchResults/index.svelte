@@ -1,11 +1,13 @@
 <script lang="ts">
 	import Header from "../Header";
-	import prettyBytes from "pretty-bytes";
-	import { params } from "svelte-hash-router";
-	import { Circle2 } from "svelte-loading-spinners";
-	import { subscribe, unsubscribe } from "../gamepad";
-	import { onDestroy } from "svelte";
 	import child_process from "child_process";
+	import http from "http";
+	import prettyBytes from "pretty-bytes";
+	import { Circle2 } from "svelte-loading-spinners";
+	import { SocksProxyAgent } from "socks-proxy-agent";
+	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface Source {
 		info_hash: string;
@@ -18,16 +20,34 @@
 	const query = unescape($params.query);
 	console.log(query);
 
-	let sources: Source[] = [];
-	fetch(
-		`https://apibay.org/q.php?q=${encodeURIComponent(
-			query.replace(/['"]/g, "").replace(/\./g, " ")
-		)}&cat=200`
-	).then((res) => {
-		res.json().then((res) => {
-			sources = res;
-		});
+	const agent = new SocksProxyAgent({
+		hostname: "localhost",
+		port: 9050,
 	});
+
+	let sources: Source[] = [];
+	http.get(
+		`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/q.php?cat=200&q=${encodeURIComponent(
+			query.replace(/['"]/g, "").replace(/\./g, " ")
+		)}`,
+		{ agent },
+		(res) => {
+			console.log(res.headers);
+
+			let data = "";
+			res.on("data", (chunk) => {
+				data += chunk;
+			});
+			res.on("end", () => {
+				try {
+					const json = JSON.parse(data);
+					sources = json;
+				} catch (err) {
+					console.error(err);
+				}
+			});
+		}
+	);
 
 	let activeSource = 0;
 
