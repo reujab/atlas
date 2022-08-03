@@ -27,28 +27,37 @@
 	});
 
 	let sources: Source[] = [];
-	http.get(
-		`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/q.php?cat=200&q=${encodeURIComponent(
-			query.replace(/['"]/g, "").replace(/\./g, " ")
-		)}`,
-		{ agent },
-		(res) => {
-			log("%O", res.headers);
+	const path = `q.php?cat=200&q=${encodeURIComponent(
+		query.replace(/['"]/g, "").replace(/\./g, " ")
+	)}`;
+	fetch(`https://apibay.org/${path}`)
+		.then((res) => {
+			res.json().then((res) => {
+				sources = res;
+			});
+		})
+		.catch(() => {
+			http.get(
+				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
+				{ agent },
+				(res) => {
+					log("%O", res.headers);
 
-			let data = "";
-			res.on("data", (chunk) => {
-				data += chunk;
-			});
-			res.on("end", () => {
-				try {
-					const json = JSON.parse(data);
-					sources = json;
-				} catch (err) {
-					error("error parsing json: %O", err);
+					let data = "";
+					res.on("data", (chunk) => {
+						data += chunk;
+					});
+					res.on("end", () => {
+						try {
+							const json = JSON.parse(data);
+							sources = json;
+						} catch (err) {
+							error("error parsing json: %O", err);
+						}
+					});
 				}
-			});
-		}
-	);
+			);
+		});
 
 	let activeSource = 0;
 
