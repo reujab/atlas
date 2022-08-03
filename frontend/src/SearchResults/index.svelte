@@ -76,6 +76,7 @@
 			magnet,
 			// use mpv because it supports wayland
 			"--mpv",
+			"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
 		]);
 
 		// once mpv has started, spawn the overlay
