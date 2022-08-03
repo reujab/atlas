@@ -12,11 +12,12 @@
 	import { onDestroy } from "svelte";
 
 	let rows = [new Row("Trending"), new Row("Top rated")];
-	const cols = 6;
 
 	let activeRow = 0;
 
 	$: activeTitle = rows[activeRow].titles[rows[activeRow].activeCol];
+
+	let rowsEle: HTMLDivElement;
 
 	getTrending("movies").then((trending) => {
 		rows[0].titles = trending;
@@ -34,7 +35,7 @@
 		});
 	}
 
-	function gamepadHandler(button: button) {
+	function gamepadHandler(button: string) {
 		const row = rows[activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
@@ -61,6 +62,12 @@
 				rows = rows;
 				break;
 		}
+
+		const rowHeight = document.querySelector(".row").clientHeight;
+		rowsEle.scrollTo(0, activeRow * rowHeight);
+
+		const colWidth = document.querySelector(".poster").clientWidth + 8 * 2;
+		row.element.scrollTo(row.activeCol * colWidth, 0);
 	}
 
 	subscribe(gamepadHandler);
@@ -69,10 +76,10 @@
 	});
 </script>
 
-<div class="h-screen px-48 bg-white">
+<div class="h-screen px-48 bg-white flex flex-col">
 	<Header title="Movies" back search="/movies/search" />
 
-	<div class="h-[9rem] flex flex-col mb-2">
+	<div class="min-h-[9rem] flex flex-col mb-2">
 		{#if activeTitle}
 			<h3 class="text-xl mb-2">
 				{activeTitle.genres.map((genre) => genres[genre]).join(" • ")}
@@ -84,27 +91,35 @@
 		{/if}
 	</div>
 
-	{#each rows
-		// wrap around
-		.concat(rows[0])
-		.slice(activeRow, activeRow + 2) as row, rowIndex}
-		<h2 class="text-7xl mb-4">{row.name}</h2>
-		<div class="flex justify-between mb-8">
-			{#each row.titles
-				// wrap around
-				.concat(row.titles.slice(0, cols))
-				.slice(row.activeCol, row.activeCol + cols) as title, colIndex}
-				<a
-					key={title.id}
-					href="#/movies/details/{title.id}"
-					class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
-					class:active={rowIndex === 0 && colIndex === 0}
+	<div
+		class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4"
+		bind:this={rowsEle}
+	>
+		{#each rows as row, rowIndex}
+			<div class="row">
+				<h2 class="text-7xl mb-4">{row.name}</h2>
+				<div
+					class="flex justify-between mb-8 overflow-scroll scroll-smooth"
+					bind:this={row.element}
 				>
-					<img src="posters/movie/{title.id}" alt={title.title} />
-				</a>
-			{/each}
-		</div>
-	{/each}
+					{#each row.titles as title, colIndex}
+						<a
+							key={title.id}
+							href="#/movies/details/{title.id}"
+							class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
+							class:active={rowIndex === activeRow &&
+								colIndex === rows[activeRow].activeCol}
+						>
+							<img
+								src="posters/movie/{title.id}"
+								alt={title.title}
+							/>
+						</a>
+					{/each}
+				</div>
+			</div>
+		{/each}
+	</div>
 </div>
 
 <style>

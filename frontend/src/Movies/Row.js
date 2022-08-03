@@ -5,6 +5,8 @@ export default class Row {
 
 	activeCol = 0
 
+	element = null
+
 	constructor(name) {
 		this.name = name
 	}
