@@ -31,7 +31,11 @@
 		const row = new Row(genre.name);
 		rows.push(row);
 		getTitlesWithGenre("movies", genre.id).then((movies) => {
-			row.titles = movies;
+			if (movies.length) {
+				row.titles = movies;
+			} else {
+				rows.splice(rows.indexOf(row), 1);
+			}
 		});
 	}
 
