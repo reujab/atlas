@@ -111,7 +111,8 @@
 								colIndex === rows[activeRow].activeCol}
 						>
 							<img
-								src="posters/movie/{title.id}"
+								src="file://{process.env
+									.POSTERS_PATH}/movie/{title.id}"
 								alt={title.title}
 							/>
 						</a>

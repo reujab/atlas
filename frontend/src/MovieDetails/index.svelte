@@ -60,7 +60,7 @@
 
 	<div class="min-h-[450px] mt-4">
 		<img
-			src="posters/movie/{title.id}"
+			src="file:///{process.env.POSTERS_PATH}/{title.id}"
 			alt="Poster"
 			class="float-left mr-4"
 		/>
