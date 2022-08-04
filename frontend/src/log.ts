@@ -9,7 +9,7 @@ export function log(format: string, ...args: any[]) {
 export function error(format: string, ...args: any[]) {
 	console.error(format, ...args);
 	for (const arg of args) {
-		format = format.replace("%O", JSON.stringify(arg, null, 2));
+		format = format.replace("%O", `${arg.error.toString()} at ${arg.filename}:${arg.lineno}`);
 	}
 	process.stderr.write(`${format}\n`);
 }

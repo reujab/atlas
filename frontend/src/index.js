@@ -4,6 +4,7 @@ import MovieDetails from "./MovieDetails";
 import Movies from "./Movies";
 import Router, { routes } from "svelte-hash-router";
 import SearchResults from "./SearchResults";
+import { error } from "./log";
 
 routes.set({
 	"/": HomeScreen,
@@ -15,3 +16,7 @@ routes.set({
 export default new Router({
 	target: document.body,
 });
+
+addEventListener("error", (err) => {
+	error("Uncaught error: %O", err);
+})

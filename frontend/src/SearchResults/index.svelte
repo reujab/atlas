@@ -73,13 +73,17 @@
 			source.name
 		)}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce`;
 
-		const webtorrent = child_process.spawn("webtorrent", [
-			"download",
-			magnet,
-			// use mpv because it supports wayland
-			"--mpv",
-			"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
-		]);
+		const webtorrent = child_process.spawn(
+			"webtorrent",
+			[
+				"download",
+				magnet,
+				// use mpv because it supports wayland
+				"--mpv",
+				"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
+			],
+			{ stdio: "inherit" }
+		);
 
 		webtorrent.on("error", (err) => {
 			error("%O", err);
@@ -90,7 +94,9 @@
 				error("webtorrent exit code: %O", code);
 			}
 
-			history.back();
+			if (location.hash.includes("/search/")) {
+				history.back();
+			}
 		});
 
 		// once mpv has started, spawn the overlay
@@ -104,7 +110,7 @@
 					started = true;
 					const overlay = child_process.spawn("atlas-overlay", {
 						detached: true,
-						stdio: "ignore",
+						stdio: "inherit",
 					});
 					overlay.on("exit", () => {
 						webtorrent.kill();
@@ -122,11 +128,11 @@
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
-			child_process.spawnSync("killall", [
-				"overlay",
-				"mpv",
-				"webtorrent",
-			]);
+			child_process.spawnSync(
+				"killall",
+				["overlay", "mpv", "webtorrent"],
+				{ stdio: "inherit" }
+			);
 			history.back();
 			return;
 		}
