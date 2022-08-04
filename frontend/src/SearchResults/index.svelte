@@ -122,6 +122,11 @@
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
+			child_process.spawnSync("killall", [
+				"overlay",
+				"mpv",
+				"webtorrent",
+			]);
 			history.back();
 			return;
 		}
