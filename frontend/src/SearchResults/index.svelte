@@ -9,6 +9,7 @@
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
+	import FaCircleExclamation from "svelte-icons/fa/FaExclamationCircle.svelte";
 
 	interface Source {
 		info_hash: string;
@@ -25,6 +26,8 @@
 		hostname: "localhost",
 		port: 9050,
 	});
+
+	let errorMsg = "";
 
 	let sources: Source[] = [];
 	const path = `q.php?cat=200&q=${encodeURIComponent(
@@ -56,6 +59,10 @@
 						} catch (err) {
 							error("error parsing json: %O", err);
 						}
+					});
+					res.on("error", (err) => {
+						error("%O", err);
+						errorMsg = err.toString();
 					});
 				}
 			);
@@ -128,6 +135,11 @@
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
+			if (errorMsg) {
+				errorMsg = "";
+				return;
+			}
+
 			child_process.spawnSync(
 				"killall",
 				["overlay", "mpv", "webtorrent"],
@@ -187,6 +199,20 @@
 		<div class="flex justify-center items-center h-full">
 			<Circle2 size={256} />
 		</div>
+	{/if}
+
+	{#if errorMsg}
+		<dialog class="top-0 bottom-0 drop-shadow-lg" open={Boolean(errorMsg)}>
+			<h1
+				class="text-6xl text-center flex border-bottom border-black mb-4"
+			>
+				<div class="w-16 h-16 text-red-500 inline-block">
+					<FaCircleExclamation />
+				</div>
+				Error
+			</h1>
+			<div>{errorMsg}</div>
+		</dialog>
 	{/if}
 </div>
 
