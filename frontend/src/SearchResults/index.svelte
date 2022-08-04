@@ -36,7 +36,9 @@
 				sources = res;
 			});
 		})
-		.catch(() => {
+		.catch((err) => {
+			error("%O", err);
+
 			http.get(
 				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
 				{ agent },
@@ -78,6 +80,18 @@
 			"--mpv",
 			"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
 		]);
+
+		webtorrent.on("error", (err) => {
+			error("%O", err);
+		});
+
+		webtorrent.on("exit", (code) => {
+			if (code !== 0) {
+				error("webtorrent exit code: %O", code);
+			}
+
+			history.back();
+		});
 
 		// once mpv has started, spawn the overlay
 		let started = false;
