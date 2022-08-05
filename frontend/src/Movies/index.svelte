@@ -9,38 +9,18 @@
 		sortedGenres,
 		getTitlesWithGenre,
 	} from "../db";
-	import { onDestroy } from "svelte";
+	import state from "./State";
+	import { onDestroy, onMount } from "svelte";
 
-	let rows = [new Row("Trending"), new Row("Top rated")];
-
-	let activeRow = 0;
-
-	$: activeTitle = rows[activeRow].titles[rows[activeRow].activeCol];
+	$: activeTitle =
+		state.rows[state.activeRow].titles[
+			state.rows[state.activeRow].activeCol
+		];
 
 	let rowsEle: HTMLDivElement;
 
-	getTrending("movies").then((trending) => {
-		rows[0].titles = trending;
-	});
-
-	getTopRated("movies").then((topRated) => {
-		rows[1].titles = topRated;
-	});
-
-	for (const genre of sortedGenres) {
-		const row = new Row(genre.name);
-		rows.push(row);
-		getTitlesWithGenre("movies", genre.id).then((movies) => {
-			if (movies.length) {
-				row.titles = movies;
-			} else {
-				rows.splice(rows.indexOf(row), 1);
-			}
-		});
-	}
-
 	function gamepadHandler(button: string) {
-		const row = rows[activeRow];
+		const row = state.rows[state.activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
@@ -50,25 +30,33 @@
 				history.back();
 				break;
 			case "up":
-				activeRow = (rows.length + activeRow - 1) % rows.length;
+				state.activeRow =
+					(state.rows.length + state.activeRow - 1) %
+					state.rows.length;
 				break;
 			case "down":
-				activeRow = (rows.length + activeRow + 1) % rows.length;
+				state.activeRow =
+					(state.rows.length + state.activeRow + 1) %
+					state.rows.length;
 				break;
 			case "left":
 				row.activeCol =
 					(row.titles.length + row.activeCol - 1) % row.titles.length;
-				rows = rows;
+				state.rows = state.rows;
 				break;
 			case "right":
 				row.activeCol =
 					(row.titles.length + row.activeCol + 1) % row.titles.length;
-				rows = rows;
+				state.rows = state.rows;
 				break;
 		}
 
+		scroll(row);
+	}
+
+	function scroll(row: Row) {
 		const rowHeight = document.querySelector(".row").clientHeight;
-		rowsEle.scrollTo(0, activeRow * rowHeight);
+		rowsEle.scrollTo(0, state.activeRow * rowHeight);
 
 		const borderWidth = 4 * 2;
 		const gap = 16;
@@ -80,6 +68,9 @@
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
+	});
+	onMount(() => {
+		scroll(state.rows[state.activeRow]);
 	});
 </script>
 
@@ -102,7 +93,7 @@
 		class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4"
 		bind:this={rowsEle}
 	>
-		{#each rows as row, rowIndex}
+		{#each state.rows as row, rowIndex}
 			{#if row.titles.length}
 				<div class="row">
 					<h2 class="text-7xl mb-4">{row.name}</h2>
@@ -115,8 +106,9 @@
 								key={title.id}
 								href="#/movies/details/{title.id}"
 								class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
-								class:active={rowIndex === activeRow &&
-									colIndex === rows[activeRow].activeCol}
+								class:active={rowIndex === state.activeRow &&
+									colIndex ===
+										state.rows[state.activeRow].activeCol}
 							>
 								<img
 									class="rounded-md"

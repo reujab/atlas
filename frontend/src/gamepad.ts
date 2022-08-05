@@ -51,6 +51,27 @@ listener.on("gamepad:button", (e: any) => {
 	}
 });
 
+onkeydown = (e) => {
+	switch (e.key) {
+		case "ArrowLeft":
+			dispatch("left");
+			break;
+		case "ArrowUp":
+			dispatch("up");
+			break;
+		case "ArrowRight":
+			dispatch("right");
+			break;
+		case "ArrowDown":
+			dispatch("down");
+			break;
+		default:
+			return;
+	}
+
+	e.preventDefault();
+}
+
 function getButtonName(id: number): string | null {
 	switch (id) {
 		case 0:

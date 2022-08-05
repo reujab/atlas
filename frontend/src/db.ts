@@ -1,16 +1,14 @@
 import postgres from "postgres";
 
-type GenreID = number;
-
 interface Genre {
-	id: GenreID,
+	id: number,
 	name: string,
 }
 
-interface Title {
+export interface Title {
 	id: number,
 	title: string,
-	genres: GenreID[],
+	genres: number[],
 	overview: string,
 	released: string,
 }
@@ -49,7 +47,7 @@ async function cacheGenres() {
 	sortedGenres.sort((a, b) => Number(a.name < b.name));
 }
 
-export const genres: { [id: GenreID]: string } = {};
+export const genres: { [id: number]: string } = {};
 
 export const cache: { [id: number]: Title } = {};
 
@@ -90,7 +88,7 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 	return precache[type].topRated;
 }
 
-export async function getTitlesWithGenre(type: "movies", genre: GenreID): Promise<Title[]> {
+export async function getTitlesWithGenre(type: "movies", genre: number): Promise<Title[]> {
 	const rows = await sql`
 		SELECT id, title, genres, overview, released::text
 		FROM titles
