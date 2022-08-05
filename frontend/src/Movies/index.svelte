@@ -70,7 +70,10 @@
 		const rowHeight = document.querySelector(".row").clientHeight;
 		rowsEle.scrollTo(0, activeRow * rowHeight);
 
-		const colWidth = document.querySelector(".poster").clientWidth + 8 * 2;
+		const borderWidth = 4 * 2;
+		const gap = 16;
+		const colWidth =
+			document.querySelector(".poster").clientWidth + borderWidth + gap;
 		row.element.scrollTo(row.activeCol * colWidth, 0);
 	}
 
@@ -80,7 +83,7 @@
 	});
 </script>
 
-<div class="h-screen px-48 bg-white flex flex-col">
+<div class="h-screen px-48 flex flex-col">
 	<Header title="Movies" back search="/movies/search" />
 
 	<div class="min-h-[9rem] flex flex-col mb-2">
@@ -100,29 +103,32 @@
 		bind:this={rowsEle}
 	>
 		{#each rows as row, rowIndex}
-			<div class="row">
-				<h2 class="text-7xl mb-4">{row.name}</h2>
-				<div
-					class="flex justify-between mb-8 overflow-scroll scroll-smooth"
-					bind:this={row.element}
-				>
-					{#each row.titles as title, colIndex}
-						<a
-							key={title.id}
-							href="#/movies/details/{title.id}"
-							class="poster shrink-0 w-[15rem] border-8 border-transparent rounded-lg"
-							class:active={rowIndex === activeRow &&
-								colIndex === rows[activeRow].activeCol}
-						>
-							<img
-								src="file://{process.env
-									.POSTERS_PATH}/movie/{title.id}"
-								alt={title.title}
-							/>
-						</a>
-					{/each}
+			{#if row.titles.length}
+				<div class="row">
+					<h2 class="text-7xl mb-4">{row.name}</h2>
+					<div
+						class="flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4"
+						bind:this={row.element}
+					>
+						{#each row.titles as title, colIndex}
+							<a
+								key={title.id}
+								href="#/movies/details/{title.id}"
+								class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
+								class:active={rowIndex === activeRow &&
+									colIndex === rows[activeRow].activeCol}
+							>
+								<img
+									class="rounded-md"
+									src="file://{process.env
+										.POSTERS_PATH}/movie/{title.id}"
+									alt={title.title}
+								/>
+							</a>
+						{/each}
+					</div>
 				</div>
-			</div>
+			{/if}
 		{/each}
 	</div>
 </div>
@@ -130,7 +136,7 @@
 <style>
 	.poster.active,
 	.poster:hover {
-		border-color: black;
+		border-color: #eee;
 	}
 
 	.clamp-3 {

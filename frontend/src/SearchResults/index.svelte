@@ -17,6 +17,7 @@
 		seeders: number;
 		leechers: number;
 		size: number;
+		element: HTMLDivElement;
 	}
 
 	const query = unescape($params.query);
@@ -27,6 +28,7 @@
 		port: 9050,
 	});
 
+	let container: HTMLDivElement;
 	let errorMsg = "";
 
 	let sources: Source[] = [];
@@ -168,6 +170,8 @@
 				}
 				break;
 		}
+
+		container.scrollTo(0, sources[activeSource]?.element.offsetTop);
 	}
 
 	subscribe(gamepadHandler);
@@ -180,12 +184,16 @@
 	<Header title={query} back />
 
 	{#if sources.length}
-		<div class="flex gap-8 flex-col text-2xl">
-			{#each sources.slice(activeSource) as source, i}
+		<div
+			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll"
+			bind:this={container}
+		>
+			{#each sources as source, i}
 				<div
-					class="source rounded-lg bg-slate-200 border-4 border-transparent p-4 flex cursor-pointer drop-shadow-sm"
-					class:active={i === 0}
+					class="source rounded-full bg-[#eee] border-4 border-transparent p-4 flex cursor-pointer drop-shadow-sm text-black"
+					class:active={i === activeSource}
 					on:click={() => play(source)}
+					bind:this={source.element}
 				>
 					{source.name}
 					<div class="grow" />

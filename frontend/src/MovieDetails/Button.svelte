@@ -3,7 +3,7 @@
 </script>
 
 <div
-	class="button p-16 h-16 flex items-center cursor-pointer text-5xl font-light border rounded-full drop-shadow-md bg-white"
+	class="button p-16 h-16 flex items-center cursor-pointer text-5xl font-light border rounded-full drop-shadow-md bg-[#eee] text-black"
 	class:active
 >
 	<div class="w-12 h-12 mr-8">

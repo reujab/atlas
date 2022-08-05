@@ -74,7 +74,7 @@
 	class="h-screen px-48 rounded-[25px] bg-cover flex items-center"
 	style="background-image: {img}"
 >
-	<div class="flex flex-col gap-48 flex-wrap h-[44rem]">
+	<div class="flex flex-col gap-48 flex-wrap h-[44rem] text-black">
 		{#each tiles as tile, i}
 			<HomeTile {tile} active={activeTile === i} />
 		{/each}
