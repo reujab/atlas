@@ -33,6 +33,7 @@ async function cacheGenres() {
 
 function cachePoster(title: Title) {
 	title.poster = new Image();
+	title.poster.className = "rounded-md";
 	title.poster.addEventListener("error", (err) => {
 		error("failed to load poster: %O", err);
 	});

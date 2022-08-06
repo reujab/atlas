@@ -118,9 +118,12 @@
 </div>
 
 <style>
-	.poster.active,
-	.poster:hover {
-		border-color: #eee;
+	.poster {
+		transition: transform 500ms 50ms;
+	}
+
+	.poster.active {
+		transform: scale(1.1);
 	}
 
 	.clamp-3 {
