@@ -86,12 +86,12 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 		AND ${genre} = ANY(genres)
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
-	`;
+	` as unknown as Title[];
 
 	for (const title of titles) {
 		cache[title.id] = title as Title;
 		cachePoster(title);
 	}
 
-	return titles as unknown as Title[];
+	return titles;
 }
