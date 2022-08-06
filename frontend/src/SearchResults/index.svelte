@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ErrorDialog from "../ErrorDialog";
 	import Header from "../Header";
 	import child_process from "child_process";
 	import http from "http";
@@ -9,7 +10,6 @@
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import FaCircleExclamation from "svelte-icons/fa/FaExclamationCircle.svelte";
 
 	interface Source {
 		info_hash: string;
@@ -59,6 +59,7 @@
 							const json = JSON.parse(data);
 							sources = json;
 						} catch (err) {
+							log("%O", data);
 							error("error parsing json: %O", err);
 						}
 					});
@@ -209,19 +210,7 @@
 		</div>
 	{/if}
 
-	{#if errorMsg}
-		<dialog class="top-0 bottom-0 drop-shadow-lg" open={Boolean(errorMsg)}>
-			<h1
-				class="text-6xl text-center flex border-bottom border-black mb-4"
-			>
-				<div class="w-16 h-16 text-red-500 inline-block">
-					<FaCircleExclamation />
-				</div>
-				Error
-			</h1>
-			<div>{errorMsg}</div>
-		</dialog>
-	{/if}
+	<ErrorDialog error={errorMsg} />
 </div>
 
 <style>
