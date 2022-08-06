@@ -47,11 +47,11 @@ export const sortedGenres: Genre[] = [];
 
 export async function getTrending(type: "movies"): Promise<Title[]> {
 	const trending = await sql`
-			SELECT id, title, genres, overview, released::text FROM titles
-			WHERE movie = ${type === "movies"}
-			ORDER BY popularity DESC NULLS LAST
-			LIMIT 100
-		` as unknown as Title[];
+		SELECT id, title, genres, overview, released::text FROM titles
+		WHERE movie = ${type === "movies"}
+		ORDER BY popularity DESC NULLS LAST
+		LIMIT 100
+	` as unknown as Title[];
 
 	for (const title of trending) {
 		cache[title.id] = title;
