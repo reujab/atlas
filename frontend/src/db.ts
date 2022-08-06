@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { error } from "./log";
 
 interface Genre {
 	id: number,
@@ -11,23 +12,8 @@ export interface Title {
 	genres: number[],
 	overview: string,
 	released: string,
+	poster: HTMLImageElement,
 }
-
-interface PreCache {
-	movies: Queries,
-}
-
-interface Queries {
-	trending: Title[],
-	topRated: Title[],
-}
-
-const precache: PreCache = {
-	movies: {
-		trending: [],
-		topRated: [],
-	},
-};
 
 const sql = postgres({
 	database: "atlas",
@@ -35,8 +21,6 @@ const sql = postgres({
 });
 
 cacheGenres();
-getTrending("movies");
-getTopRated("movies");
 
 async function cacheGenres() {
 	const rows = await sql`SELECT id::bigint, name FROM genres`;
@@ -47,6 +31,14 @@ async function cacheGenres() {
 	sortedGenres.sort((a, b) => Number(a.name < b.name));
 }
 
+function cachePoster(title: Title) {
+	title.poster = new Image();
+	title.poster.addEventListener("error", (err) => {
+		error("failed to load poster: %O", err);
+	});
+	title.poster.src = `file://${process.env.POSTERS_PATH}/movie/${title.id}`;
+}
+
 export const genres: { [id: number]: string } = {};
 
 export const cache: { [id: number]: Title } = {};
@@ -54,42 +46,40 @@ export const cache: { [id: number]: Title } = {};
 export const sortedGenres: Genre[] = [];
 
 export async function getTrending(type: "movies"): Promise<Title[]> {
-	if (!precache[type].trending.length) {
-		precache[type].trending = await sql`
+	const trending = await sql`
 			SELECT id, title, genres, overview, released::text FROM titles
 			WHERE movie = ${type === "movies"}
 			ORDER BY popularity DESC NULLS LAST
 			LIMIT 100
 		` as unknown as Title[];
 
-		for (const title of precache[type].trending) {
-			cache[title.id] = title;
-		}
+	for (const title of trending) {
+		cache[title.id] = title;
+		cachePoster(title);
 	}
 
-	return precache[type].trending;
+	return trending;
 }
 
 export async function getTopRated(type: "movies"): Promise<Title[]> {
-	if (!precache[type].topRated.length) {
-		precache[type].topRated = await sql`
-			SELECT id, title, genres, overview, released::text FROM titles
-			WHERE movie = ${type === "movies"}
-			AND votes >= 1000
-			ORDER BY score DESC NULLS LAST
-			LIMIT 200
-		` as unknown as Title[];
+	const topRated = await sql`
+		SELECT id, title, genres, overview, released::text FROM titles
+		WHERE movie = ${type === "movies"}
+		AND votes >= 1000
+		ORDER BY score DESC NULLS LAST
+		LIMIT 100
+	` as unknown as Title[];
 
-		for (const title of precache[type].topRated) {
-			cache[title.id] = title;
-		}
+	for (const title of topRated) {
+		cache[title.id] = title;
+		cachePoster(title);
 	}
 
-	return precache[type].topRated;
+	return topRated;
 }
 
 export async function getTitlesWithGenre(type: "movies", genre: number): Promise<Title[]> {
-	const rows = await sql`
+	const titles = await sql`
 		SELECT id, title, genres, overview, released::text
 		FROM titles
 		WHERE movie = ${type === "movies"}
@@ -98,9 +88,10 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 		LIMIT 100
 	`;
 
-	for (const title of rows) {
+	for (const title of titles) {
 		cache[title.id] = title as Title;
+		cachePoster(title);
 	}
 
-	return rows as unknown as Title[];
+	return titles as unknown as Title[];
 }

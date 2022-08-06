@@ -2,13 +2,7 @@
 	import Header from "../Header";
 	import Row from "./Row";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import {
-		getTrending,
-		getTopRated,
-		genres,
-		sortedGenres,
-		getTitlesWithGenre,
-	} from "../db";
+	import { genres } from "../db";
 	import state from "./State";
 	import { onDestroy, onMount } from "svelte";
 
@@ -110,12 +104,10 @@
 									colIndex ===
 										state.rows[state.activeRow].activeCol}
 							>
-								<img
-									class="rounded-md"
-									src="file://{process.env
-										.POSTERS_PATH}/movie/{title.id}"
-									alt={title.title}
-								/>
+								<!-- svelte hack to only load the image once -->
+								<!-- not sure why this works but it's simpler than running -->
+								<!-- row.appendChild(title.poster) in onMount() -->
+								{@html title.poster?.outerHTML}
 							</a>
 						{/each}
 					</div>

@@ -14,17 +14,24 @@ class State {
 			this.rows[1].titles = topRated;
 		});
 
-		for (const genre of sortedGenres) {
-			const row = new Row(genre.name);
-			this.rows.push(row);
-			getTitlesWithGenre("movies", genre.id).then((movies) => {
-				if (movies.length) {
-					row.titles = movies;
-				} else {
-					this.rows.splice(this.rows.indexOf(row), 1);
-				}
-			});
-		}
+		const interval = setInterval(() => {
+			if (Object.keys(sortedGenres).length === 0) {
+				return;
+			}
+
+			clearInterval(interval);
+			for (const genre of sortedGenres) {
+				const row = new Row(genre.name);
+				this.rows.push(row);
+				getTitlesWithGenre("movies", genre.id).then((movies) => {
+					if (movies.length) {
+						row.titles = movies;
+					} else {
+						this.rows.splice(this.rows.indexOf(row), 1);
+					}
+				});
+			}
+		}, 100);
 	}
 }
 
