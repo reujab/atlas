@@ -15,7 +15,7 @@ class State {
 		});
 
 		const interval = setInterval(() => {
-			if (Object.keys(sortedGenres).length === 0) {
+			if (sortedGenres.length === 0) {
 				return;
 			}
 
