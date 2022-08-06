@@ -146,7 +146,7 @@
 
 			child_process.spawnSync(
 				"killall",
-				["overlay", "mpv", "webtorrent"],
+				["overlay", "mpv", "WebTorrent"],
 				{ stdio: "inherit" }
 			);
 			history.back();
