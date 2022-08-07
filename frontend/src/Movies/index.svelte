@@ -88,31 +88,29 @@
 		bind:this={rowsEle}
 	>
 		{#each state.rows as row, rowIndex}
-			{#if row.titles.length}
-				<div class="row">
-					<h2 class="text-7xl mb-4">{row.name}</h2>
-					<div
-						class="flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4"
-						bind:this={row.element}
-					>
-						{#each row.titles as title, colIndex}
-							<a
-								key={title.id}
-								href="#/movies/details/{title.id}"
-								class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
-								class:active={rowIndex === state.activeRow &&
-									colIndex ===
-										state.rows[state.activeRow].activeCol}
-							>
-								<!-- svelte hack to only load the image once -->
-								<!-- not sure why this works but it's simpler than running -->
-								<!-- row.appendChild(title.poster) in onMount() -->
-								{@html title.poster?.outerHTML}
-							</a>
-						{/each}
-					</div>
+			<div class="row">
+				<h2 class="text-7xl mb-4">{row.name}</h2>
+				<div
+					class="flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4"
+					bind:this={row.element}
+				>
+					{#each row.titles as title, colIndex}
+						<a
+							key={title.id}
+							href="#/movies/details/{title.id}"
+							class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
+							class:active={rowIndex === state.activeRow &&
+								colIndex ===
+									state.rows[state.activeRow].activeCol}
+						>
+							<!-- svelte hack to only load the image once -->
+							<!-- not sure why this works but it's simpler than running -->
+							<!-- row.appendChild(title.poster) in onMount() -->
+							{@html title.poster?.outerHTML}
+						</a>
+					{/each}
 				</div>
-			{/if}
+			</div>
 		{/each}
 	</div>
 </div>
