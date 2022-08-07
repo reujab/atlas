@@ -31,13 +31,16 @@ async function cacheGenres() {
 	sortedGenres.sort((a, b) => Number(a.name < b.name));
 }
 
-function cachePoster(title: Title) {
-	title.poster = new Image();
-	title.poster.className = "rounded-md";
-	title.poster.addEventListener("error", (err) => {
-		error("failed to load poster: %O", err);
-	});
-	title.poster.src = `file://${process.env.POSTERS_PATH}/movie/${title.id}`;
+function cacheTitles(titles: Title[]) {
+	for (const title of titles) {
+		cache[title.id] = title;
+		title.poster = new Image();
+		title.poster.className = "rounded-md";
+		title.poster.addEventListener("error", (err) => {
+			error("failed to load poster: %O", err);
+		});
+		title.poster.src = `file://${process.env.POSTERS_PATH}/movie/${title.id}`;
+	}
 }
 
 export const genres: { [id: number]: string } = {};
@@ -54,10 +57,7 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 		LIMIT 100
 	` as unknown as Title[];
 
-	for (const title of trending) {
-		cache[title.id] = title;
-		cachePoster(title);
-	}
+	cacheTitles(trending);
 
 	return trending;
 }
@@ -71,10 +71,7 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 		LIMIT 100
 	` as unknown as Title[];
 
-	for (const title of topRated) {
-		cache[title.id] = title;
-		cachePoster(title);
-	}
+	cacheTitles(topRated);
 
 	return topRated;
 }
@@ -89,10 +86,7 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 		LIMIT 100
 	` as unknown as Title[];
 
-	for (const title of titles) {
-		cache[title.id] = title as Title;
-		cachePoster(title);
-	}
+	cacheTitles(titles);
 
 	return titles;
 }
