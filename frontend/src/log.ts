@@ -9,7 +9,11 @@ export function log(format: string, ...args: any[]) {
 export function error(format: string, ...args: any[]) {
 	console.error(format, ...args);
 	for (const arg of args) {
-		format = format.replace("%O", `${arg.error.toString()} at ${arg.filename}:${arg.lineno}`);
+		let error = arg;
+		if (arg?.error) {
+			error = arg.error
+		}
+		format = format.replace("%O", `${error} at ${arg?.filename}:${arg?.lineno}`);
 	}
 	process.stderr.write(`${format}\n`);
 }

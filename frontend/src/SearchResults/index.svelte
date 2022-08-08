@@ -101,7 +101,7 @@
 		});
 
 		webtorrent.on("exit", (code) => {
-			if (code !== 0) {
+			if (code) {
 				error("webtorrent exit code: %O", code);
 			}
 
