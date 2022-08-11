@@ -13,8 +13,11 @@
 </div>
 
 <style>
-	.button.active,
-	.button:hover {
-		border-color: black;
+	.button {
+		transition: transform 500ms;
+	}
+
+	.button.active {
+		transform: scale(1.1);
 	}
 </style>

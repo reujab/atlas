@@ -12,6 +12,7 @@ export interface Title {
 	genres: number[],
 	overview: string,
 	released: string,
+	trailer: string | null,
 	poster: HTMLImageElement,
 }
 
@@ -51,8 +52,10 @@ export const sortedGenres: Genre[] = [];
 
 export async function getTrending(type: "movies"): Promise<Title[]> {
 	const trending = await sql`
-		SELECT id, title, genres, overview, released::text FROM titles
+		SELECT id, title, genres, overview, released::text, trailer
+		FROM titles
 		WHERE movie = ${type === "movies"}
+		AND trailer IS NOT NULL
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
@@ -64,7 +67,8 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 
 export async function getTopRated(type: "movies"): Promise<Title[]> {
 	const topRated = await sql`
-		SELECT id, title, genres, overview, released::text FROM titles
+		SELECT id, title, genres, overview, released::text, trailer
+		FROM titles
 		WHERE movie = ${type === "movies"}
 		AND votes >= 1000
 		ORDER BY score DESC NULLS LAST
@@ -78,7 +82,7 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 
 export async function getTitlesWithGenre(type: "movies", genre: number): Promise<Title[]> {
 	const titles = await sql`
-		SELECT id, title, genres, overview, released::text
+		SELECT id, title, genres, overview, released::text, trailer
 		FROM titles
 		WHERE movie = ${type === "movies"}
 		AND ${genre} = ANY(genres)

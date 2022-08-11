@@ -4,6 +4,7 @@
 	import child_process from "child_process";
 	import http from "http";
 	import prettyBytes from "pretty-bytes";
+	import spawnOverlay from "../spawnOverlay";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { SocksProxyAgent } from "socks-proxy-agent";
 	import { log, error } from "../log";
@@ -110,31 +111,7 @@
 			}
 		});
 
-		// once mpv has started, spawn the overlay
-		let started = false;
-		async function checkPosition() {
-			const child = child_process.spawn("playerctl", ["position"]);
-			child.stdout.on("data", (data) => {
-				log(data.toString());
-				const position = Number(data.toString().trim());
-				if (position > 0.1) {
-					started = true;
-					const overlay = child_process.spawn("atlas-overlay", {
-						detached: true,
-						stdio: "inherit",
-					});
-					overlay.on("exit", () => {
-						webtorrent.kill();
-					});
-				}
-			});
-			child.on("exit", () => {
-				if (!started) {
-					checkPosition();
-				}
-			});
-		}
-		checkPosition();
+		spawnOverlay();
 	}
 
 	function gamepadHandler(button: string) {

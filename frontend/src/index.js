@@ -5,12 +5,14 @@ import Movies from "./Movies";
 import Router, { routes } from "svelte-hash-router";
 import SearchResults from "./SearchResults";
 import { error } from "./log";
+import Trailer from "./Trailer";
 
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,
 	"/movies/details/:id": MovieDetails,
 	"/search/:query": SearchResults,
+	"/trailer/:id": Trailer,
 });
 
 export default new Router({

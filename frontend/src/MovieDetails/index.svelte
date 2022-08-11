@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Button from "./Button";
+	import Button from "./Button.svelte";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
-	import FaPlus from "svelte-icons/fa/FaPlus.svelte";
-	import Header from "../Header";
+	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
+	import Header from "../Header/index.svelte";
 	import { cache, genres } from "../db";
 	import { log } from "../log";
 	import { onDestroy } from "svelte";
@@ -31,6 +31,8 @@
 					case 0:
 						location.href = playHref;
 						break;
+					case 2:
+						location.href = `#/trailer/${title.id}`;
 				}
 				break;
 			case "B":
@@ -42,7 +44,11 @@
 				}
 				break;
 			case "right":
-				if (activeButton < 2) {
+				let lastButton = 1;
+				if (title.trailer) {
+					lastButton = 2;
+				}
+				if (activeButton < lastButton) {
 					activeButton++;
 				}
 				break;
@@ -83,10 +89,14 @@
 			<Button icon={FaPlay} text="Play" active={activeButton === 0} />
 		</a>
 		<Button icon={FaDownload} text="Download" active={activeButton === 1} />
-		<Button
-			icon={FaPlus}
-			text="Add to watchlist"
-			active={activeButton === 2}
-		/>
+		{#if title.trailer}
+			<a href="#/trailer/{title.id}">
+				<Button
+					icon={FaYoutube}
+					text="Watch trailer"
+					active={activeButton === 2}
+				/>
+			</a>
+		{/if}
 	</div>
 </div>
