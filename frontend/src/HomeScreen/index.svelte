@@ -1,7 +1,7 @@
 <script lang="ts">
 	import HomeTile from "./HomeTile/index.svelte";
 	import fs from "fs";
-	import { error } from "../log";
+	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
@@ -59,6 +59,7 @@
 			icon: forecast.icon,
 			description: forecast.shortForecast,
 		};
+		log("%O", weather);
 	});
 
 	function gamepadHandler(button: string) {
