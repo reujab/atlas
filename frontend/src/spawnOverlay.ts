@@ -11,14 +11,17 @@ export default function spawnOverlay(cb?: (code?: number) => void) {
 			const position = Number(data.toString().trim());
 			if (position > 0.1) {
 				started = true;
-				const overlay = child_process.spawn("atlas-overlay", {
-					detached: true,
-					stdio: "inherit",
-				});
 
-				if (cb) {
-					overlay.on("exit", cb);
-				}
+				setTimeout(() => {
+					const overlay = child_process.spawn("atlas-overlay", {
+						detached: true,
+						stdio: "inherit",
+					});
+
+					if (cb) {
+						overlay.on("exit", cb);
+					}
+				}, 2000);
 			}
 		});
 		child.on("exit", () => {

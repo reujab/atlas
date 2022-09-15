@@ -55,7 +55,6 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 		SELECT id, title, genres, overview, released::text, trailer
 		FROM titles
 		WHERE movie = ${type === "movies"}
-		AND trailer IS NOT NULL
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];

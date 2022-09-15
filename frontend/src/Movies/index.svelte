@@ -56,7 +56,7 @@
 				.querySelector(".posters")
 				.scrollTo(
 					row.element.querySelectorAll(".poster")[row.activeCol]
-						.offsetLeft,
+						?.offsetLeft,
 					0
 				);
 		}
@@ -92,7 +92,7 @@
 			<div class="row" bind:this={row.element}>
 				<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 				<div
-					class="posters flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative"
+					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative"
 				>
 					{#each row.titles as title, colIndex}
 						<a
