@@ -45,27 +45,28 @@
 				break;
 		}
 
-		scroll(row);
+		scroll();
 	}
 
-	function scroll(row: Row) {
-		const rowHeight = document.querySelector(".row").clientHeight;
-		rowsEle.scrollTo(0, state.activeRow * rowHeight);
+	function scroll() {
+		rowsEle.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
 
-		const borderWidth = 4 * 2;
-		const gap = 16;
-		const colWidth =
-			document.querySelector(".poster").clientWidth + borderWidth + gap;
-		row.element.scrollTo(row.activeCol * colWidth, 0);
+		for (const row of state.rows) {
+			row.element
+				.querySelector(".posters")
+				.scrollTo(
+					row.element.querySelectorAll(".poster")[row.activeCol]
+						.offsetLeft,
+					0
+				);
+		}
 	}
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
 	});
-	onMount(() => {
-		scroll(state.rows[state.activeRow]);
-	});
+	onMount(scroll);
 </script>
 
 <div class="h-screen px-48 flex flex-col">
@@ -84,15 +85,14 @@
 	</div>
 
 	<div
-		class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4"
+		class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4 relative"
 		bind:this={rowsEle}
 	>
 		{#each state.rows as row, rowIndex}
-			<div class="row">
-				<h2 class="text-7xl mb-4">{row.name}</h2>
+			<div class="row" bind:this={row.element}>
+				<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 				<div
-					class="flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4"
-					bind:this={row.element}
+					class="posters flex justify-between mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative"
 				>
 					{#each row.titles as title, colIndex}
 						<a

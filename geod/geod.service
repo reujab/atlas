@@ -1,0 +1,11 @@
+[Unit]
+Description=Geolocation daemon
+Before=postgresql.service
+After=networking.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/geod
+
+[Install]
+WantedBy=graphical.target

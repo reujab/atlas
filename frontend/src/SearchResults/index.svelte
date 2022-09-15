@@ -150,7 +150,7 @@
 				break;
 		}
 
-		container.scrollTo(0, sources[activeSource]?.element.offsetTop);
+		container.scrollTo(0, sources[activeSource]?.element.offsetTop - 20);
 	}
 
 	subscribe(gamepadHandler);
@@ -164,12 +164,12 @@
 
 	{#if sources.length}
 		<div
-			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll"
+			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll mt-8"
 			bind:this={container}
 		>
 			{#each sources as source, i}
 				<div
-					class="source rounded-full bg-[#eee] border-4 border-transparent p-4 flex cursor-pointer drop-shadow-sm text-black"
+					class="source rounded-full bg-[#eee] px-16 py-4 flex cursor-pointer white-shadow text-black"
 					class:active={i === activeSource}
 					on:click={() => play(source)}
 					bind:this={source.element}
@@ -192,8 +192,14 @@
 </div>
 
 <style>
-	.source.active,
-	.source:hover {
-		border-color: black !important;
+	.source {
+		/* transition: transform 500ms; */
+		transition: padding 500ms, font-size 500ms;
+	}
+
+	.source.active {
+		/* transform: scaleY(1.25); */
+		padding: 1em 20px;
+		font-size: 1.1em;
 	}
 </style>
