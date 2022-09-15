@@ -4,13 +4,13 @@
 
 <a
 	href="#{tile.path}"
-	class="tile w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl"
+	class="tile w-64 h-64 bg-white shrink-0 items-center flex flex-col p-2 rounded-xl drop-shadow-xl border border-1 border-slate-300 font-light"
 	class:active
 >
 	<div
 		class="p-2 w-40 h-40 flex justify-center items-center {tile.iconClass}"
 	>
-		<svelte:component this={tile.icon} />
+		<img src={tile.icon} alt={tile.title} />
 	</div>
 	<div class="grow" />
 	<div class="text-5xl">

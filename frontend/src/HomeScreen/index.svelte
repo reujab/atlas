@@ -1,15 +1,12 @@
 <script lang="ts">
-	import HomeTile from "./HomeTile";
-	import FaFilm from "svelte-icons/fa/FaFilm.svelte";
-	import FaTv from "svelte-icons/fa/FaTv.svelte";
-	import { subscribe, unsubscribe } from "../gamepad";
+	import HomeTile from "./HomeTile/index.svelte";
 	import { onDestroy } from "svelte";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface Tile {
 		title: string;
 		path: string;
 		icon: any;
-		iconClass: string;
 	}
 
 	// set background based on time of day
@@ -19,18 +16,16 @@
 	const img = `url(./backgrounds/${timeOfDay}/${index}.webp)`;
 
 	// home tiles
-	const tiles = [
+	const tiles: Tile[] = [
 		{
 			title: "Movies",
 			path: "/movies",
-			icon: FaFilm,
-			iconClass: "text-indigo-700",
+			icon: require("../img/popcorn.png"),
 		},
 		{
 			title: "TV Shows",
 			path: "/shows",
-			icon: FaTv,
-			iconClass: "text-lime-700",
+			icon: require("../img/tv.png"),
 		},
 	];
 	let activeTile = 0;

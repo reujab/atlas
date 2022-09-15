@@ -16,7 +16,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.html$/i,
+				test: /\.(html|png)$/i,
 				type: "asset/resource",
 			},
 			{
