@@ -12,7 +12,7 @@
 
 	const title = cache[$params.id];
 	log("%O", title);
-	const playHref = `#/search/${escape(title.title)
+	const playHref = `#/results/${escape(title.title)
 		.replace(/\./g, "%2E")
 		.replace(/\+/g, "%2B")}`;
 

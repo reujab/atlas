@@ -106,7 +106,7 @@
 				error("webtorrent exit code: %O", code);
 			}
 
-			if (location.hash.includes("/search/")) {
+			if (location.hash.includes("/results/")) {
 				history.back();
 			}
 		});

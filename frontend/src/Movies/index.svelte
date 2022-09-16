@@ -23,6 +23,9 @@
 			case "B":
 				history.back();
 				break;
+			case "Y":
+				location.hash = "#/search";
+				break;
 			case "up":
 				state.activeRow =
 					(state.rows.length + state.activeRow - 1) %
@@ -70,7 +73,7 @@
 </script>
 
 <div class="h-screen px-48 flex flex-col">
-	<Header title="Movies" back search="/movies/search" />
+	<Header title="Movies" back search="/search" />
 
 	<div class="min-h-[9rem] flex flex-col mb-2">
 		{#if activeTitle}

@@ -97,6 +97,12 @@ onkeydown = (e) => {
 		case "ArrowDown":
 			dispatch("down");
 			break;
+		case "Enter":
+			dispatch("A");
+			break;
+		case "Escape":
+			dispatch("B");
+			break;
 		default:
 			return;
 	}
