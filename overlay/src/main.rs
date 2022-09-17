@@ -5,7 +5,7 @@ use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, 
 use relm4::{AppUpdate, Model, RelmApp, Sender, Widgets};
 use std::{process::Command, thread};
 
-const PROGRESS_BAR_WIDTH: i32 = 600;
+const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
 
 struct State {
@@ -26,6 +26,12 @@ pub enum Msg {
     UpdateStatus(Status),
 }
 
+struct Format {
+    hours: String,
+    minutes: String,
+    seconds: String,
+}
+
 #[relm4_macros::widget]
 impl Widgets<State, ()> for AppWidgets {
     view! {
@@ -41,8 +47,23 @@ impl Widgets<State, ()> for AppWidgets {
                     set_child = Some(&Box) {
                         add_css_class: "container",
                         set_orientation: Orientation::Horizontal,
-                        append = position = &Label {
-                            set_label: &format_secs(model.position),
+                        append = position_hours = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.position).hours,
+                        },
+                        append = &Label {
+                            set_label: ":",
+                        },
+                        append = position_minutes = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.position).minutes,
+                        },
+                        append = &Label {
+                            set_label: ":",
+                        },
+                        append = position_seconds = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.position).seconds,
                         },
                         append = &Box {
                             set_hexpand: true,
@@ -65,8 +86,31 @@ impl Widgets<State, ()> for AppWidgets {
                         append = &Box {
                             set_hexpand: true,
                         },
-                        append = duration = &Label {
-                            set_label: &format_secs(model.duration),
+                        // append = duration = &Label {
+                        //     set_label: &format_secs(model.duration),
+                        //     set_halign: Align::End,
+                        // },
+                        append = duration_hours = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.duration).hours,
+                            set_halign: Align::End,
+                        },
+                        append = &Label {
+                            set_label: ":",
+                            set_halign: Align::End,
+                        },
+                        append = duration_minutes = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.duration).minutes,
+                            set_halign: Align::End,
+                        },
+                        append = &Label {
+                            set_label: ":",
+                            set_halign: Align::End,
+                        },
+                        append = duration_seconds = &Label {
+                            add_css_class: "mono",
+                            set_label: &format(model.duration).seconds,
                             set_halign: Align::End,
                         },
                     },
@@ -90,7 +134,10 @@ impl Widgets<State, ()> for AppWidgets {
     fn post_view() {
         self.revealer
             .set_reveal_child(model.status == Status::Paused);
-        self.position.set_label(&format_secs(model.position));
+        let position_format = format(model.position);
+        self.position_hours.set_label(&position_format.hours);
+        self.position_minutes.set_label(&position_format.minutes);
+        self.position_seconds.set_label(&position_format.seconds);
         self.status_icon.set_icon_name(Some(match model.status {
             Status::Paused => "media-playback-pause",
             _ => "media-playback-start",
@@ -101,7 +148,10 @@ impl Widgets<State, ()> for AppWidgets {
                     * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32,
             0,
         );
-        self.duration.set_label(&format_secs(model.duration));
+        let duration_format = format(model.duration);
+        self.duration_hours.set_label(&duration_format.hours);
+        self.duration_minutes.set_label(&duration_format.minutes);
+        self.duration_seconds.set_label(&duration_format.seconds);
     }
 }
 
@@ -128,11 +178,15 @@ impl AppUpdate for State {
     }
 }
 
-fn format_secs(secs: u32) -> String {
+fn format(secs: u32) -> Format {
     let hours = secs / 3600;
     let minutes = secs % 3600 / 60;
     let seconds = secs % 60;
-    format!("{hours}:{minutes:02}:{seconds:02}")
+    Format {
+        hours: hours.to_string(),
+        minutes: format!("{minutes:02}"),
+        seconds: format!("{seconds:02}"),
+    }
 }
 
 fn main() {
