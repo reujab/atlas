@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Header from "../Header";
-	import Row from "./Row";
-	import { subscribe, unsubscribe } from "../gamepad";
-	import { genres } from "../db";
+	import Header from "../Header/index.svelte";
 	import state from "./State";
+	import { genres } from "../db";
 	import { onDestroy, onMount } from "svelte";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	$: activeTitle =
 		state.rows[state.activeRow].titles[
