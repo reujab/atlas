@@ -93,3 +93,17 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 
 	return titles;
 }
+
+export async function getAutocomplete(query: string): Promise<Title[]> {
+	const titles = await sql`
+		SELECT id, title, genres, overview, released::text, trailer
+		FROM titles
+		WHERE title ILIKE ${"%" + query.split(" ").join("%") + "%"}
+		ORDER BY popularity DESC NULLS LAST
+		LIMIT 2
+	` as unknown as Title[];
+
+	cacheTitles(titles);
+
+	return titles;
+}
