@@ -1,11 +1,12 @@
 <script lang="ts">
-	import Header from "../Header";
-	import { subscribe, unsubscribe } from "../gamepad";
-	import { onDestroy } from "svelte";
+	import Header from "../Header/index.svelte";
 	import MdChevronLeft from "svelte-icons/md/MdChevronLeft.svelte";
-	import MdSpaceBar from "svelte-icons/md/MdSpaceBar.svelte";
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
+	import MdSpaceBar from "svelte-icons/md/MdSpaceBar.svelte";
+	import state from "./State";
 	import { getAutocomplete, Title } from "../db";
+	import { onDestroy } from "svelte";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	const keyboard = [
 		["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "<"],
@@ -14,7 +15,6 @@
 	];
 	let activeRow = 0;
 	let activeCol = 4;
-	let query = "";
 	let autocomplete: Title[] = [];
 
 	function gamepadHandler(button: string) {
@@ -23,18 +23,18 @@
 				if (activeRow >= 0) {
 					let char = keyboard[activeRow][activeCol];
 					if (char === "<") {
-						query = query.slice(0, -1);
+						state.query = state.query.slice(0, -1);
 						update();
 					} else if (char === "!") {
-						if (query) {
-							location.href = `#/results/${query}`;
+						if (state.query) {
+							location.href = `#/results/${state.query}`;
 						}
 					} else {
-						if (query.length) {
+						if (state.query.length) {
 							char = char.toLowerCase();
 						}
-						query += char;
-						if (query.length === 1) {
+						state.query += char;
+						if (state.query.length === 1) {
 							autocomplete = [];
 						}
 						update();
@@ -46,14 +46,15 @@
 				}
 				break;
 			case "B":
+				state.query = "";
 				history.back();
 				break;
 			case "X":
-				query = query.slice(0, -1);
+				state.query = state.query.slice(0, -1);
 				update();
 				break;
 			case "Y":
-				query += " ";
+				state.query += " ";
 				update();
 				break;
 			case "left":
@@ -82,7 +83,7 @@
 					}
 				} else {
 					if (
-						query &&
+						state.query &&
 						autocomplete.length &&
 						activeRow > -autocomplete.length
 					) {
@@ -100,7 +101,7 @@
 						activeCol--;
 					}
 				} else {
-					if (query && autocomplete.length) {
+					if (state.query && autocomplete.length) {
 						activeRow = -autocomplete.length;
 					} else {
 						activeRow = 0;
@@ -120,11 +121,12 @@
 	}
 
 	async function update() {
-		if (query) {
-			autocomplete = (await getAutocomplete(query)) || autocomplete;
+		if (state.query) {
+			autocomplete = (await getAutocomplete(state.query)) || autocomplete;
 		}
 	}
 
+	update();
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
@@ -137,11 +139,11 @@
 
 		<div
 			class="search p-4 bg-white text-black rounded-[2rem] mt-4 text-6xl whitespace-pre overflow-hidden text-ellipsis white-shadow max-h-[92px]"
-			class:extended-1={query && autocomplete.length === 1}
-			class:extended-2={query && autocomplete.length === 2}
+			class:extended-1={state.query && autocomplete.length === 1}
+			class:extended-2={state.query && autocomplete.length === 2}
 		>
-			{query}<span class="cursor relative top-[-0.35rem] right-[0.2rem]"
-				>|</span
+			{state.query}<span
+				class="cursor relative top-[-0.35rem] right-[0.2rem]">|</span
 			>
 			{#each autocomplete as title, i}
 				<div
