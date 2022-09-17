@@ -5,6 +5,7 @@ After=networking.target
 
 [Service]
 Type=oneshot
+ExecStartPre=/bin/sh -c 'until ping -c1 -W1 google.com > /dev/null; do sleep 1; done; echo ready; sleep 1'
 ExecStart=/usr/local/bin/geod
 
 [Install]
