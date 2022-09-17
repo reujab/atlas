@@ -94,14 +94,22 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 	return titles;
 }
 
-export async function getAutocomplete(query: string): Promise<Title[]> {
-	const titles = await sql`
+let autocompleteQuery: null | postgres.PendingQueryModifiers<postgres.Row[]> = null;
+export async function getAutocomplete(query: string): Promise<null | Title[]> {
+	autocompleteQuery?.cancel();
+	autocompleteQuery = sql`
 		SELECT id, title, genres, overview, released::text, trailer
 		FROM titles
 		WHERE title ILIKE ${"%" + query.split(" ").join("%") + "%"}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 2
-	` as unknown as Title[];
+	`.execute();
+	let titles;
+	try {
+		titles = await autocompleteQuery as unknown as Title[];
+	} catch (_) {
+		return null;
+	}
 
 	cacheTitles(titles);
 

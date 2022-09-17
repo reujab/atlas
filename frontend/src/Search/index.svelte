@@ -121,7 +121,7 @@
 	async function update() {
 		if (query) {
 			showSuggestions = true;
-			autocomplete = await getAutocomplete(query);
+			autocomplete = (await getAutocomplete(query)) || autocomplete;
 		} else {
 			showSuggestions = false;
 		}
@@ -149,13 +149,11 @@
 					class="title text-5xl h-40 flex gap-4 mt-4 rounded-[2rem] drop-shadow"
 					class:active={activeRow + 2 === i}
 				>
-					{#if title.poster}
-						<div
-							class="flex justify-center rounded-[2rem] overflow-hidden"
-						>
-							{@html title.poster.outerHTML}
-						</div>
-					{/if}
+					<div
+						class="flex justify-center rounded-[2rem] overflow-hidden shrink-0"
+					>
+						{@html title.poster?.outerHTML}
+					</div>
 					<span class="self-center grow whitespace-normal">
 						{title.title}
 					</span>
