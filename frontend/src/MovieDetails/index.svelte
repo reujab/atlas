@@ -72,7 +72,7 @@
 		/>
 
 		<h3 class="text-3xl mb-8">
-			{title.genres.map((genre) => genres[genre]).join(" • ")}
+			{title.genres?.map((genre) => genres[genre]).join(" • ")}
 		</h3>
 
 		<h3 class="text-4xl">
