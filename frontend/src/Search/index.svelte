@@ -46,7 +46,9 @@
 				}
 				break;
 			case "B":
-				state.query = "";
+				setTimeout(() => {
+					state.query = "";
+				});
 				history.back();
 				break;
 			case "X":
