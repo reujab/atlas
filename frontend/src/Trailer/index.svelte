@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Header from "../Header";
+	import Header from "../Header/index.svelte";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
 	import { params } from "svelte-hash-router";

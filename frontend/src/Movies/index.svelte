@@ -72,7 +72,7 @@
 </script>
 
 <div class="h-screen px-48 flex flex-col">
-	<Header title="Movies" back search="/search" />
+	<Header title="Movies" back search />
 
 	<div class="min-h-[9rem] flex flex-col mb-2">
 		{#if activeTitle}

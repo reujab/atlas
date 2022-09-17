@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ErrorDialog from "../ErrorDialog";
-	import Header from "../Header";
+	import ErrorDialog from "../ErrorDialog/index.svelte";
+	import Header from "../Header/index.svelte";
 	import child_process from "child_process";
 	import http from "http";
 	import prettyBytes from "pretty-bytes";
