@@ -40,7 +40,7 @@
 						update();
 					}
 				} else {
-					location.href = `#/movies/details/${
+					location.href = `#/movies/${
 						autocomplete[activeRow + autocomplete.length].id
 					}`;
 				}

@@ -8,10 +8,14 @@ import SearchResults from "./SearchResults";
 import Trailer from "./Trailer";
 import { error } from "./log";
 
+addEventListener("error", (err) => {
+	error("Uncaught error: %O", err);
+})
+
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,
-	"/movies/details/:id": MovieDetails,
+	"/movies/:id": MovieDetails,
 	"/results/:query": SearchResults,
 	"/trailer/:id": Trailer,
 	"/search": Search,
@@ -20,7 +24,3 @@ routes.set({
 export default new Router({
 	target: document.body,
 });
-
-addEventListener("error", (err) => {
-	error("Uncaught error: %O", err);
-})

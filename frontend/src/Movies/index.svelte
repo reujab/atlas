@@ -17,7 +17,7 @@
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
-				location.hash = `#/movies/details/${title.id}`;
+				location.hash = `#/movies/${title.id}`;
 				break;
 			case "B":
 				history.back();
