@@ -12,4 +12,8 @@ done
 
 . ~/.env
 export POSTERS_PATH
-atlas-frontend --enable-features=UseOzonePlatform --ozone-platform=wayland &>> /tmp/atlas.log
+
+while pidof frame > /dev/null; do
+	atlas-frontend --enable-features=UseOzonePlatform --ozone-platform=wayland &>> /tmp/atlas.log
+	sleep 1
+done

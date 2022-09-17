@@ -100,7 +100,8 @@ export async function getAutocomplete(query: string): Promise<null | Title[]> {
 	autocompleteQuery = sql`
 		SELECT id, title, genres, overview, released::text, trailer
 		FROM titles
-		WHERE title ILIKE ${"%" + query.split(" ").join("%") + "%"}
+		WHERE overview IS NOT NULL
+		AND title ILIKE ${"%" + query.split(" ").join("%") + "%"}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 2
 	`.execute();

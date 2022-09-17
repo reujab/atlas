@@ -16,7 +16,6 @@
 	let activeCol = 4;
 	let query = "";
 	let autocomplete: Title[] = [];
-	let showSuggestions = false;
 
 	function gamepadHandler(button: string) {
 		switch (button) {
@@ -42,7 +41,7 @@
 					}
 				} else {
 					location.href = `#/movies/details/${
-						autocomplete[activeRow + 2].id
+						autocomplete[activeRow + autocomplete.length].id
 					}`;
 				}
 				break;
@@ -51,9 +50,11 @@
 				break;
 			case "X":
 				query = query.slice(0, -1);
+				update();
 				break;
 			case "Y":
 				query += " ";
+				update();
 				break;
 			case "left":
 				if (activeRow >= 0) {
@@ -81,9 +82,9 @@
 					}
 				} else {
 					if (
-						showSuggestions &&
+						query &&
 						autocomplete.length &&
-						activeRow > -2
+						activeRow > -autocomplete.length
 					) {
 						activeRow--;
 					} else {
@@ -99,7 +100,7 @@
 						activeCol--;
 					}
 				} else {
-					if (showSuggestions && autocomplete.length) {
+					if (query && autocomplete.length) {
 						activeRow = -autocomplete.length;
 					} else {
 						activeRow = 0;
@@ -120,10 +121,7 @@
 
 	async function update() {
 		if (query) {
-			showSuggestions = true;
 			autocomplete = (await getAutocomplete(query)) || autocomplete;
-		} else {
-			showSuggestions = false;
 		}
 	}
 
@@ -139,20 +137,21 @@
 
 		<div
 			class="search p-4 bg-white text-black rounded-[2rem] mt-4 text-6xl whitespace-pre overflow-hidden text-ellipsis white-shadow max-h-[92px]"
-			class:extended={showSuggestions && autocomplete.length}
+			class:extended-1={query && autocomplete.length === 1}
+			class:extended-2={query && autocomplete.length === 2}
 		>
 			{query}<span class="cursor relative top-[-0.35rem] right-[0.2rem]"
 				>|</span
 			>
 			{#each autocomplete as title, i}
 				<div
-					class="title text-5xl h-40 flex gap-4 mt-4 rounded-[2rem] drop-shadow"
-					class:active={activeRow + 2 === i}
+					class="title text-6xl h-40 flex gap-4 mt-4 rounded-[2rem] drop-shadow"
+					class:active={activeRow + autocomplete.length === i}
 				>
 					<div
 						class="flex justify-center rounded-[2rem] overflow-hidden shrink-0"
 					>
-						{@html title.poster?.outerHTML}
+						{@html title.poster.outerHTML}
 					</div>
 					<span class="self-center grow whitespace-normal">
 						{title.title}
@@ -250,7 +249,11 @@
 		transition: 1s max-height;
 	}
 
-	.search.extended {
+	.search.extended-1 {
+		max-height: 268px;
+	}
+
+	.search.extended-2 {
 		max-height: 444px;
 	}
 
