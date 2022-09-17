@@ -59,7 +59,7 @@
 				.querySelector(".posters")
 				.scrollTo(
 					row.element.querySelectorAll(".poster")[row.activeCol]
-						?.offsetLeft,
+						?.offsetLeft - 16,
 					0
 				);
 		}
@@ -99,7 +99,6 @@
 				>
 					{#each row.titles as title, colIndex}
 						<a
-							key={title.id}
 							href="#/movies/details/{title.id}"
 							class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
 							class:active={rowIndex === state.activeRow &&

@@ -59,6 +59,9 @@ async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
                 if res.status() != 200 {
                     error!("{url} returned {}", res.status());
                 }
+                if res.status().as_u16() >= 500 {
+                    continue;
+                }
                 break Ok(res);
             }
             Err(err) => {
