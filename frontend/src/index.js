@@ -6,11 +6,14 @@ import Router, { routes } from "svelte-hash-router";
 import Search from "./Search";
 import SearchResults from "./SearchResults";
 import Trailer from "./Trailer";
+import startupSound from "../audio/startup.wav";
 import { error } from "./log";
 
 addEventListener("error", (err) => {
 	error("Uncaught error: %O", err);
 })
+
+new Audio(startupSound).play();
 
 routes.set({
 	"/": HomeScreen,
