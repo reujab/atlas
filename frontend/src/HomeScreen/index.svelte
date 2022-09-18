@@ -1,3 +1,11 @@
+<script lang="ts" context="module">
+	export interface Tile {
+		title: string;
+		path: string;
+		icon: any;
+	}
+</script>
+
 <script lang="ts">
 	import HomeTile from "./HomeTile.svelte";
 	import fs from "fs";
@@ -5,18 +13,12 @@
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	export interface Tile {
-		title: string;
-		path: string;
-		icon: any;
-	}
-	
 	interface Weather {
 		city: string;
 		temp: string;
 		icon: string;
 		forecast: string;
-	}	
+	}
 
 	// set background based on time of day
 	const hour = new Date().getHours();
@@ -52,21 +54,31 @@
 		}
 
 		const coords = JSON.parse(geo.toString());
-		const metaRes = await fetch(
-			`https://api.weather.gov/points/${coords.join(",")}`
-		);
-		const meta = await metaRes.json();
 
-		const forecastRes = await fetch(meta.properties.forecast);
-		const forecast = (await forecastRes.json()).properties.periods[0];
+		getWeather();
+		async function getWeather() {
+			try {
+				const metaRes = await fetch(
+					`https://api.weather.gov/points/${coords.join(",")}`
+				);
+				const meta = await metaRes.json();
 
-		weather = {
-			city: meta.properties.relativeLocation.properties.city,
-			temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
-			icon: forecast.icon,
-			forecast: forecast.shortForecast,
-		};
-		log("%O", weather);
+				const forecastRes = await fetch(meta.properties.forecast);
+				const forecast = (await forecastRes.json()).properties
+					.periods[0];
+
+				weather = {
+					city: meta.properties.relativeLocation.properties.city,
+					temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
+					icon: forecast.icon.replace(/,\d+/g, ""),
+					forecast: forecast.shortForecast,
+				};
+				log("%O", weather);
+			} catch (err) {
+				error("error getting weather: %O", err);
+				setTimeout(getWeather, 1000);
+			}
+		}
 	});
 
 	function gamepadHandler(button: string) {

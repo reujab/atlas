@@ -161,7 +161,7 @@
 						{title.title}
 					</span>
 					<span class="self-center text-slate-600">
-						{title.released?.slice(0, 4) || ""}
+						{title.released?.getFullYear() || ""}
 					</span>
 				</div>
 			{/each}

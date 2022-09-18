@@ -18,7 +18,7 @@
 
 	let activeButton = 0;
 
-	const releaseDate = new Date(title.released).toLocaleDateString(undefined, {
+	const releaseDate = title.released.toLocaleDateString(undefined, {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
@@ -44,10 +44,7 @@
 				}
 				break;
 			case "right":
-				let lastButton = 1;
-				if (title.trailer) {
-					lastButton = 2;
-				}
+				let lastButton = title.trailer ? 2 : 1;
 				if (activeButton < lastButton) {
 					activeButton++;
 				}

@@ -1,7 +1,7 @@
 [Unit]
 Description=Geolocation daemon
-Before=postgresql.service
-After=networking.target
+Before=openvpn.service
+After=network-online.target
 
 [Service]
 Type=oneshot

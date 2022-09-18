@@ -11,7 +11,7 @@ export interface Title {
 	title: string,
 	genres: number[],
 	overview: string,
-	released: string,
+	released: Date,
 	trailer: string | null,
 	poster: HTMLImageElement,
 }
@@ -52,9 +52,10 @@ export const sortedGenres: Genre[] = [];
 
 export async function getTrending(type: "movies"): Promise<Title[]> {
 	const trending = await sql`
-		SELECT id, title, genres, overview, released::text, trailer
+		SELECT id, title, genres, overview, released, trailer
 		FROM titles
-		WHERE movie = ${type === "movies"}
+		WHERE ts IS NOT NULL
+		AND movie = ${type === "movies"}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
@@ -66,9 +67,10 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 
 export async function getTopRated(type: "movies"): Promise<Title[]> {
 	const topRated = await sql`
-		SELECT id, title, genres, overview, released::text, trailer
+		SELECT id, title, genres, overview, released, trailer
 		FROM titles
-		WHERE movie = ${type === "movies"}
+		WHERE ts IS NOT NULL
+		AND movie = ${type === "movies"}
 		AND votes >= 1000
 		ORDER BY score DESC NULLS LAST
 		LIMIT 100
@@ -81,9 +83,10 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 
 export async function getTitlesWithGenre(type: "movies", genre: number): Promise<Title[]> {
 	const titles = await sql`
-		SELECT id, title, genres, overview, released::text, trailer
+		SELECT id, title, genres, overview, released, trailer
 		FROM titles
-		WHERE movie = ${type === "movies"}
+		WHERE ts IS NOT NULL
+		AND movie = ${type === "movies"}
 		AND ${genre} = ANY(genres)
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
@@ -98,7 +101,7 @@ let autocompleteQuery: null | postgres.PendingQueryModifiers<postgres.Row[]> = n
 export async function getAutocomplete(query: string): Promise<null | Title[]> {
 	autocompleteQuery?.cancel();
 	autocompleteQuery = sql`
-		SELECT id, title, genres, overview, released::text, trailer
+		SELECT id, title, genres, overview, released, trailer
 		FROM titles
 		WHERE ts IS NOT NULL
 		AND movie

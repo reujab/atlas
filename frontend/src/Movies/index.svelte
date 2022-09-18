@@ -98,7 +98,7 @@
 				>
 					{#each row.titles as title, colIndex}
 						<a
-							href="#/movies/details/{title.id}"
+							href="#/movies/{title.id}"
 							class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
 							class:active={rowIndex === state.activeRow &&
 								colIndex ===
