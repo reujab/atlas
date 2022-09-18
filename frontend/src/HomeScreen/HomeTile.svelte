@@ -1,5 +1,6 @@
 <script lang="ts">
-	export let tile: any, active: boolean;
+	import { Tile } from "./index.svelte"
+	export let tile: Tile, active: boolean;
 </script>
 
 <a

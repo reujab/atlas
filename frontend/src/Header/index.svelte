@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let title: string, back: boolean, search: boolean;
+	export let title: string, back: boolean, search: string;
 
 	import FaArrowLeft from "svelte-icons/fa/FaArrowLeft.svelte";
 	import FaSearch from "svelte-icons/fa/FaSearch.svelte";
@@ -7,7 +7,7 @@
 
 <h1 class="text-8xl font-light pt-10 flex items-center mb-2">
 	{#if back}
-		<div class="icon mr-6 cursor-pointer">
+		<div class="mr-6 cursor-pointer">
 			<div
 				class="w-16 h-16 drop-shadow-md p-1 content-box"
 				on:click={history.back.bind(history)}
@@ -27,14 +27,3 @@
 		</a>
 	{/if}
 </h1>
-
-<style>
-	.icon {
-		border: 4px solid transparent;
-		border-radius: 0.5rem;
-	}
-
-	.icon:hover {
-		border-color: black;
-	}
-</style>

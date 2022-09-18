@@ -1,15 +1,22 @@
 <script lang="ts">
-	import HomeTile from "./HomeTile/index.svelte";
+	import HomeTile from "./HomeTile.svelte";
 	import fs from "fs";
 	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	interface Tile {
+	export interface Tile {
 		title: string;
 		path: string;
 		icon: any;
 	}
+	
+	interface Weather {
+		city: string;
+		temp: string;
+		icon: string;
+		forecast: string;
+	}	
 
 	// set background based on time of day
 	const hour = new Date().getHours();
@@ -37,7 +44,7 @@
 		date = new Date();
 	}, 50);
 
-	let weather: any;
+	let weather: null | Weather = null;
 	fs.readFile("/tmp/geo.json", async (err, geo) => {
 		if (err) {
 			error("error reading geo.json: %O", err);
@@ -57,7 +64,7 @@
 			city: meta.properties.relativeLocation.properties.city,
 			temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
 			icon: forecast.icon,
-			description: forecast.shortForecast,
+			forecast: forecast.shortForecast,
 		};
 		log("%O", weather);
 	});
@@ -149,7 +156,7 @@
 						/>
 						<span>{weather.temp}</span>
 					</div>
-					<div class="text-4xl">{weather.description}</div>
+					<div class="text-4xl">{weather.forecast}</div>
 				{/if}
 			</div>
 		</div>
