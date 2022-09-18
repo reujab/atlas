@@ -1,7 +1,7 @@
 import child_process from "child_process";
 import { log } from "./log";
 
-export default function spawnOverlay(cb?: (code?: number) => void) {
+export default function spawnOverlay(cb?: (code?: number) => void): () => void {
 	// once mpv has started, spawn the overlay
 	let started = false;
 	async function checkPosition() {
@@ -9,7 +9,7 @@ export default function spawnOverlay(cb?: (code?: number) => void) {
 		child.stdout.on("data", (data) => {
 			log(data.toString());
 			const position = Number(data.toString().trim());
-			if (position > 0.1) {
+			if (position > 0.5) {
 				started = true;
 
 				setTimeout(() => {
@@ -31,4 +31,8 @@ export default function spawnOverlay(cb?: (code?: number) => void) {
 		});
 	}
 	checkPosition();
+
+	return () => {
+		started = true;
+	}
 }

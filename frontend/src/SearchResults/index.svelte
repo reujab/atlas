@@ -31,6 +31,7 @@
 
 	let container: HTMLDivElement;
 	let errorMsg = "";
+	let cancelOverlay: null | (() => void) = null;
 
 	let sources: Source[] = [];
 	const path = `q.php?cat=200&q=${encodeURIComponent(
@@ -111,7 +112,7 @@
 			}
 		});
 
-		spawnOverlay();
+		cancelOverlay = spawnOverlay();
 	}
 
 	function gamepadHandler(button: string) {
@@ -121,6 +122,7 @@
 				return;
 			}
 
+			cancelOverlay?.();
 			child_process.spawnSync(
 				"killall",
 				["overlay", "mpv", "WebTorrent"],
