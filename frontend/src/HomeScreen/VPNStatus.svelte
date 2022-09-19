@@ -1,6 +1,7 @@
 <script lang="ts">
 	import child_process from "child_process";
 	import { error } from "../log";
+	import { onDestroy } from "svelte";
 
 	let connected: null | boolean = null;
 	let location: null | string = null;
@@ -40,7 +41,11 @@
 
 	getStatus();
 	getLocation();
-	setInterval(getStatus, 5000);
+
+	const interval = setInterval(getStatus, 5000);
+	onDestroy(() => {
+		clearInterval(interval);
+	});
 </script>
 
 {#if connected !== null}

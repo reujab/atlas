@@ -18,7 +18,7 @@
 
 	let activeButton = 0;
 
-	const releaseDate = title.released.toLocaleDateString(undefined, {
+	const releaseDate = title.released?.toLocaleDateString(undefined, {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
@@ -61,25 +61,29 @@
 <div class="h-screen px-48 bg-white flex flex-col">
 	<Header title={title.title} back />
 
-	<div class="min-h-[450px] mt-4">
-		<img
-			src="file:///{process.env.POSTERS_PATH}/movie/{title.id}"
-			alt="Poster"
-			class="float-left mr-4"
-		/>
+	<div class="flex grow items-center">
+		<div class="flex gap-4 my-4">
+			<div class="shrink-0 flex flex-col gap-4">
+				<img
+					src="file:///{process.env.POSTERS_PATH}/movie/{title.id}"
+					alt="Poster"
+					class="rounded-md white-shadow "
+				/>
 
-		<h3 class="text-3xl mb-8">
-			{title.genres?.map((genre) => genres[genre]).join(" • ")}
-		</h3>
+				<span class="text-3xl text-center">{releaseDate}</span>
+			</div>
 
-		<h3 class="text-4xl">
-			{title.overview}
-		</h3>
+			<div>
+				<h3 class="text-4xl mb-8">
+					{title.genres?.map((genre) => genres[genre]).join(" • ")}
+				</h3>
 
-		<h3 class="text-3xl mt-8">{releaseDate}</h3>
+				<h3 class="text-3xl">
+					{title.overview}
+				</h3>
+			</div>
+		</div>
 	</div>
-
-	<div class="grow" />
 
 	<div class="flex justify-around mb-16">
 		<a href={playHref}>

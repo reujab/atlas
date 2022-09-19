@@ -152,7 +152,7 @@
 				break;
 		}
 
-		container.scrollTo(0, sources[activeSource]?.element.offsetTop - 20);
+		container.scrollTo(0, sources[activeSource]?.element.offsetTop - 16);
 	}
 
 	subscribe(gamepadHandler);
@@ -161,12 +161,14 @@
 	});
 </script>
 
-<div class="h-screen px-48 bg-white flex flex-col">
-	<Header title={query} back />
+<div class="h-screen bg-white flex flex-col">
+	<div class="px-48">
+		<Header title={query} back />
+	</div>
 
 	{#if sources.length}
 		<div
-			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll mt-8"
+			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll px-48 mt-4 py-4 items-center"
 			bind:this={container}
 		>
 			{#each sources as source, i}
@@ -195,13 +197,11 @@
 
 <style>
 	.source {
-		/* transition: transform 500ms; */
-		transition: padding 500ms, font-size 500ms;
+		transition: min-width 500ms;
+		min-width: 100%;
 	}
 
 	.source.active {
-		/* transform: scaleY(1.25); */
-		padding: 1em 20px;
-		font-size: 1.1em;
+		min-width: 105%;
 	}
 </style>
