@@ -4,20 +4,26 @@
 
 	let connected: null | boolean = null;
 	let location: null | string = null;
+	function getStatus() {
+		child_process.exec("windscribe status", (err, stdout) => {
+			if (err) {
+				error("error running 'windscribe status': %O", err);
+				connected = false;
+				return;
+			}
 
-	child_process.exec("windscribe status", (err, stdout) => {
-		if (err) {
-			error("error running 'windscribe status': %O", err);
-			connected = false;
-			return;
-		}
+			const lines = stdout.trim().split("\n");
+			const lastLine = lines[lines.length - 1];
+			const lastStatus = connected;
+			connected = lastLine.slice(0, 9) === "CONNECTED";
 
-		const lines = stdout.trim().split("\n");
-		const lastLine = lines[lines.length - 1];
-		connected = lastLine.slice(0, 9) === "CONNECTED";
-	});
+			if (connected !== lastStatus && lastStatus !== null) {
+				getLocation();
+			}
+		});
+	}
 
-	(async () => {
+	async function getLocation() {
 		let json;
 		try {
 			const res = await fetch("https://ipapi.co/json/");
@@ -30,7 +36,11 @@
 		if (json.city) {
 			location = `${json.city}, ${json.region}`;
 		}
-	})();
+	}
+
+	getStatus();
+	getLocation();
+	setInterval(getStatus, 5000);
 </script>
 
 {#if connected !== null}

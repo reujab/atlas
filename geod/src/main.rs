@@ -3,8 +3,13 @@ use std::{fs::File, io::Write};
 
 #[derive(Deserialize)]
 struct Response {
-    latitude: f64,
-    longitude: f64,
+    location: Location,
+}
+
+#[derive(Deserialize)]
+struct Location {
+    lat: f64,
+    lng: f64,
 }
 
 fn main() {
@@ -13,7 +18,7 @@ fn main() {
             .user_agent("reqwest")
             .build()
             .unwrap()
-            .get("https://ipapi.co/json/")
+            .get("https://location.services.mozilla.com/v1/geolocate?key=geoclue")
             .send()
         {
             Ok(res) => res,
@@ -22,8 +27,8 @@ fn main() {
                 continue;
             }
         };
-        let res = match res.json::<Response>() {
-            Ok(res) => res,
+        let location = match res.json::<Response>() {
+            Ok(res) => res.location,
             Err(err) => {
                 eprintln!("{:?}", err);
                 continue;
@@ -31,7 +36,7 @@ fn main() {
         };
 
         let mut file = File::create("/tmp/geo.json").unwrap();
-        file.write_all(format!("[{}, {}]", res.latitude, res.longitude).as_bytes())
+        file.write_all(format!("[{}, {}]", location.lat, location.lng).as_bytes())
             .unwrap();
         break;
     }
