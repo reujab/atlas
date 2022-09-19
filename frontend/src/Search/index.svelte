@@ -1,4 +1,5 @@
 <script lang="ts">
+	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
 	import MdChevronLeft from "svelte-icons/md/MdChevronLeft.svelte";
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
@@ -172,22 +173,24 @@
 		{#each keyboard as row, i}
 			<div>
 				{#each row as char, j}
-					<span
-						class="char"
+					<div
+						class="char relative white-shadow"
 						class:active={i === activeRow && j === activeCol}
 					>
 						{#if char === "<"}
+							<GamepadButton button="X" position={20} />
 							<MdChevronLeft />
 						{:else if char === "!"}
 							<MdSearch />
 						{:else if char === " "}
+							<GamepadButton button="Y" position={20} />
 							<div class="mb-[-2rem]">
 								<MdSpaceBar />
 							</div>
 						{:else}
 							{char}
 						{/if}
-					</span>
+					</div>
 				{/each}
 			</div>
 		{/each}
@@ -202,10 +205,9 @@
 		justify-content: center;
 	}
 
-	.keyboard span {
+	.char {
 		height: 7rem;
 		width: 7rem;
-		border: 1px solid gray;
 		background: white;
 		border-radius: 2rem;
 		transition: transform 500ms;
