@@ -6,7 +6,7 @@
 	let connected: null | boolean = null;
 	let location: null | string = null;
 	function getStatus() {
-		child_process.exec("windscribe status", (err, stdout) => {
+		child_process.exec("windscribe status", (err, stdout, stderr) => {
 			if (err) {
 				error("error running 'windscribe status': %O", err);
 				connected = false;
@@ -20,6 +20,10 @@
 
 			if (connected !== lastStatus && lastStatus !== null) {
 				getLocation();
+			}
+
+			if (!connected) {
+				error(`disconnected from vpn: ${stdout}\n${stderr}`);
 			}
 		});
 	}
