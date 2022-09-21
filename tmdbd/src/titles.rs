@@ -23,8 +23,6 @@ struct Title {
     #[serde(alias = "name")]
     title: String,
     // only appears on movies
-    #[serde(default)]
-    video: Option<bool>,
     #[serde(rename = "vote_average")]
     score: f64,
     #[serde(rename = "vote_count")]
@@ -58,6 +56,7 @@ struct Videos {
 struct VideoResults {
     key: String,
     site: String,
+    r#type: String,
 }
 
 pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
@@ -141,11 +140,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         }
     };
 
-    let trailer = if title.video.unwrap_or(true) {
-        get_trailer(id, endpoint).await
-    } else {
-        None
-    };
+    let trailer = get_trailer(id, endpoint).await;
 
     let runtime = title.runtime.or_else(|| {
         title
@@ -216,7 +211,7 @@ async fn get_trailer(id: i32, endpoint: &str) -> Option<String> {
     .unwrap();
 
     for video in videos.results {
-        if video.site == "YouTube" {
+        if video.site == "YouTube" && video.r#type.contains("Trailer") {
             return Some(video.key);
         }
     }

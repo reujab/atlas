@@ -18,6 +18,12 @@ pub fn update_position(sender: Sender<super::Msg>) {
 
     loop {
         let output = Command::new("playerctl").arg("position").output().unwrap();
+
+        if String::from_utf8(output.stderr).unwrap().trim() == "No players found" {
+            send!(sender, super::Msg::Quit);
+            break;
+        }
+
         let position = String::from_utf8(output.stdout)
             .unwrap()
             .trim()

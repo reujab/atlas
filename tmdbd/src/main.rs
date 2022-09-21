@@ -7,7 +7,6 @@ mod titles;
 
 use env_logger::Env;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::Row;
 use std::{env, time::Duration};
 use tokio::time::sleep;
 

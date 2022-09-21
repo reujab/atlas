@@ -24,6 +24,7 @@ pub enum Msg {
     UpdateDuration(u32),
     UpdatePosition(u32),
     UpdateStatus(Status),
+    Quit,
 }
 
 struct Format {
@@ -123,7 +124,8 @@ impl Widgets<State, ()> for AppWidgets {
         println!("pre_init");
         let sender_clone = sender.clone();
         thread::spawn(move || position_worker::update_position(sender_clone));
-        thread::spawn(input_worker::handle_gamepad);
+        let sender_clone = sender.clone();
+        thread::spawn(move || input_worker::handle_gamepad(sender_clone));
     }
 
     fn post_init() {
@@ -173,6 +175,7 @@ impl AppUpdate for State {
             Msg::UpdateStatus(status) => {
                 self.status = status;
             }
+            Msg::Quit => return false,
         }
         true
     }
@@ -194,6 +197,7 @@ fn main() {
         .args(&["-STOP", "atlas-frontend"])
         .output()
         .unwrap();
+
     let state = State {
         status: Status::Playing,
         duration: 0,
@@ -201,8 +205,10 @@ fn main() {
     };
     let app = RelmApp::new(state);
     app.run();
+
     Command::new("killall")
         .args(&["-CONT", "atlas-frontend"])
         .output()
         .unwrap();
+    Command::new("killall").arg("mpv").output().unwrap();
 }

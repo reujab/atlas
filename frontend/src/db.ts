@@ -112,7 +112,8 @@ export async function getAutocomplete(query: string): Promise<null | Title[]> {
 	let titles;
 	try {
 		titles = await autocompleteQuery as unknown as Title[];
-	} catch (_) {
+	} catch (err) {
+		console.error(err);
 		return null;
 	}
 

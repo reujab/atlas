@@ -5,19 +5,32 @@
 	import { params } from "svelte-hash-router";
 	import child_process from "child_process";
 	import spawnOverlay from "../spawnOverlay";
+	import { subscribe, unsubscribe } from "../gamepad";
+	import { onDestroy } from "svelte";
 
 	const title = cache[$params.id];
-
-	child_process.spawn(
+	const mpv = child_process.spawn(
 		"mpv",
 		["--audio-device=alsa/hdmi:CARD=PCH,DEV=0", `ytdl://${title.trailer}`],
 		{ stdio: "inherit" }
 	);
-
-	spawnOverlay(() => {
+	const cancelOverlay = spawnOverlay(() => {
 		if (location.hash.includes("/trailer")) {
 			history.back();
 		}
+	});
+
+	function gamepadHandler(button: string) {
+		if (button === "B") {
+			mpv.kill();
+			cancelOverlay();
+			history.back();
+		}
+	}
+
+	subscribe(gamepadHandler);
+	onDestroy(() => {
+		unsubscribe(gamepadHandler);
 	});
 </script>
 

@@ -25,6 +25,8 @@ CREATE TABLE titles (
 	PRIMARY KEY (id, movie)
 );
 
+CREATE INDEX titles_popularity ON titles (popularity DESC NULLS LAST);
+
 CREATE TABLE seasons (
 	id INT,
 	season SMALLINT,
