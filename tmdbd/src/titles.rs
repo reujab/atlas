@@ -22,6 +22,7 @@ struct Title {
     tagline: Option<String>,
     #[serde(alias = "name")]
     title: String,
+    videos: Videos,
     // only appears on movies
     #[serde(rename = "vote_average")]
     score: f64,
@@ -114,7 +115,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         TitleType::Movie => "movie",
         TitleType::Series => "tv",
     };
-    let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}&append_to_response=release_dates,content_ratings");
+    let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}&append_to_response=videos,release_dates,content_ratings");
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
         sqlx::query(
@@ -163,7 +164,12 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         }
     };
 
-    let trailer = get_trailer(id, endpoint).await;
+    let trailer = title
+        .videos
+        .results
+        .iter()
+        .find(|video| video.site == "YouTube" && video.r#type.contains("Trailer"))
+        .and_then(|video| Some(&video.key));
 
     let runtime = title.runtime.or_else(|| {
         title
@@ -225,43 +231,22 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
             AND movie = $14
         "#,
     ))
-    .bind(&title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
-    .bind(&title.language)
-    .bind(&title.overview)
-    .bind(&title.popularity)
-    .bind(&title.release_date)
+    .bind(title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
+    .bind(title.language)
+    .bind(title.overview)
+    .bind(title.popularity)
+    .bind(title.release_date)
     .bind(runtime)
-    .bind(&title.tagline)
+    .bind(title.tagline)
     .bind(&title.title)
     .bind(trailer)
     .bind(title.score * 10.0)
-    .bind(&title.votes)
-    .bind(&rating)
+    .bind(title.votes)
+    .bind(rating)
     .bind(id)
     .bind(title_type == TitleType::Movie)
     .execute(&mut *conn)
     .await
     .unwrap();
     info!("Updated {endpoint} {}", title.title);
-}
-
-async fn get_trailer(id: i32, endpoint: &str) -> Option<String> {
-    sleep(Duration::from_secs(1)).await;
-    let key = env::var("TMDB_KEY").unwrap();
-    let videos = get(&format!(
-        "https://api.themoviedb.org/3/{endpoint}/{id}/videos?api_key={key}"
-    ))
-    .await
-    .unwrap()
-    .json::<Videos>()
-    .await
-    .unwrap();
-
-    for video in videos.results {
-        if video.site == "YouTube" && video.r#type.contains("Trailer") {
-            return Some(video.key);
-        }
-    }
-
-    None
 }
