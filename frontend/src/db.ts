@@ -56,6 +56,7 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 		SELECT id, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
+		AND language = 'en'
 		AND movie = ${type === "movies"}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
@@ -71,6 +72,7 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 		SELECT id, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
+		AND language = 'en'
 		AND movie = ${type === "movies"}
 		AND votes >= 1000
 		ORDER BY score DESC NULLS LAST
@@ -87,6 +89,7 @@ export async function getTitlesWithGenre(type: "movies", genre: number): Promise
 		SELECT id, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
+		AND language = 'en'
 		AND movie = ${type === "movies"}
 		AND ${genre} = ANY(genres)
 		ORDER BY popularity DESC NULLS LAST
