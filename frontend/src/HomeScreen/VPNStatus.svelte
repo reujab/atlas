@@ -39,7 +39,9 @@
 		}
 
 		if (json.city) {
-			location = `${json.city}, ${json.region}`;
+			const state =
+				json.region.length > 12 ? json.region_code : json.region;
+			location = `${json.city}, ${state}`;
 		}
 	}
 

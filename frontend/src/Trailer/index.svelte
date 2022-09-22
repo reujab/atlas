@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Header from "../Header/index.svelte";
-	import { Circle2 } from "svelte-loading-spinners";
-	import { cache } from "../db";
-	import { params } from "svelte-hash-router";
 	import child_process from "child_process";
 	import spawnOverlay from "../spawnOverlay";
-	import { subscribe, unsubscribe } from "../gamepad";
+	import { Circle2 } from "svelte-loading-spinners";
+	import { cache } from "../db";
 	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = cache[$params.id];
 	const mpv = child_process.spawn(
