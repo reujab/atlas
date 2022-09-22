@@ -35,7 +35,7 @@
 					city: meta.properties.relativeLocation.properties.city,
 					temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
 					icon: forecast.icon.replace(/,\d+/g, ""),
-					forecast: forecast.shortForecast,
+					forecast: forecast.shortForecast.replace(/and/gi, "&"),
 				};
 				log("%O", weather);
 			} catch (err) {
