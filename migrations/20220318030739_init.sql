@@ -5,6 +5,24 @@ CREATE TABLE genres (
 	series BOOLEAN
 );
 
+CREATE TYPE rating AS ENUM (
+	'NR',
+
+	'G',
+	'PG',
+	'PG-13',
+	'R',
+	'NC-17',
+
+	'TV-Y',
+	'TV-Y7',
+	'TV-Y7-FV',
+	'TV-G',
+	'TV-PG',
+	'TV-14',
+	'TV-MA'
+);
+
 CREATE TABLE titles (
 	id INT,
 	movie BOOLEAN,
@@ -21,6 +39,7 @@ CREATE TABLE titles (
 	trailer VARCHAR(16),
 	score SMALLINT,
 	votes INT,
+	rating rating,
 
 	PRIMARY KEY (id, movie)
 );

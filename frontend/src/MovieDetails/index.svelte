@@ -4,6 +4,7 @@
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
 	import Header from "../Header/index.svelte";
+	import Rating from "./Rating.svelte";
 	import { cache, genres } from "../db";
 	import { log } from "../log";
 	import { onDestroy } from "svelte";
@@ -75,7 +76,14 @@
 
 			<div>
 				<h3 class="text-4xl mb-8">
-					{title.genres?.map((genre) => genres[genre]).join(" • ")}
+					{#if title.rating}
+						<Rating rating={title.rating} />
+					{/if}
+					<span class:ml-2={title.rating}>
+						{title.genres
+							?.map((genre) => genres[genre])
+							.join(" • ")}
+					</span>
 				</h3>
 
 				<h3 class="text-3xl">

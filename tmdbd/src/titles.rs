@@ -27,9 +27,13 @@ struct Title {
     score: f64,
     #[serde(rename = "vote_count")]
     votes: i32,
+    #[serde(default)]
+    release_dates: Option<ReleaseDates>,
 
     #[serde(default)]
     seasons: Option<Vec<Season>>,
+    #[serde(default)]
+    content_ratings: Option<ReleaseDates>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -57,6 +61,25 @@ struct VideoResults {
     key: String,
     site: String,
     r#type: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct ReleaseDates {
+    results: Vec<ReleaseDate>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ReleaseDate {
+    iso_3166_1: String,
+    // movie
+    release_dates: Option<Vec<Rating>>,
+    // tv
+    rating: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Rating {
+    certification: String,
 }
 
 pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
@@ -91,7 +114,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         TitleType::Movie => "movie",
         TitleType::Series => "tv",
     };
-    let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}");
+    let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}&append_to_response=release_dates,content_ratings");
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
         sqlx::query(
@@ -169,14 +192,37 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         }
     }
 
+    let rating = if let Some(release_dates) = title.release_dates {
+        release_dates
+            .results
+            .iter()
+            .find(|res| res.iso_3166_1 == "US")
+            .and_then(|res| {
+                res.release_dates
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .find(|res| !res.certification.is_empty())
+                    .and_then(|res| Some(res.certification.clone()))
+            })
+    } else if let Some(ratings) = title.content_ratings {
+        ratings
+            .results
+            .iter()
+            .find(|res| res.iso_3166_1 == "US")
+            .and_then(|res| res.rating.clone())
+    } else {
+        None
+    };
+
     sqlx::query(&format!(
         r#"
             UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
                 released = {released}, runtime = $6, tagline = $7, title = $8, trailer = $9,
-                score = $10, votes = $11
-            WHERE id = $12
-            AND movie = $13
+                score = $10, votes = $11, rating = $12::rating
+            WHERE id = $13
+            AND movie = $14
         "#,
     ))
     .bind(&title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
@@ -190,6 +236,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     .bind(trailer)
     .bind(title.score * 10.0)
     .bind(&title.votes)
+    .bind(&rating)
     .bind(id)
     .bind(title_type == TitleType::Movie)
     .execute(&mut *conn)
