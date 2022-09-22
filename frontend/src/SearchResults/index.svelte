@@ -2,89 +2,38 @@
 	import ErrorDialog from "../ErrorDialog/index.svelte";
 	import Header from "../Header/index.svelte";
 	import child_process from "child_process";
-	import http from "http";
 	import prettyBytes from "pretty-bytes";
+	import search, { Source } from "./search";
 	import spawnOverlay from "../spawnOverlay";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { SocksProxyAgent } from "socks-proxy-agent";
 	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	interface Source {
-		info_hash: string;
-		name: string;
-		seeders: number;
-		leechers: number;
-		size: number;
-		element: HTMLDivElement;
-	}
-
 	const query = unescape($params.query);
 	log(query);
-
-	const agent = new SocksProxyAgent({
-		hostname: "localhost",
-		port: 9050,
-	});
 
 	let container: HTMLDivElement;
 	let errorMsg = "";
 	let cancelOverlay: null | (() => void) = null;
 
 	let sources: Source[] = [];
-	const path = `q.php?cat=200&q=${encodeURIComponent(
-		query.replace(/['"]/g, "").replace(/\./g, " ")
-	)}`;
-	fetch(`https://apibay.org/${path}`)
+	search(query)
 		.then((res) => {
-			res.json().then((res) => {
-				sources = res;
-			});
+			sources = res;
 		})
 		.catch((err) => {
-			error("%O", err);
-
-			http.get(
-				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
-				{ agent },
-				(res) => {
-					log("%O", res.headers);
-
-					let data = "";
-					res.on("data", (chunk) => {
-						data += chunk;
-					});
-					res.on("end", () => {
-						try {
-							const json = JSON.parse(data);
-							sources = json;
-						} catch (err) {
-							log("%O", data);
-							error("error parsing json: %O", err);
-						}
-					});
-					res.on("error", (err) => {
-						error("%O", err);
-						errorMsg = err.toString();
-					});
-				}
-			);
+			error("search error: %O", err);
 		});
 
 	let activeSource = 0;
 
-	function play(source: Source) {
+	async function play(source: Source) {
 		// shows loading icon
 		sources = [];
 
-		const magnet = `magnet:?xt=urn:btih:${
-			source.info_hash
-		}&dn=${encodeURIComponent(
-			source.name
-		)}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce`;
-
+		const magnet = await source.getMagnet();
 		const webtorrent = child_process.spawn(
 			"webtorrent",
 			[

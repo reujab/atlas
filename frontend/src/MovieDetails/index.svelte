@@ -15,7 +15,7 @@
 	log("%O", title);
 	const playHref = `#/results/${escape(title.title)
 		.replace(/\./g, "%2E")
-		.replace(/\+/g, "%2B")}`;
+		.replace(/\+/g, "%2B")}%20${title.released.getFullYear()}`;
 
 	let activeButton = 0;
 

@@ -29,10 +29,10 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "gamepad.js": "^1.0.4",
     "postgres": "^3.2.4",
     "pretty-bytes": "^6.0.0",
-    "socks-proxy-agent": "^7.0.0",
     "svelte-hash-router": "^1.0.1",
     "svelte-icons": "^2.1.0",
     "svelte-loading-spinners": "^0.1.7"
