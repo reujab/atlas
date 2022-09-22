@@ -61,5 +61,5 @@ function parse_size(size: string): number {
 	const dens = ["KB", "MB", "GB"];
 	const [num, den] = size.split(" ");
 	const multiplier = Math.pow(1000, dens.indexOf(den) + 1);
-	return Number(num) * multiplier;
+	return Number(num.replace(/,/g, "")) * multiplier;
 }
