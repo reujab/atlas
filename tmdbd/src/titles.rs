@@ -19,7 +19,6 @@ struct Title {
     runtime: Option<i16>,
     #[serde(default)]
     episode_run_time: Option<Vec<i16>>,
-    tagline: Option<String>,
     #[serde(alias = "name")]
     title: String,
     videos: Videos,
@@ -90,12 +89,12 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
         let next = sqlx::query(&format!(
             r#"
                 SELECT id FROM titles
-                WHERE movie = $1
-                ORDER BY ts ASC NULLS FIRST, popularity DESC
+                WHERE type = $1
+                ORDER BY ts ASC NULLS FIRST, popularity DESC NULLS LAST
                 LIMIT 1
             "#
         ))
-        .bind(title_type == TitleType::Movie)
+        .bind(&title_type)
         .fetch_optional(&mut conn)
         .await
         .unwrap();
@@ -111,11 +110,7 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
 async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     let mut conn = pool.acquire().await.unwrap();
     let key = env::var("TMDB_KEY").unwrap();
-    let endpoint = match title_type {
-        TitleType::Movie => "movie",
-        TitleType::Series => "tv",
-    };
-    let url = format!("https://api.themoviedb.org/3/{endpoint}/{id}?api_key={key}&append_to_response=videos,release_dates,content_ratings");
+    let url = format!("https://api.themoviedb.org/3/{}/{id}?api_key={key}&append_to_response=videos,release_dates,content_ratings", title_type.to_string());
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
         sqlx::query(
@@ -123,11 +118,11 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
                 UPDATE titles
                 SET ts = now()
                 WHERE id = $1
-                AND movie = $2
+                AND type = $2
             "#,
         )
         .bind(id)
-        .bind(title_type == TitleType::Movie)
+        .bind(title_type)
         .execute(&mut conn)
         .await
         .unwrap();
@@ -225,10 +220,10 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         r#"
             UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
-                released = {released}, runtime = $6, tagline = $7, title = $8, trailer = $9,
-                score = $10, votes = $11, rating = $12::rating
-            WHERE id = $13
-            AND movie = $14
+                released = {released}, runtime = $6, title = $7, trailer = $8,
+                score = $9, votes = $10, rating = $11::rating
+            WHERE id = $12
+            AND type = $13
         "#,
     ))
     .bind(title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
@@ -237,16 +232,15 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     .bind(title.popularity)
     .bind(title.release_date)
     .bind(runtime)
-    .bind(title.tagline)
     .bind(&title.title)
     .bind(trailer)
     .bind(title.score * 10.0)
     .bind(title.votes)
     .bind(rating)
     .bind(id)
-    .bind(title_type == TitleType::Movie)
+    .bind(&title_type)
     .execute(&mut *conn)
     .await
     .unwrap();
-    info!("Updated {endpoint} {}", title.title);
+    info!("Updated {} {}", title_type.to_string(), title.title);
 }

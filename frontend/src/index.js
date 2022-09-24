@@ -15,9 +15,9 @@ addEventListener("error", (err) => {
 routes.set({
 	"/": HomeScreen,
 	"/movies": Movies,
-	"/movies/:id": MovieDetails,
+	"/movie/:id": MovieDetails,
+	"/:type/:id/trailer": Trailer,
 	"/results/:query": SearchResults,
-	"/trailer/:id": Trailer,
 	"/search": Search,
 });
 

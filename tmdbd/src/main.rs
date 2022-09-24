@@ -12,17 +12,19 @@ use tokio::time::sleep;
 
 type Pool = sqlx::Pool<sqlx::Postgres>;
 
-#[derive(Clone, PartialEq)]
+#[derive(sqlx::Type, Clone, PartialEq)]
+#[sqlx(rename_all = "lowercase")]
+#[sqlx(type_name = "type")]
 pub enum TitleType {
     Movie,
-    Series,
+    TV,
 }
 
 impl ToString for TitleType {
     fn to_string(&self) -> String {
         match self {
             TitleType::Movie => "movie",
-            TitleType::Series => "series",
+            TitleType::TV => "tv",
         }
         .to_owned()
     }
@@ -46,7 +48,7 @@ async fn main() {
 
     tokio::join!(
         titles::update(&pool, TitleType::Movie),
-        titles::update(&pool, TitleType::Series),
+        titles::update(&pool, TitleType::TV),
     );
 }
 

@@ -7,6 +7,7 @@ interface Genre {
 }
 
 export interface Title {
+	type: "movie" | "tv",
 	id: number,
 	title: string,
 	genres: number[],
@@ -35,29 +36,32 @@ async function cacheGenres() {
 
 function cacheTitles(titles: Title[]) {
 	for (const title of titles) {
-		cache[title.id] = title;
+		cache[title.type][title.id] = title;
 		title.poster = new Image();
 		title.poster.className = "rounded-md";
 		title.poster.addEventListener("error", (err) => {
 			error("failed to load poster: %O", err);
 		});
-		title.poster.src = `file://${process.env.POSTERS_PATH}/movie/${title.id}`;
+		title.poster.src = `file://${process.env.POSTERS_PATH}/${title.type}/${title.id}`;
 	}
 }
 
 export const genres: { [id: number]: string } = {};
 
-export const cache: { [id: number]: Title } = {};
+export const cache: { [type: string]: { [id: number]: Title } } = {
+	movie: {},
+	tv: {},
+};
 
 export const sortedGenres: Genre[] = [];
 
-export async function getTrending(type: "movies"): Promise<Title[]> {
+export async function getTrending(type: "movie"): Promise<Title[]> {
 	const trending = await sql`
-		SELECT id, title, genres, overview, released, trailer, rating
+		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
 		AND language = 'en'
-		AND movie = ${type === "movies"}
+		AND type = ${type}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
@@ -67,13 +71,13 @@ export async function getTrending(type: "movies"): Promise<Title[]> {
 	return trending;
 }
 
-export async function getTopRated(type: "movies"): Promise<Title[]> {
+export async function getTopRated(type: "movie"): Promise<Title[]> {
 	const topRated = await sql`
-		SELECT id, title, genres, overview, released, trailer, rating
+		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
 		AND language = 'en'
-		AND movie = ${type === "movies"}
+		AND type = ${type}
 		AND votes >= 1000
 		ORDER BY score DESC NULLS LAST
 		LIMIT 100
@@ -84,13 +88,13 @@ export async function getTopRated(type: "movies"): Promise<Title[]> {
 	return topRated;
 }
 
-export async function getTitlesWithGenre(type: "movies", genre: number): Promise<Title[]> {
+export async function getTitlesWithGenre(type: "movie", genre: number): Promise<Title[]> {
 	const titles = await sql`
-		SELECT id, title, genres, overview, released, trailer, rating
+		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
 		AND language = 'en'
-		AND movie = ${type === "movies"}
+		AND type = ${type}
 		AND ${genre} = ANY(genres)
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
@@ -105,10 +109,9 @@ let autocompleteQuery: null | postgres.PendingQueryModifiers<postgres.Row[]> = n
 export async function getAutocomplete(query: string): Promise<null | Title[]> {
 	autocompleteQuery?.cancel();
 	autocompleteQuery = sql`
-		SELECT id, title, genres, overview, released, trailer, rating
+		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
-		AND movie
 		AND title ILIKE ${"%" + query.split(" ").join("%") + "%"}
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 2

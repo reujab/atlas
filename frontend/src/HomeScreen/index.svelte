@@ -29,7 +29,7 @@
 		},
 		{
 			title: "TV Shows",
-			path: "/shows",
+			path: "/tv",
 			icon: require("../img/tv.png"),
 		},
 	];

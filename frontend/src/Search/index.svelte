@@ -41,9 +41,8 @@
 						update();
 					}
 				} else {
-					location.href = `#/movies/${
-						autocomplete[activeRow + autocomplete.length].id
-					}`;
+					const title = autocomplete[activeRow + autocomplete.length];
+					location.href = `#/${title.type}/${title.id}`;
 				}
 				break;
 			case "B":

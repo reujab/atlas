@@ -17,7 +17,7 @@
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
-				location.hash = `#/movies/${title.id}`;
+				location.hash = `#/${title.type}/${title.id}`;
 				break;
 			case "B":
 				history.back();
@@ -98,7 +98,7 @@
 				>
 					{#each row.titles as title, colIndex}
 						<a
-							href="#/movies/{title.id}"
+							href="#/{title.type}/{title.id}"
 							class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
 							class:active={rowIndex === state.activeRow &&
 								colIndex ===

@@ -8,7 +8,7 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const title = cache[$params.id];
+	const title = cache[$params.type][$params.id];
 	const mpv = child_process.spawn(
 		"mpv",
 		["--audio-device=alsa/hdmi:CARD=PCH,DEV=0", `ytdl://${title.trailer}`],

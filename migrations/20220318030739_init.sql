@@ -5,6 +5,8 @@ CREATE TABLE genres (
 	series BOOLEAN
 );
 
+CREATE TYPE type AS ENUM ('movie', 'tv');
+
 CREATE TYPE rating AS ENUM (
 	'NR',
 
@@ -25,24 +27,25 @@ CREATE TYPE rating AS ENUM (
 
 CREATE TABLE titles (
 	id INT,
-	movie BOOLEAN,
+	type type,
 	ts TIMESTAMP,
 
+	title TEXT,
 	genres SMALLINT[],
 	language CHAR(2),
-	overview TEXT,
 	popularity FLOAT,
+	rating rating,
 	released DATE,
 	runtime SMALLINT,
-	tagline TEXT,
-	title TEXT,
-	trailer VARCHAR(16),
 	score SMALLINT,
 	votes INT,
-	rating rating,
+	trailer VARCHAR(16),
+	overview TEXT,
 
-	PRIMARY KEY (id, movie)
+	PRIMARY KEY (id, type)
 );
+
+CREATE INDEX titles_ts ON titles (ts ASC NULLS FIRST, popularity DESC NULLS LAST);
 
 CREATE INDEX titles_popularity ON titles (popularity DESC NULLS LAST);
 

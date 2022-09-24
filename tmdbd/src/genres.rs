@@ -18,7 +18,7 @@ pub async fn insert(pool: &sqlx::Pool<sqlx::Postgres>) {
     let mut trans = pool.begin().await.unwrap();
 
     insert_category(&mut trans, TitleType::Movie).await;
-    insert_category(&mut trans, TitleType::Series).await;
+    insert_category(&mut trans, TitleType::TV).await;
 
     info!("Committing transaction");
     trans.commit().await.unwrap();
@@ -26,11 +26,10 @@ pub async fn insert(pool: &sqlx::Pool<sqlx::Postgres>) {
 
 async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, category: TitleType) {
     let key = env::var("TMDB_KEY").unwrap();
-    let endpoint = match category {
-        TitleType::Movie => "movie",
-        TitleType::Series => "tv",
-    };
-    let url = format!("https://api.themoviedb.org/3/genre/{endpoint}/list?api_key={key}");
+    let url = format!(
+        "https://api.themoviedb.org/3/genre/{}/list?api_key={key}",
+        category.to_string()
+    );
     let genres = get(&url)
         .await
         .unwrap()
@@ -52,7 +51,7 @@ async fn insert_category(trans: &mut sqlx::Transaction<'_, sqlx::Postgres>, cate
         .bind(genre.id)
         .bind(genre.name)
         .bind(category == TitleType::Movie)
-        .bind(category == TitleType::Series)
+        .bind(category == TitleType::TV)
         .execute(&mut *trans)
         .await
         .unwrap();

@@ -50,7 +50,7 @@ su postgres -c "createdb atlas"
 # TODO copy .env
 
 su atlas -c '
-mkdir -p ~/posters/{movie,series}
+mkdir -p ~/posters/{movie,tv}
 cat >> ~/.bashrc << EOF
 if [[ $(tty) = /dev/tty1 ]]; then
 	~/start.sh &> /tmp/atlas.log

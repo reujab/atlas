@@ -15,7 +15,7 @@ pub struct Title {
 pub async fn insert(pool: &crate::Pool) {
     tokio::join!(
         insert_category(&pool, TitleType::Movie),
-        insert_category(&pool, TitleType::Series),
+        insert_category(&pool, TitleType::TV),
     );
 }
 
@@ -28,7 +28,7 @@ async fn insert_category(pool: &crate::Pool, category: TitleType) {
     let date = time.format("%m_%d_%Y");
     let endpoint = match category {
         TitleType::Movie => "movie",
-        TitleType::Series => "tv_series",
+        TitleType::TV => "tv_series",
     };
     let url = format!("https://files.tmdb.org/p/exports/{endpoint}_ids_{date}.json.gz");
     let bytes = get(&url).await.unwrap().bytes().await.unwrap();
@@ -40,15 +40,15 @@ async fn insert_category(pool: &crate::Pool, category: TitleType) {
         let title = serde_json::from_str::<Title>(line).unwrap();
         sqlx::query(
             r#"
-                INSERT INTO titles (id, movie, title, popularity)
+                INSERT INTO titles (id, type, title, popularity)
                 VALUES ($1, $2, $3, $4)
-                ON CONFLICT (id, movie)
+                ON CONFLICT (id, type)
                 DO UPDATE
                 SET popularity = $4
             "#,
         )
         .bind(title.id)
-        .bind(category == TitleType::Movie)
+        .bind(&category)
         .bind(title.original_title)
         .bind(title.popularity)
         .execute(&mut *trans)

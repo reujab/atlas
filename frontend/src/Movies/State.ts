@@ -6,11 +6,11 @@ class State {
 	activeRow = 0
 
 	constructor() {
-		getTrending("movies").then((trending) => {
+		getTrending("movie").then((trending) => {
 			this.rows[0].titles = trending;
 		});
 
-		getTopRated("movies").then((topRated) => {
+		getTopRated("movie").then((topRated) => {
 			this.rows[1].titles = topRated;
 		});
 
@@ -23,7 +23,7 @@ class State {
 			for (const genre of sortedGenres) {
 				const row = new Row(genre.name);
 				this.rows.push(row);
-				getTitlesWithGenre("movies", genre.id).then((movies) => {
+				getTitlesWithGenre("movie", genre.id).then((movies) => {
 					if (movies.length) {
 						row.titles = movies;
 					} else {

@@ -11,11 +11,11 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const title = cache[$params.id];
+	const title = cache.movie[$params.id];
 	log("%O", title);
 	const playHref = `#/results/${escape(title.title)
 		.replace(/\./g, "%2E")
-		.replace(/\+/g, "%2B")}%20${title.released.getFullYear()}`;
+		.replace(/\+/g, "%2B")}%20${title.released?.getFullYear()}`;
 
 	let activeButton = 0;
 
@@ -33,7 +33,7 @@
 						location.href = playHref;
 						break;
 					case 2:
-						location.href = `#/trailer/${title.id}`;
+						location.href = `#/${title.type}/${title.id}/trailer`;
 				}
 				break;
 			case "B":
@@ -66,7 +66,8 @@
 		<div class="flex gap-4 my-4">
 			<div class="shrink-0 flex flex-col gap-4">
 				<img
-					src="file:///{process.env.POSTERS_PATH}/movie/{title.id}"
+					src="file:///{process.env
+						.POSTERS_PATH}/{title.type}/{title.id}"
 					alt="Poster"
 					class="rounded-md white-shadow "
 				/>
@@ -99,7 +100,7 @@
 		</a>
 		<Button icon={FaDownload} text="Download" active={activeButton === 1} />
 		{#if title.trailer}
-			<a href="#/trailer/{title.id}">
+			<a href="#/{title.type}/{title.id}/trailer">
 				<Button
 					icon={FaYoutube}
 					text="Watch trailer"
