@@ -8,21 +8,23 @@ CREATE TABLE genres (
 CREATE TYPE type AS ENUM ('movie', 'tv');
 
 CREATE TYPE rating AS ENUM (
-	'NR',
-
 	'G',
-	'PG',
-	'PG-13',
-	'R',
-	'NC-17',
-
+	'TV-G',
 	'TV-Y',
 	'TV-Y7',
 	'TV-Y7-FV',
-	'TV-G',
+
+	'PG',
 	'TV-PG',
+
+	'PG-13',
 	'TV-14',
+
+	'R',
 	'TV-MA'
+	'NC-17',
+
+	'NR',
 );
 
 CREATE TABLE titles (

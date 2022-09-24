@@ -62,11 +62,7 @@ export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 		WHERE ts IS NOT NULL
 		AND language = 'en'
 		AND type = ${type}
-		AND rating != 'G'
-		AND rating != 'TV-Y'
-		AND rating != 'TV-Y7'
-		AND rating != 'TV-Y7-FV'
-		AND rating != 'TV-G'
+		AND rating >= 'PG-13'
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
@@ -101,11 +97,7 @@ export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): P
 		AND language = 'en'
 		AND type = ${type}
 		AND ${genre} = ANY(genres)
-		AND rating != 'G'
-		AND rating != 'TV-Y'
-		AND rating != 'TV-Y7'
-		AND rating != 'TV-Y7-FV'
-		AND rating != 'TV-G'
+		AND rating >= 'PG-13'
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
