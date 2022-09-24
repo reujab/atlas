@@ -11,7 +11,7 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const title = cache.movie[$params.id];
+	const title = cache[$params.type][$params.id];
 	log("%O", title);
 	const playHref = `#/results/${escape(title.title)
 		.replace(/\./g, "%2E")

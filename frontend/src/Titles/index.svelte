@@ -1,9 +1,13 @@
 <script lang="ts">
 	import Header from "../Header/index.svelte";
-	import state from "./State";
+	import store from "./State";
 	import { genres } from "../db";
 	import { onDestroy, onMount } from "svelte";
+	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
+
+	const type = $params.type as "movie" | "tv";
+	const state = store[type];
 
 	$: activeTitle =
 		state.rows[state.activeRow].titles[
@@ -72,7 +76,11 @@
 </script>
 
 <div class="h-screen px-48 flex flex-col">
-	<Header title="Movies" back search="/search" />
+	<Header
+		title={type === "movie" ? "Movies" : "TV Shows"}
+		back
+		search="/search"
+	/>
 
 	<div class="min-h-[9rem] flex flex-col mb-2">
 		{#if activeTitle}

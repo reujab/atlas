@@ -24,7 +24,7 @@
 	const tiles: Tile[] = [
 		{
 			title: "Movies",
-			path: "/movies",
+			path: "/movie",
 			icon: require("../img/popcorn.png"),
 		},
 		{

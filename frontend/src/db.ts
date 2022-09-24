@@ -55,13 +55,18 @@ export const cache: { [type: string]: { [id: number]: Title } } = {
 
 export const sortedGenres: Genre[] = [];
 
-export async function getTrending(type: "movie"): Promise<Title[]> {
+export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 	const trending = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
 		WHERE ts IS NOT NULL
 		AND language = 'en'
 		AND type = ${type}
+		AND rating != 'G'
+		AND rating != 'TV-Y'
+		AND rating != 'TV-Y7'
+		AND rating != 'TV-Y7-FV'
+		AND rating != 'TV-G'
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
@@ -71,7 +76,7 @@ export async function getTrending(type: "movie"): Promise<Title[]> {
 	return trending;
 }
 
-export async function getTopRated(type: "movie"): Promise<Title[]> {
+export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 	const topRated = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
@@ -88,7 +93,7 @@ export async function getTopRated(type: "movie"): Promise<Title[]> {
 	return topRated;
 }
 
-export async function getTitlesWithGenre(type: "movie", genre: number): Promise<Title[]> {
+export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): Promise<Title[]> {
 	const titles = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
@@ -96,6 +101,11 @@ export async function getTitlesWithGenre(type: "movie", genre: number): Promise<
 		AND language = 'en'
 		AND type = ${type}
 		AND ${genre} = ANY(genres)
+		AND rating != 'G'
+		AND rating != 'TV-Y'
+		AND rating != 'TV-Y7'
+		AND rating != 'TV-Y7-FV'
+		AND rating != 'TV-G'
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
