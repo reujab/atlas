@@ -110,7 +110,7 @@
 	});
 </script>
 
-<div class="h-screen bg-white flex flex-col">
+<div class="h-screen flex flex-col">
 	<div class="px-48">
 		<Header title={query} back />
 	</div>

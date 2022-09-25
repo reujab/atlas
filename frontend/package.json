@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "webpack watch -c webpack.dev & tailwindcss -o http/index.css -w & sleep 10; npm run start; kill %1 %2",
     "build": "webpack build -c webpack.prod & tailwindcss -o http/index.css -m & wait",
-    "start": ". ../.env; export POSTERS_PATH; electron . --enable-features=UseOzonePlatform --ozone-platform=wayland",
+    "start": ". ../.env; export POSTERS_PATH TMDB_KEY; electron . --enable-features=UseOzonePlatform --ozone-platform=wayland",
     "package": "npm run build && electron-builder build -l deb"
   },
   "author": "reujab <reujab@gmail.com>",

@@ -11,13 +11,47 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
+	interface IButton {
+		title: string;
+		href: string;
+		icon: any;
+	}
+
 	const title = cache[$params.type][$params.id];
 	log("%O", title);
-	const playHref = `#/results/${escape(title.title)
-		.replace(/\./g, "%2E")
-		.replace(/\+/g, "%2B")}%20${title.released?.getFullYear()}`;
 
+	const buttons: IButton[] = [];
 	let activeButton = 0;
+
+	if ($params.type === "movie") {
+		buttons.push({
+			title: "Play",
+			href: `#/results/${escape(title.title)
+				.replace(/\./g, "%2E")
+				.replace(/\+/g, "%2B")}%20${title.released?.getFullYear()}`,
+			icon: FaPlay,
+		});
+
+		buttons.push({
+			title: "Download",
+			href: `#/movie/${title.id}/download`,
+			icon: FaDownload,
+		});
+	} else {
+		buttons.push({
+			title: "View",
+			href: `#/tv/${title.id}/view`,
+			icon: FaPlay,
+		});
+	}
+
+	if (title.trailer) {
+		buttons.push({
+			title: "Watch trailer",
+			href: `#/${title.type}/${title.id}/trailer`,
+			icon: FaYoutube,
+		});
+	}
 
 	const releaseDate = title.released?.toLocaleDateString(undefined, {
 		day: "numeric",
@@ -28,13 +62,7 @@
 	function gamepadHandler(button: string) {
 		switch (button) {
 			case "A":
-				switch (activeButton) {
-					case 0:
-						location.href = playHref;
-						break;
-					case 2:
-						location.href = `#/${title.type}/${title.id}/trailer`;
-				}
+				location.href = buttons[activeButton].href;
 				break;
 			case "B":
 				history.back();
@@ -45,8 +73,7 @@
 				}
 				break;
 			case "right":
-				let lastButton = title.trailer ? 2 : 1;
-				if (activeButton < lastButton) {
+				if (activeButton < buttons.length - 1) {
 					activeButton++;
 				}
 				break;
@@ -59,7 +86,7 @@
 	});
 </script>
 
-<div class="h-screen px-48 bg-white flex flex-col">
+<div class="h-screen px-48 flex flex-col">
 	<Header title={title.title} back />
 
 	<div class="flex grow items-center">
@@ -69,7 +96,7 @@
 					src="file:///{process.env
 						.POSTERS_PATH}/{title.type}/{title.id}"
 					alt="Poster"
-					class="rounded-md white-shadow "
+					class="rounded-md white-shadow"
 				/>
 
 				<span class="text-3xl text-center">{releaseDate}</span>
@@ -95,18 +122,14 @@
 	</div>
 
 	<div class="flex justify-around mb-16">
-		<a href={playHref}>
-			<Button icon={FaPlay} text="Play" active={activeButton === 0} />
-		</a>
-		<Button icon={FaDownload} text="Download" active={activeButton === 1} />
-		{#if title.trailer}
-			<a href="#/{title.type}/{title.id}/trailer">
+		{#each buttons as button, i}
+			<a href={button.href}>
 				<Button
-					icon={FaYoutube}
-					text="Watch trailer"
-					active={activeButton === 2}
+					icon={button.icon}
+					text={button.title}
+					active={i === activeButton}
 				/>
 			</a>
-		{/if}
+		{/each}
 	</div>
 </div>

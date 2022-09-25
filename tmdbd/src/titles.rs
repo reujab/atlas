@@ -22,16 +22,14 @@ struct Title {
     #[serde(alias = "name")]
     title: String,
     videos: Videos,
-    // only appears on movies
+    // movies
     #[serde(rename = "vote_average")]
     score: f64,
     #[serde(rename = "vote_count")]
     votes: i32,
     #[serde(default)]
     release_dates: Option<ReleaseDates>,
-
-    #[serde(default)]
-    seasons: Option<Vec<Season>>,
+    // shows
     #[serde(default)]
     content_ratings: Option<ReleaseDates>,
 }
@@ -39,16 +37,6 @@ struct Title {
 #[derive(Deserialize, Debug)]
 struct Genre {
     id: i16,
-}
-
-#[derive(Deserialize, Debug)]
-struct Season {
-    #[serde(rename = "season_number")]
-    season: i16,
-    #[serde(rename = "episode_count")]
-    episodes: i16,
-    name: String,
-    overview: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -171,27 +159,6 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
             .episode_run_time
             .and_then(|ert| if ert.is_empty() { None } else { Some(ert[0]) })
     });
-
-    if let Some(seasons) = title.seasons {
-        for season in seasons {
-            sqlx::query(
-                r#"
-                    INSERT INTO seasons (id, season, episodes, name, overview)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (id, season, episodes)
-                    DO NOTHING
-                "#,
-            )
-            .bind(&id)
-            .bind(season.season)
-            .bind(season.episodes)
-            .bind(season.name)
-            .bind(season.overview)
-            .execute(&mut conn)
-            .await
-            .unwrap();
-        }
-    }
 
     let rating = if let Some(release_dates) = title.release_dates {
         release_dates

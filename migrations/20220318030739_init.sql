@@ -21,10 +21,10 @@ CREATE TYPE rating AS ENUM (
 	'TV-14',
 
 	'R',
-	'TV-MA'
+	'TV-MA',
 	'NC-17',
 
-	'NR',
+	'NR'
 );
 
 CREATE TABLE titles (
@@ -50,12 +50,3 @@ CREATE TABLE titles (
 CREATE INDEX titles_ts ON titles (ts ASC NULLS FIRST, popularity DESC NULLS LAST);
 
 CREATE INDEX titles_popularity ON titles (popularity DESC NULLS LAST);
-
-CREATE TABLE seasons (
-	id INT,
-	season SMALLINT,
-	episodes SMALLINT,
-	name TEXT,
-	overview TEXT,
-	PRIMARY KEY (id, season, episodes)
-);

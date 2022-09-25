@@ -34,7 +34,7 @@
 	});
 </script>
 
-<div class="h-screen px-48 bg-white flex flex-col">
+<div class="h-screen px-48 flex flex-col">
 	<Header title={title.title} back />
 
 	<div class="flex justify-center items-center h-full">
