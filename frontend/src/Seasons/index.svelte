@@ -8,7 +8,6 @@
 
 	interface Season {
 		number: number;
-		date: Date;
 		overview: string;
 		episodes: Episode[];
 		activeEpisode: number;
@@ -51,7 +50,6 @@
 				const season = json[`season/${i * 20 + j + 1}`];
 				seasons.push({
 					number: season.season_number,
-					date: new Date(season.air_date),
 					overview: season.overview,
 					episodes: season.episodes.map((episode: any) => ({
 						number: episode.episode_number,
@@ -123,13 +121,13 @@
 	{#if ready}
 		<div class="px-48 min-h-[108px] flex flex-col mb-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
-				{activeEpisode?.overview}
+				{activeEpisode.overview}
 			</div>
 		</div>
 
 		<div class="px-48">
 			<div
-				class="flex gap-5 overflow-scroll scroll-smooth pt-4 pb-5 px-3 shrink-0 relative"
+				class="flex gap-8 overflow-scroll scroll-smooth pt-4 pb-5 px-3 shrink-0 relative"
 				bind:this={seasonsEle}
 			>
 				{#each seasons as season, i}
@@ -145,7 +143,7 @@
 		</div>
 
 		<div
-			class="flex px-48 flex-col gap-10 overflow-scroll scroll-smooth pt-5 relative pb-24"
+			class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13.5rem]"
 			bind:this={episodesEle}
 		>
 			{#each activeSeason.episodes as episode, i (episode.number + episode.still)}
@@ -155,16 +153,23 @@
 					bind:this={episode.ele}
 				>
 					{#if episode.still}
-						<img
-							alt=""
-							src="https://image.tmdb.org/t/p/w227_and_h127_bestv2{episode.still}"
-							class="inline-block min-w-[227px]"
-							on:error={(err) => error("img err: %O", err)}
-						/>
+						<div
+							class="max-h-[127px] min-w-[277px] max-w-[277px] overflow-hidden flex items-center justify-start"
+						>
+							<img
+								alt=""
+								src="https://image.tmdb.org/t/p/w227_and_h127_bestv2{episode.still}"
+								class="inline-block min-w-[227px]"
+								on:error={(err) => error("img err: %O", err)}
+							/>
+						</div>
 					{/if}
 
 					<div class="ml-4">
-						E{String(episode.number).padStart(2, "0")}: {episode.name}
+						<span class="text-slate-600 mr-2 inline-block">
+							E{String(episode.number).padStart(2, "0")}
+						</span>
+						{episode.name}
 					</div>
 				</div>
 			{/each}
@@ -180,11 +185,20 @@
 	}
 
 	.season,
-	.episode {
+	.episode,
+	img {
 		transition: transform 500ms 50ms;
+	}
+
+	img {
+		transform: scale(1.2);
 	}
 
 	.active {
 		transform: scale(1.15);
+	}
+
+	.active img {
+		transform: scale(1);
 	}
 </style>
