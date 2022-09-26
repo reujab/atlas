@@ -5,8 +5,10 @@
 	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
 	import Header from "../Header/index.svelte";
 	import Rating from "./Rating.svelte";
+	import getSeasons from "../Seasons/getSeasons";
+	import seasonsState from "../Seasons/State";
 	import { cache, genres } from "../db";
-	import { log } from "../log";
+	import { error, log } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -65,6 +67,7 @@
 				location.href = buttons[activeButton].href;
 				break;
 			case "B":
+				seasonsState.seasons = [];
 				history.back();
 				break;
 			case "left":
@@ -78,6 +81,17 @@
 				}
 				break;
 		}
+	}
+
+	// preload seasons
+	if (title.type === "tv" && !seasonsState.seasons.length) {
+		getSeasons(title)
+			.then((seasons) => {
+				seasonsState.seasons = seasons;
+			})
+			.catch((err) => {
+				error("%O", err);
+			});
 	}
 
 	subscribe(gamepadHandler);

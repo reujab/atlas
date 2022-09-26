@@ -1,77 +1,40 @@
 <script lang="ts">
 	import Carousel from "svelte-carousel";
 	import Header from "../Header/index.svelte";
+	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { fetchJSON } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	interface Season {
-		number: number;
-		episodes: Episode[];
-		activeEpisode: number;
-		ele: HTMLDivElement;
-		episodesEle: HTMLDivElement;
-	}
-
-	interface Episode {
-		number: number;
-		date: Date;
-		name: string;
-		overview: string;
-		runtime: number;
-		still: string;
-		ele: HTMLDivElement;
-	}
-
 	const title = cache.tv[$params.id];
+	let seasons = state.seasons;
 
-	let ready = false;
-	let seasons: Season[] = [];
+	if (!seasons.length) {
+		const interval = setInterval(() => {
+			if (state.seasons.length) {
+				seasons = state.seasons;
+				clearInterval(interval);
+			}
+		}, 50);
+	}
+
 	let seasonIndex = 0;
 	$: activeSeason = seasons[seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 	let seasonsEle: HTMLDivElement;
-	(async () => {
-		for (let i = 0, keys = 20; keys === 20; i++) {
-			let append = Array(20)
-				.fill(null)
-				.map((_, j) => `season/${i * 20 + j + 1}`)
-				.join(",");
-			const json = await fetchJSON(
-				`https://api.themoviedb.org/3/tv/${title.id}?api_key=${process.env.TMDB_KEY}&append_to_response=${append}`
-			);
-			keys = Object.keys(json).filter((key) => key.startsWith("season/"))
-				.length;
-
-			for (let j = 0; j < keys; j++) {
-				const season = json[`season/${i * 20 + j + 1}`];
-				if (season.episodes.length) {
-					seasons.push({
-						number: season.season_number,
-						episodes: season.episodes.map((episode: any) => ({
-							number: episode.episode_number,
-							date: new Date(episode.air_date),
-							name: episode.name,
-							overview: episode.overview,
-							runtime: episode.runtime,
-							still: episode.still_path,
-						})),
-						activeEpisode: 0,
-						ele: null,
-						episodesEle: null,
-					});
-				}
-			}
-		}
-
-		seasons = seasons;
-		ready = true;
-	})();
 
 	function gamepadHandler(button: string) {
+		if (button === "B") {
+			history.back();
+			return;
+		}
+
+		if (!seasons.length) {
+			return;
+		}
+
 		switch (button) {
 			case "A":
 				location.href = `#/results/${escape(title.title)
@@ -85,9 +48,6 @@
 					2,
 					"0"
 				)}`;
-				return;
-			case "B":
-				history.back();
 				return;
 			case "left":
 				if (seasonIndex > 0) {
@@ -143,7 +103,7 @@
 		<Header title={title.title} back />
 	</div>
 
-	{#if ready}
+	{#if seasons.length}
 		<div class="px-48 min-h-[108px] flex flex-col my-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
 				{activeEpisode.overview}
