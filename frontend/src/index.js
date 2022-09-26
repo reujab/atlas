@@ -28,3 +28,26 @@ routes.set({
 export default new Router({
 	target: document.body,
 });
+
+export async function fetchJSON(url) {
+	let error;
+
+	for (let i = 0; i < 3; i++) {
+		try {
+			const res = await fetch(url);
+			if (res.status >= 400 && res.status < 500) {
+				return Promise.reject(`4xx status: ${res.status}`);
+			}
+			if (res.status !== 200) {
+				throw new Error(`status: ${res.status}`);
+			}
+
+			return await res.json();
+		} catch (err) {
+			error("%O", err);
+			error = err;
+		}
+	}
+
+	return Promise.reject(error);
+}

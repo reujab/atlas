@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Carousel from "svelte-carousel";
 	import Header from "../Header/index.svelte";
+	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
+	import { fetchJSON } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -38,29 +40,30 @@
 				.fill(null)
 				.map((_, j) => `season/${i * 20 + j + 1}`)
 				.join(",");
-			const res = await fetch(
+			const json = await fetchJSON(
 				`https://api.themoviedb.org/3/tv/${title.id}?api_key=${process.env.TMDB_KEY}&append_to_response=${append}`
 			);
-			const json = await res.json();
 			keys = Object.keys(json).filter((key) => key.startsWith("season/"))
 				.length;
 
 			for (let j = 0; j < keys; j++) {
 				const season = json[`season/${i * 20 + j + 1}`];
-				seasons.push({
-					number: season.season_number,
-					episodes: season.episodes.map((episode: any) => ({
-						number: episode.episode_number,
-						date: new Date(episode.air_date),
-						name: episode.name,
-						overview: episode.overview,
-						runtime: episode.runtime,
-						still: episode.still_path,
-					})),
-					activeEpisode: 0,
-					ele: null,
-					episodesEle: null,
-				});
+				if (season.episodes.length) {
+					seasons.push({
+						number: season.season_number,
+						episodes: season.episodes.map((episode: any) => ({
+							number: episode.episode_number,
+							date: new Date(episode.air_date),
+							name: episode.name,
+							overview: episode.overview,
+							runtime: episode.runtime,
+							still: episode.still_path,
+						})),
+						activeEpisode: 0,
+						ele: null,
+						episodesEle: null,
+					});
+				}
 			}
 		}
 
@@ -89,11 +92,15 @@
 			case "left":
 				if (seasonIndex > 0) {
 					carousel.goTo(seasonIndex - 1);
+				} else {
+					carousel.goTo(seasons.length - 1);
 				}
 				break;
 			case "right":
 				if (seasonIndex < seasons.length - 1) {
 					carousel.goTo(seasonIndex + 1);
+				} else {
+					carousel.goTo(0);
 				}
 				break;
 			case "up":
@@ -137,7 +144,7 @@
 	</div>
 
 	{#if ready}
-		<div class="px-48 min-h-[108px] flex flex-col mb-2">
+		<div class="px-48 min-h-[108px] flex flex-col my-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
 				{activeEpisode.overview}
 			</div>
@@ -171,7 +178,7 @@
 		>
 			{#each seasons as season, i}
 				<div
-					class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13.5rem] h-[66vh]"
+					class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13rem] h-[66vh]"
 					bind:this={season.episodesEle}
 				>
 					{#each season.episodes as episode, j}
@@ -207,6 +214,10 @@
 				</div>
 			{/each}
 		</Carousel>
+	{:else}
+		<div class="flex justify-center items-center h-full">
+			<Circle2 size={256} />
+		</div>
 	{/if}
 </div>
 
@@ -224,7 +235,7 @@
 	}
 
 	img {
-		transform: scale(1.2);
+		transform: scale(1.15);
 	}
 
 	.active {

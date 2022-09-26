@@ -33,6 +33,7 @@
     "gamepad.js": "^1.0.4",
     "postgres": "^3.2.4",
     "pretty-bytes": "^6.0.0",
+    "socks-proxy-agent": "^7.0.0",
     "svelte-carousel": "^1.0.20",
     "svelte-hash-router": "^1.0.1",
     "svelte-icons": "^2.1.0",

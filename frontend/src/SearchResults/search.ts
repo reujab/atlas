@@ -1,5 +1,8 @@
 import cheerio from "cheerio";
-import { error } from "../log"
+import http from "http";
+import { SocksProxyAgent } from "socks-proxy-agent";
+import { log, error } from "../log"
+import { fetchJSON } from "..";
 
 export interface Source {
 	getMagnet: () => Promise<string>;
@@ -19,11 +22,10 @@ export default async function search(query: string): Promise<Source[]> {
 	return sources.sort((a, b) => b.seeders - a.seeders);
 }
 
-async function searchPB(query: string): Promise<Source[]> {
-	try {
-		const path = `q.php?cat=200&q=${query}`;
-		const res = await fetch(`https://apibay.org/${path}`);
-		const sources = await res.json();
+function searchPB(query: string): Promise<Source[]> {
+	const path = `q.php?cat=200&q=${query}`;
+
+	function parseSources(sources: any): Source[] {
 		return sources.map((source: any) => ({
 			getMagnet: async () => {
 				return `magnet:?xt=urn:btih:${source.info_hash}&dn=${encodeURIComponent(source.name)}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce`;
@@ -34,10 +36,45 @@ async function searchPB(query: string): Promise<Source[]> {
 			size: Number(source.size),
 			element: null,
 		} as Source));
-	} catch (err) {
-		error("error searching pb: %O", err);
-		return [];
 	}
+
+	return new Promise((resolve, reject) => {
+		fetchJSON(`https://apibay.org/${path}`).then((sources) => {
+			resolve(parseSources(sources));
+		}).catch((err) => {
+			error("error searching pb: %O", err);
+
+			const agent = new SocksProxyAgent({
+				hostname: "localhost",
+				port: 9050,
+			});
+			http.get(
+				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
+				{ agent },
+				(res) => {
+					log("%O", res.headers);
+
+					let data = "";
+					res.on("data", (chunk) => {
+						data += chunk;
+					});
+					res.on("end", () => {
+						try {
+							resolve(parseSources(JSON.parse(data)));
+						} catch (err) {
+							log("%O", data);
+							error("error parsing json: %O", err);
+							resolve([]);
+						}
+					});
+					res.on("error", (err) => {
+						error("pb onion err: %O", err);
+						resolve([]);
+					});
+				}
+			);
+		});
+	});
 }
 
 async function search1337x(query: string): Promise<Source[]> {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import fs from "fs";
+	import { fetchJSON } from "..";
 	import { log, error } from "../log";
 
 	interface Weather {
@@ -22,14 +23,12 @@
 		getWeather();
 		async function getWeather() {
 			try {
-				const metaRes = await fetch(
+				const meta = await fetchJSON(
 					`https://api.weather.gov/points/${coords.join(",")}`
 				);
-				const meta = await metaRes.json();
 
-				const forecastRes = await fetch(meta.properties.forecast);
-				const forecast = (await forecastRes.json()).properties
-					.periods[0];
+				const forecast = (await fetchJSON(meta.properties.forecast))
+					.properties.periods[0];
 
 				weather = {
 					city: meta.properties.relativeLocation.properties.city,

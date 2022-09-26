@@ -1,6 +1,7 @@
 <script lang="ts">
 	import child_process from "child_process";
 	import { error } from "../log";
+	import { fetchJSON } from "..";
 	import { onDestroy } from "svelte";
 
 	let connected: null | boolean = null;
@@ -31,8 +32,7 @@
 	async function getLocation() {
 		let json;
 		try {
-			const res = await fetch("https://ipapi.co/json/");
-			json = await res.json();
+			json = await fetchJSON("https://ipapi.co/json/");
 		} catch (err) {
 			error("error fetching from ipapi.co: %O", err);
 			return;
