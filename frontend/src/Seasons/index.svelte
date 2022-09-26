@@ -1,17 +1,17 @@
 <script lang="ts">
+	import Carousel from "svelte-carousel";
 	import Header from "../Header/index.svelte";
 	import { cache } from "../db";
-	import { params } from "svelte-hash-router";
-	import { error } from "../log";
-	import { subscribe, unsubscribe } from "../gamepad";
 	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface Season {
 		number: number;
-		overview: string;
 		episodes: Episode[];
 		activeEpisode: number;
 		ele: HTMLDivElement;
+		episodesEle: HTMLDivElement;
 	}
 
 	interface Episode {
@@ -32,7 +32,6 @@
 	$: activeSeason = seasons[seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 	let seasonsEle: HTMLDivElement;
-	let episodesEle: HTMLDivElement;
 	(async () => {
 		for (let i = 0, keys = 20; keys === 20; i++) {
 			let append = Array(20)
@@ -50,7 +49,6 @@
 				const season = json[`season/${i * 20 + j + 1}`];
 				seasons.push({
 					number: season.season_number,
-					overview: season.overview,
 					episodes: season.episodes.map((episode: any) => ({
 						number: episode.episode_number,
 						date: new Date(episode.air_date),
@@ -61,6 +59,7 @@
 					})),
 					activeEpisode: 0,
 					ele: null,
+					episodesEle: null,
 				});
 			}
 		}
@@ -71,17 +70,30 @@
 
 	function gamepadHandler(button: string) {
 		switch (button) {
+			case "A":
+				location.href = `#/results/${escape(title.title)
+					.replace(/\./g, "%2E")
+					.replace(
+						/\+/g,
+						"%2B"
+					)}%20${title.released?.getFullYear()} s${String(
+					activeSeason.number
+				).padStart(2, "0")}e${String(activeEpisode.number).padStart(
+					2,
+					"0"
+				)}`;
+				return;
 			case "B":
 				history.back();
 				return;
 			case "left":
 				if (seasonIndex > 0) {
-					seasonIndex--;
+					carousel.goTo(seasonIndex - 1);
 				}
 				break;
 			case "right":
 				if (seasonIndex < seasons.length - 1) {
-					seasonIndex++;
+					carousel.goTo(seasonIndex + 1);
 				}
 				break;
 			case "up":
@@ -104,7 +116,13 @@
 
 	function scroll() {
 		seasonsEle.scrollTo(activeSeason.ele.offsetLeft - 16, 0);
-		episodesEle.scrollTo(0, activeEpisode.ele.offsetTop - 20);
+		activeSeason.episodesEle.scrollTo(0, activeEpisode.ele.offsetTop - 20);
+	}
+
+	let carousel: Carousel;
+
+	function retry(e) {
+		e.srcElement.src = e.srcElement.src;
 	}
 
 	subscribe(gamepadHandler);
@@ -142,38 +160,53 @@
 			</div>
 		</div>
 
-		<div
-			class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13.5rem]"
-			bind:this={episodesEle}
+		<Carousel
+			arrows={false}
+			dots={false}
+			duration={250}
+			bind:this={carousel}
+			on:pageChange={(e) => {
+				seasonIndex = e.detail;
+			}}
 		>
-			{#each activeSeason.episodes as episode, i (episode.number + episode.still)}
+			{#each seasons as season, i}
 				<div
-					class="episode flex bg-[#eee] rounded-xl text-black overflow-hidden text-5xl min-h-[127px] items-center relative white-shadow"
-					class:active={i === activeSeason.activeEpisode}
-					bind:this={episode.ele}
+					class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13.5rem] h-[66vh]"
+					bind:this={season.episodesEle}
 				>
-					{#if episode.still}
+					{#each season.episodes as episode, j}
 						<div
-							class="max-h-[127px] min-w-[277px] max-w-[277px] overflow-hidden flex items-center justify-start"
+							class="episode flex bg-[#eee] rounded-xl text-black overflow-hidden text-5xl min-h-[127px] items-center relative white-shadow"
+							class:active={i === seasonIndex &&
+								j === activeSeason.activeEpisode}
+							bind:this={episode.ele}
 						>
-							<img
-								alt=""
-								src="https://image.tmdb.org/t/p/w227_and_h127_bestv2{episode.still}"
-								class="inline-block min-w-[227px]"
-								on:error={(err) => error("img err: %O", err)}
-							/>
-						</div>
-					{/if}
+							{#if episode.still && Math.abs(seasonIndex - i) < 2}
+								<div
+									class="max-h-[127px] min-w-[277px] max-w-[277px] overflow-hidden flex items-center justify-start drop-shadow"
+								>
+									<img
+										alt=""
+										src="https://image.tmdb.org/t/p/w227_and_h127_bestv2{episode.still}"
+										class="inline-block min-w-[227px]"
+										on:error={retry}
+									/>
+								</div>
+							{/if}
 
-					<div class="ml-4">
-						<span class="text-slate-600 mr-2 inline-block">
-							E{String(episode.number).padStart(2, "0")}
-						</span>
-						{episode.name}
-					</div>
+							<div class="ml-4">
+								<span class="text-slate-600 mr-2 inline-block">
+									E{String(episode.number).padStart(2, "0")}
+								</span>
+								<span class:text-4xl={episode.name.length > 40}>
+									{episode.name}
+								</span>
+							</div>
+						</div>
+					{/each}
 				</div>
 			{/each}
-		</div>
+		</Carousel>
 	{/if}
 </div>
 

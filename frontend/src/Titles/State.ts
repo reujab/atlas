@@ -21,10 +21,14 @@ class State {
 
 			clearInterval(interval);
 			for (const genre of sortedGenres) {
+				if (["Kids", "News", "Talk"].includes(genre.name)) {
+					continue;
+				}
+
 				const row = new Row(genre.name);
 				this.rows.push(row);
 				getTitlesWithGenre(type, genre.id).then((titles) => {
-					if (titles.length) {
+					if (titles.length >= 6) {
 						row.titles = titles;
 					} else {
 						this.rows.splice(this.rows.indexOf(row), 1);
