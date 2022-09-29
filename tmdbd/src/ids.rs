@@ -31,7 +31,15 @@ async fn insert_category(pool: &crate::Pool, category: TitleType) {
         TitleType::TV => "tv_series",
     };
     let url = format!("https://files.tmdb.org/p/exports/{endpoint}_ids_{date}.json.gz");
-    let bytes = get(&url).await.unwrap().bytes().await.unwrap();
+    let bytes = loop {
+        match get(&url).await {
+            Ok(res) => match res.bytes().await {
+                Ok(bytes) => break bytes,
+                Err(err) => error!("{}", err),
+            },
+            Err(err) => error!("{}", err),
+        }
+    };
     let mut decoder = GzDecoder::new(bytes.as_ref());
     let mut s = String::new();
     decoder.read_to_string(&mut s).unwrap();
