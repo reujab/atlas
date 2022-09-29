@@ -54,25 +54,27 @@
 		scroll();
 	}
 
-	function scroll() {
+	function scroll(instant) {
 		rowsEle.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
 
 		for (const row of state.rows) {
-			row.element
-				.querySelector(".posters")
-				.scrollTo(
+			row.element.querySelector(".posters").scrollTo({
+				left:
 					row.element.querySelectorAll(".poster")[row.activeCol]
 						?.offsetLeft - 16,
-					0
-				);
+				top: 0,
+				behavior: instant ? "instant" : "auto",
+			});
 		}
 	}
 
 	subscribe(gamepadHandler);
+	onMount(() => {
+		scroll(true);
+	});
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
 	});
-	onMount(scroll);
 </script>
 
 <div class="h-screen px-48 flex flex-col">
@@ -102,7 +104,7 @@
 			<div class="row" bind:this={row.element}>
 				<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 				<div
-					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative"
+					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[388px]"
 				>
 					{#each row.titles as title, colIndex}
 						<a
@@ -115,7 +117,9 @@
 							<!-- svelte hack to only load the image once -->
 							<!-- not sure why this works but it's simpler than running -->
 							<!-- row.appendChild(title.poster) in onMount() -->
-							{@html title.poster?.outerHTML}
+							{#if Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
+								{@html title.poster?.outerHTML}
+							{/if}
 						</a>
 					{/each}
 				</div>
