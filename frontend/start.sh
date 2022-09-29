@@ -11,7 +11,7 @@ until [[ -S $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]; do
 done
 
 . ~/.env
-export POSTERS_PATH
+export POSTERS_PATH TMDB_KEY
 
 while pidof frame > /dev/null; do
 	atlas-frontend --enable-features=UseOzonePlatform --ozone-platform=wayland &>> /tmp/atlas.log
