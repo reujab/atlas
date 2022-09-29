@@ -18,6 +18,8 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
+export const episodeRegex = /\b(?:seasons?|s)[ .]*(\d+)[ .,&s-]*(?:\d+0p)?(\d+)?[ .]*(?:(?:episode|ep?)[ .]*(\d+))?/i;
+
 export default async function search(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
 	let sources = (await Promise.all([searchPB(query, type, signal), search1337x(query, type, signal)])).flat();
@@ -60,7 +62,7 @@ export default async function search(query: string, type?: "movie" | "tv", signa
 
 		source.score = score;
 
-		const match = name.match(/\b(?:seasons?|s)[ .]*(\d+)[ .,&s-]*(?:\d+0p)?(\d+)?[ .]*(?:(?:episode|ep?)[ .]*(\d+))?/);
+		const match = name.match(episodeRegex);
 		if (match) {
 			log("%O %O %O %O %O", source.name, source.seeders, match[1], match[2] || null, match[3] || null)
 			const season = Number(match[1]);

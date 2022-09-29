@@ -95,6 +95,7 @@
 		}
 	}
 
+	playState.file = null;
 	playState.magnet = null;
 	if (title.type === "movie") {
 		search(
@@ -108,6 +109,7 @@
 
 				if (sources[0]?.seeders >= 10) {
 					sources[0].getMagnet().then((magnet) => {
+						playState.file = null;
 						playState.magnet = magnet;
 						buttons[0].icon = FaPlay;
 						buttons[1].icon = FaDownload;

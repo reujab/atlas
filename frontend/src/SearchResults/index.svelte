@@ -38,6 +38,7 @@
 		switch (button) {
 			case "A":
 				sources[activeSource].getMagnet().then((magnet) => {
+					playState.file = null;
 					playState.magnet = magnet;
 					location.href = "#/play";
 				});

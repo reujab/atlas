@@ -1,12 +1,13 @@
 <script lang="ts">
-	const Carousel = require("svelte-carousel");
+	const Carousel = require("svelte-carousel").default;
 	const { params } = require("svelte-hash-router");
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
+	import child_process from "child_process";
 	import playState from "../Play/State";
-	import search, { Source } from "../SearchResults/search";
+	import search, { episodeRegex, Source } from "../SearchResults/search";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
@@ -16,7 +17,9 @@
 
 	const title = cache.tv[$params.id];
 	const magnets: {
-		[season: number]: { [episode: number]: null | string };
+		[season: number]: {
+			[episode: number]: null | { magnet: string; season: boolean };
+		};
 	} = {};
 	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
@@ -24,6 +27,7 @@
 	let seasonIndex = 0;
 	let seasonsEle: HTMLDivElement;
 	let controller: AbortController;
+	let loading = false;
 	$: activeSeason = seasons[seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
@@ -41,7 +45,11 @@
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
-			history.back();
+			if (loading) {
+				loading = false;
+			} else {
+				history.back();
+			}
 			return;
 		}
 
@@ -51,10 +59,68 @@
 
 		switch (button) {
 			case "A":
-				if (magnets[activeSeason.number]?.[activeEpisode.number]) {
-					playState.magnet =
-						magnets[activeSeason.number][activeEpisode.number];
-					location.href = `#/tv/${title.id}/play`;
+				const magnet =
+					magnets[activeSeason.number]?.[activeEpisode.number];
+				if (magnet) {
+					if (magnet.season) {
+						loading = true;
+
+						const webtorrent = child_process.spawn("webtorrent", [
+							magnet.magnet,
+							"-s",
+						]);
+						let stdout = "";
+
+						webtorrent.on("error", (err) => {
+							error("webtorrent error: %O", err);
+							loading = false;
+						});
+
+						webtorrent.stdout.on("data", (chunk) => {
+							stdout += chunk;
+						});
+
+						webtorrent.stderr.on("data", (chunk) => {
+							process.stderr.write(chunk);
+						});
+
+						webtorrent.on("exit", (code) => {
+							if (code !== 0) {
+								error("webtorrent exit code: %O", code);
+								loading = false;
+								return;
+							}
+
+							if (!loading) {
+								return;
+							}
+
+							log("stdout: %O", stdout);
+							const matches = stdout.matchAll(
+								/^(\d+) *(.+\.(?:mkv|mp4|avi)) \(\d+ .+\)$/gm
+							);
+							for (const match of matches) {
+								const index = match[1];
+								const name = match[2];
+								const epMatch = name.match(episodeRegex);
+								if (
+									Number(epMatch?.[3]) ===
+									activeEpisode.number
+								) {
+									playState.file = index;
+									playState.magnet = magnet.magnet;
+									location.href = `#/tv/${title.id}/play`;
+									return;
+								}
+							}
+							error("no matches found");
+							loading = false;
+						});
+					} else {
+						playState.file = null;
+						playState.magnet = magnet.magnet;
+						location.href = `#/tv/${title.id}/play`;
+					}
 				}
 				return;
 			case "left":
@@ -132,7 +198,10 @@
 				if (source?.seeders >= 5) {
 					const magnet = await source.getMagnet();
 					if (source.episode) {
-						magnets[season.number][episode.number] = magnet;
+						magnets[season.number][episode.number] = {
+							magnet,
+							season: false,
+						};
 					} else {
 						for (const seasonNum of source.seasons) {
 							if (!magnets[seasonNum]) {
@@ -141,7 +210,10 @@
 
 							for (let i = 1; i <= season.episodes.length; i++) {
 								if (!magnets[seasonNum][i]) {
-									magnets[seasonNum][i] = magnet;
+									magnets[seasonNum][i] = {
+										magnet,
+										season: true,
+									};
 								}
 							}
 						}
@@ -179,7 +251,7 @@
 		<Header title={title.title} back />
 	</div>
 
-	{#if seasons.length}
+	{#if seasons.length && !loading}
 		<div class="px-48 min-h-[108px] flex flex-col my-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
 				{activeEpisode.overview}

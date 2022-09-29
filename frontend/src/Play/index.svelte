@@ -35,6 +35,7 @@
 			// use mpv because it supports wayland
 			"--mpv",
 			"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0 --save-position-on-quit",
+			...(state.file ? ["-s", state.file] : []),
 		],
 		{ stdio: "inherit" }
 	);
