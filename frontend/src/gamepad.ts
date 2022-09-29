@@ -103,6 +103,12 @@ onkeydown = (e) => {
 		case "Escape":
 			dispatch("B");
 			break;
+		case "x":
+			dispatch("X");
+			break;
+		case "y":
+			dispatch("Y");
+			break;
 		default:
 			return;
 	}

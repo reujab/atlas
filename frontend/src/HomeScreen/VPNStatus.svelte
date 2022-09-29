@@ -19,12 +19,15 @@
 			const lastStatus = connected;
 			connected = lastLine.slice(0, 9) === "CONNECTED";
 
-			if (connected !== lastStatus && lastStatus !== null) {
+			if (
+				(connected !== lastStatus && lastStatus !== null) ||
+				!location
+			) {
 				getLocation();
 			}
 
 			if (!connected) {
-				error(`disconnected from vpn: ${stdout}\n${stderr}`);
+				error(`disconnected from vpn: ${stdout}${stderr}`);
 			}
 		});
 	}

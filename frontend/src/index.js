@@ -1,5 +1,6 @@
 import "./db";
 import HomeScreen from "./HomeScreen";
+import Play from "./Play/index.svelte";
 import Router, { routes } from "svelte-hash-router";
 import Search from "./Search/index.svelte";
 import SearchResults from "./SearchResults/index.svelte";
@@ -17,8 +18,10 @@ routes.set({
 	"/": HomeScreen,
 	"/search": Search,
 	"/results/:query": SearchResults,
+
 	"/:type": Titles,
 	"/:type/:id": TitleDetails,
+	"/:type/:id/play": Play,
 	"/:type/:id/trailer": Trailer,
 	"/tv/:id/view": Seasons,
 
@@ -29,12 +32,12 @@ export default new Router({
 	target: document.body,
 });
 
-export async function fetchJSON(url) {
-	let error;
+export async function fetchJSON(url, signal) {
+	let lastErr;
 
 	for (let i = 0; i < 3; i++) {
 		try {
-			const res = await fetch(url);
+			const res = await fetch(url, { signal });
 			if (res.status >= 400 && res.status < 500) {
 				return Promise.reject(`4xx status: ${res.status}`);
 			}
@@ -44,10 +47,13 @@ export async function fetchJSON(url) {
 
 			return await res.json();
 		} catch (err) {
+			lastErr = err;
+			if (err instanceof DOMException) {
+				break;
+			}
 			error("%O", err);
-			error = err;
 		}
 	}
 
-	return Promise.reject(error);
+	return Promise.reject(lastErr);
 }

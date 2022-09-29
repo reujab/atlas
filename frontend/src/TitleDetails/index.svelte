@@ -6,7 +6,10 @@
 	import Header from "../Header/index.svelte";
 	import Rating from "./Rating.svelte";
 	import getSeasons from "../Seasons/getSeasons";
+	import playState from "../Play/State";
+	import search, { Source } from "../SearchResults/search";
 	import seasonsState from "../Seasons/State";
+	import { Circle2 } from "svelte-loading-spinners";
 	import { cache, genres } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy } from "svelte";
@@ -14,9 +17,10 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface IButton {
-		title: string;
-		href: string;
+		hidden?: boolean;
 		icon: any;
+		title: string;
+		onClick: () => void;
 	}
 
 	const title = cache[$params.type][$params.id];
@@ -27,31 +31,39 @@
 
 	if ($params.type === "movie") {
 		buttons.push({
+			icon: Circle2,
 			title: "Play",
-			href: `#/results/${escape(title.title)
-				.replace(/\./g, "%2E")
-				.replace(/\+/g, "%2B")}%20${title.released?.getFullYear()}`,
-			icon: FaPlay,
+			onClick() {
+				if (playState.magnet) {
+					location.href = `#/movie/${title.id}/play`;
+				}
+			},
 		});
 
 		buttons.push({
+			icon: Circle2,
 			title: "Download",
-			href: `#/movie/${title.id}/download`,
-			icon: FaDownload,
+			onClick() {
+				// TODO
+			},
 		});
 	} else {
 		buttons.push({
-			title: "View",
-			href: `#/tv/${title.id}/view`,
 			icon: FaPlay,
+			title: "View",
+			onClick() {
+				location.href = `#/tv/${title.id}/view`;
+			},
 		});
 	}
 
 	if (title.trailer) {
 		buttons.push({
-			title: "Watch trailer",
-			href: `#/${title.type}/${title.id}/trailer`,
 			icon: FaYoutube,
+			title: "Watch trailer",
+			onClick() {
+				location.href = `#/${title.type}/${title.id}/trailer`;
+			},
 		});
 	}
 
@@ -64,7 +76,7 @@
 	function gamepadHandler(button: string) {
 		switch (button) {
 			case "A":
-				location.href = buttons[activeButton].href;
+				buttons[activeButton].onClick();
 				break;
 			case "B":
 				seasonsState.seasons = [];
@@ -81,6 +93,33 @@
 				}
 				break;
 		}
+	}
+
+	playState.magnet = null;
+	if (title.type === "movie") {
+		search(
+			`${title.title} ${
+				title.released ? title.released.getFullYear() : ""
+			}`
+		)
+			.then((sources: Source[]) => {
+				log("sources: %O", sources);
+
+				if (sources[0]?.seeders >= 10) {
+					sources[0].getMagnet().then((magnet) => {
+						playState.magnet = magnet;
+						buttons[0].icon = FaPlay;
+						buttons[1].icon = FaDownload;
+					});
+				} else {
+					buttons[0].title = "Unavailable";
+					buttons[0].icon = null;
+					buttons[1].hidden = true;
+				}
+			})
+			.catch((err) => {
+				error("search err: %O", err);
+			});
 	}
 
 	// preload seasons
@@ -137,13 +176,15 @@
 
 	<div class="flex justify-around mb-16">
 		{#each buttons as button, i}
-			<a href={button.href}>
-				<Button
-					icon={button.icon}
-					text={button.title}
-					active={i === activeButton}
-				/>
-			</a>
+			{#if !button.hidden}
+				<div class="pointer-cursor" on:click={button.onClick}>
+					<Button
+						icon={button.icon}
+						text={button.title}
+						active={i === activeButton}
+					/>
+				</div>
+			{/if}
 		{/each}
 	</div>
 </div>
