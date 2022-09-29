@@ -100,7 +100,8 @@
 		search(
 			`${title.title} ${
 				title.released ? title.released.getFullYear() : ""
-			}`
+			}`,
+			"movie"
 		)
 			.then((sources: Source[]) => {
 				log("sources: %O", sources);

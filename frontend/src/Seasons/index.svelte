@@ -15,7 +15,17 @@
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 
 	const title = cache.tv[$params.id];
+	const magnets: {
+		[season: number]: { [episode: number]: null | string };
+	} = {};
+	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
+	let carousel: Carousel;
+	let seasonIndex = 0;
+	let seasonsEle: HTMLDivElement;
+	let controller: AbortController;
+	$: activeSeason = seasons[seasonIndex];
+	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
 	if (seasons.length) {
 		onMount(update);
@@ -28,11 +38,6 @@
 			}
 		}, 50);
 	}
-
-	let seasonIndex = 0;
-	$: activeSeason = seasons[seasonIndex];
-	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
-	let seasonsEle: HTMLDivElement;
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
@@ -84,10 +89,6 @@
 		setTimeout(update);
 	}
 
-	const magnets: {
-		[season: number]: { [episode: number]: null | string };
-	} = {};
-	let controller: AbortController;
 	async function update() {
 		seasonsEle.scrollTo(activeSeason.ele.offsetLeft - 16, 0);
 		activeSeason.episodesEle.scrollTo(0, activeEpisode.ele.offsetTop - 20);
@@ -156,15 +157,12 @@
 		}
 	}
 
-	const searchCache: { [query: string]: Source[] } = {};
 	async function cachedSearch(query: string): Promise<null | Source[]> {
 		if (!searchCache[query]) {
-			searchCache[query] = await search(query, controller.signal);
+			searchCache[query] = await search(query, "tv", controller.signal);
 		}
 		return searchCache[query];
 	}
-
-	let carousel: Carousel;
 
 	function retry(e: any) {
 		e.srcElement.src = e.srcElement.src;
@@ -248,10 +246,10 @@
 								</span>
 							</div>
 
-							{#if i === seasonIndex && j === activeSeason.activeEpisode}
-								<div
-									class="mr-8 h-full flex items-center justify-center min-w-[146px]"
-								>
+							<div
+								class="mr-8 h-full flex items-center justify-center min-w-[146px]"
+							>
+								{#if i === seasonIndex && j === activeSeason.activeEpisode}
 									{#if magnets[season.number] && magnets[season.number][episode.number] !== undefined}
 										{#if magnets[season.number][episode.number]}
 											<div class="h-1/2 flex gap-8">
@@ -270,8 +268,8 @@
 									{:else}
 										<Circle2 />
 									{/if}
-								</div>
-							{/if}
+								{/if}
+							</div>
 						</div>
 					{/each}
 				</div>

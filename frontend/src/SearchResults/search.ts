@@ -18,9 +18,9 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export default async function search(query: string, signal?: AbortSignal): Promise<Source[]> {
+export default async function search(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
-	let sources = (await Promise.all([searchPB(query, signal), search1337x(query, signal)])).flat();
+	let sources = (await Promise.all([searchPB(query, type, signal), search1337x(query, type, signal)])).flat();
 
 	function simplify(s: string): string {
 		return decodeURIComponent(s).replace(/\.|\(/g, " ").split(" ")[0].toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -78,8 +78,9 @@ export default async function search(query: string, signal?: AbortSignal): Promi
 	return sources;
 }
 
-function searchPB(query: string, signal?: AbortSignal): Promise<Source[]> {
-	const path = `q.php?cat=200&q=${query}`;
+function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
+	const cat = type === "movie" ? "201,207" : type === "tv" ? "205,208" : "200"
+	const path = `q.php?cat=${cat}&q=${query}`;
 
 	function parseSources(sources: any): Source[] {
 		return sources.map((source: any) => ({
@@ -144,8 +145,8 @@ function searchPB(query: string, signal?: AbortSignal): Promise<Source[]> {
 	});
 }
 
-async function search1337x(query: string, signal?: AbortSignal): Promise<Source[]> {
-	const path = `search/${query}/1/`;
+async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
+	const path = type === "movie" ? `category-search/${query}/Movies/1/` : type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
 	const res = await fetch(`https://1337x.to/${path}`, { signal });
 	const html = await res.text();
 	if (signal?.aborted) {
