@@ -1,4 +1,5 @@
 <script lang="ts">
+	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
 	import playState from "../Play/State";
 	import prettyBytes from "pretty-bytes";
@@ -6,7 +7,6 @@
 	import { Circle2 } from "svelte-loading-spinners";
 	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
-	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const query = unescape($params.query);

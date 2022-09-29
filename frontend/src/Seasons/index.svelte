@@ -1,5 +1,7 @@
 <script lang="ts">
-	import Carousel from "svelte-carousel";
+	const Carousel = require("svelte-carousel");
+	const { params } = require("svelte-hash-router");
+	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
@@ -10,9 +12,7 @@
 	import { cache } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy, onMount } from "svelte";
-	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 
 	const title = cache.tv[$params.id];
 	const magnets: {
@@ -20,7 +20,7 @@
 	} = {};
 	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
-	let carousel: Carousel;
+	let carousel: any;
 	let seasonIndex = 0;
 	let seasonsEle: HTMLDivElement;
 	let controller: AbortController;

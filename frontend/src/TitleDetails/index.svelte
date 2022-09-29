@@ -1,4 +1,5 @@
 <script lang="ts">
+	const { params } = require("svelte-hash-router");
 	import Button from "./Button.svelte";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
@@ -13,7 +14,6 @@
 	import { cache, genres } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy } from "svelte";
-	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface IButton {

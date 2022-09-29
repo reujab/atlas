@@ -1,11 +1,11 @@
 <script lang="ts">
+	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
 	import child_process from "child_process";
 	import spawnOverlay from "../spawnOverlay";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
 	import { onDestroy } from "svelte";
-	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = cache[$params.type][$params.id];
