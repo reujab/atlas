@@ -97,7 +97,7 @@ export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): P
 		AND language = 'en'
 		AND type = ${type}
 		AND ${genre} = ANY(genres)
-		AND rating >= 'PG-13'
+		AND (rating >= 'PG-13' OR ${genre} = 99)
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
