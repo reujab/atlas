@@ -91,7 +91,7 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
             fetch(&pool, next.get::<i32, _>(0), title_type.clone()).await;
         }
 
-        sleep(Duration::from_secs(1)).await;
+        sleep(Duration::from_millis(500)).await;
     }
 }
 
