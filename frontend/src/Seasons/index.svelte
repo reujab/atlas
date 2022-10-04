@@ -14,6 +14,7 @@
 	import { error, log } from "../log";
 	import { onDestroy, onMount } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
+	import getFiles from "../SearchResults/getFiles";
 
 	const title = cache.tv[$params.id];
 	const magnets: {
@@ -64,57 +65,17 @@
 				if (magnet) {
 					if (magnet.season) {
 						loading = true;
-
-						const webtorrent = child_process.spawn("webtorrent", [
-							magnet.magnet,
-							"-s",
-						]);
-						let stdout = "";
-
-						webtorrent.on("error", (err) => {
-							error("webtorrent error: %O", err);
-							loading = false;
-						});
-
-						webtorrent.stdout.on("data", (chunk) => {
-							stdout += chunk;
-						});
-
-						webtorrent.stderr.on("data", (chunk) => {
-							process.stderr.write(chunk);
-						});
-
-						webtorrent.on("exit", (code) => {
-							if (code !== 0) {
-								error("webtorrent exit code: %O", code);
-								loading = false;
-								return;
-							}
-
-							if (!loading) {
-								return;
-							}
-
-							log("stdout: %O", stdout);
-							const matches = stdout.matchAll(
-								/^(\d+) *(.+\.(?:mkv|mp4|avi)) \(\d+ .+\)$/gm
+						getFiles(magnet.magnet).then((files) => {
+							const file = files.find(
+								(file) => file.episode === activeEpisode.number
 							);
-							for (const match of matches) {
-								const index = match[1];
-								const name = match[2];
-								const epMatch = name.match(episodeRegex);
-								if (
-									Number(epMatch?.[3]) ===
-									activeEpisode.number
-								) {
-									playState.file = index;
-									playState.magnet = magnet.magnet;
-									location.href = `#/tv/${title.id}/play`;
-									return;
-								}
+							if (file) {
+								playState.file = file.index;
+								playState.magnet = magnet.magnet;
+								location.href = `#/tv/${title.id}/play`;
+							} else {
+								loading = false;
 							}
-							error("no matches found");
-							loading = false;
 						});
 					} else {
 						playState.file = null;

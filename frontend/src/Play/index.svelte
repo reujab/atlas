@@ -10,12 +10,14 @@
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const title = cache[$params.type][$params.id];
+	const title = $params.type
+		? cache[$params.type][$params.id].title
+		: unescape($params.query);
 	const cancelOverlay = spawnOverlay();
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
-			cancelOverlay?.();
+			cancelOverlay();
 			child_process.spawnSync(
 				"killall",
 				["overlay", "mpv", "WebTorrent"],
@@ -61,7 +63,7 @@
 </script>
 
 <div class="h-screen flex flex-col px-48">
-	<Header back title={title.title} />
+	<Header back {title} />
 
 	<div class="flex justify-center items-center h-full">
 		<Circle2 size={256} />

@@ -54,7 +54,7 @@
 		scroll();
 	}
 
-	function scroll(instant) {
+	function scroll(instant?: boolean) {
 		rowsEle.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
 
 		for (const row of state.rows) {
@@ -104,7 +104,7 @@
 			<div class="row" bind:this={row.element}>
 				<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 				<div
-					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[388px]"
+					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[400px] items-center"
 				>
 					{#each row.titles as title, colIndex}
 						<a
@@ -114,10 +114,7 @@
 								colIndex ===
 									state.rows[state.activeRow].activeCol}
 						>
-							<!-- svelte hack to only load the image once -->
-							<!-- not sure why this works but it's simpler than running -->
-							<!-- row.appendChild(title.poster) in onMount() -->
-							{#if Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
+							{#if rowIndex === state.activeRow || Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
 								{@html title.poster?.outerHTML}
 							{/if}
 						</a>

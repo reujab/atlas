@@ -18,12 +18,13 @@ routes.set({
 	"/": HomeScreen,
 	"/search": Search,
 	"/results/:query": SearchResults,
+	"/results/:query/play": Play,
+	"/tv/:id/view": Seasons,
 
 	"/:type": Titles,
 	"/:type/:id": TitleDetails,
 	"/:type/:id/play": Play,
 	"/:type/:id/trailer": Trailer,
-	"/tv/:id/view": Seasons,
 
 	"*": HomeScreen,
 });

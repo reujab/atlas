@@ -1,20 +1,23 @@
 <script lang="ts">
 	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
+	import getFiles, { File } from "./getFiles";
 	import playState from "../Play/State";
 	import prettyBytes from "pretty-bytes";
-	import search, { Source } from "./search";
+	import search, { episodeRegex, Source } from "./search";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const query = unescape($params.query);
-	log(query);
-
 	let container: HTMLDivElement;
+	let sourceIndex = 0;
+	let sources: Source[] | File[] = [];
+	let showingFiles = false;
+	$: activeSource = sources[sourceIndex];
 
-	let sources: Source[] = [];
+	log(query);
 	search(query)
 		.then((res) => {
 			sources = res;
@@ -22,8 +25,6 @@
 		.catch((err) => {
 			error("search error: %O", err);
 		});
-
-	let activeSource = 0;
 
 	function gamepadHandler(button: string) {
 		if (button === "B") {
@@ -37,25 +38,58 @@
 
 		switch (button) {
 			case "A":
-				sources[activeSource].getMagnet().then((magnet) => {
-					playState.file = null;
+				const source = activeSource;
+				const playHref = `#/results/${query}/play`;
+				sources = [];
+
+				if (showingFiles) {
+					playState.file = (source as File).index;
+					location.href = playHref;
+					return;
+				}
+
+				(source as Source).getMagnet().then((magnet) => {
 					playState.magnet = magnet;
-					location.href = "#/play";
+
+					// test if source has a season with no episode
+					const match = source.name.match(episodeRegex);
+					if (match?.[1] && !match?.[3]) {
+						showingFiles = true;
+						sources = [];
+						getFiles(magnet)
+							.then((files) => {
+								sourceIndex = 0;
+								sources = files;
+							})
+							.catch((err) => {
+								error("getFiles err: %O", err);
+								history.back();
+								return;
+							});
+					} else {
+						playState.file = null;
+						location.href = playHref;
+					}
 				});
 				break;
 			case "up":
-				if (activeSource > 0) {
-					activeSource--;
+				if (sourceIndex > 0) {
+					sourceIndex--;
 				}
 				break;
 			case "down":
-				if (activeSource < sources.length - 1) {
-					activeSource++;
+				if (sourceIndex < sources.length - 1) {
+					sourceIndex++;
 				}
 				break;
 		}
 
-		container.scrollTo(0, sources[activeSource]?.element.offsetTop - 16);
+		setTimeout(() => {
+			container?.scrollTo(
+				0,
+				(activeSource as Source)?.element.offsetTop - 16
+			);
+		});
 	}
 
 	subscribe(gamepadHandler);
@@ -77,14 +111,18 @@
 			{#each sources as source, i}
 				<div
 					class="source rounded-full bg-[#eee] px-16 py-4 flex white-shadow text-black"
-					class:active={i === activeSource}
+					class:active={i === sourceIndex}
 					bind:this={source.element}
 				>
 					{source.name}
 					<div class="grow" />
-					{`${source.seeders} | ${source.leechers}`}
-					{" • "}
-					{prettyBytes(Number(source.size))}
+					{#if source.leechers !== undefined}
+						{`${source.seeders} | ${source.leechers}`}
+						{" • "}
+						{prettyBytes(Number(source.size))}
+					{:else}
+						{source.size}
+					{/if}
 				</div>
 			{/each}
 		</div>
