@@ -171,14 +171,18 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
                     .unwrap()
                     .iter()
                     .find(|res| !res.certification.is_empty())
-                    .and_then(|res| Some(res.certification.clone()))
+                    .and_then(|res| Some(res.certification.trim().to_owned()))
             })
     } else if let Some(ratings) = title.content_ratings {
         ratings
             .results
             .iter()
             .find(|res| res.iso_3166_1 == "US")
-            .and_then(|res| res.rating.clone())
+            .and_then(|res| {
+                res.rating
+                    .as_ref()
+                    .and_then(|rating| Some(rating.trim().to_owned()))
+            })
     } else {
         None
     };
