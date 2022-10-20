@@ -35,7 +35,6 @@ class State {
 				getTitlesWithGenre(type, genre.id).then((titles) => {
 					if (titles.length >= 6) {
 						row.titles = titles;
-
 					} else {
 						this.rows.splice(this.rows.indexOf(row), 1);
 					}
