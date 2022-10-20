@@ -51,5 +51,5 @@ CREATE INDEX titles_ts ON titles (ts ASC NULLS FIRST, popularity DESC NULLS LAST
 
 CREATE INDEX titles_popularity ON titles (popularity DESC NULLS LAST);
 
-CREATE INDEX titles_score ON titles (score DESC NULLS LAST)
+CREATE INDEX titles_score ON titles (score DESC NULLS LAST, popularity DESC NULLS LAST)
 WHERE votes >= 1000;

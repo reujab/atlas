@@ -80,7 +80,7 @@ export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 			SELECT * FROM titles
 			WHERE type = ${type}
 			AND votes >= 1000
-			ORDER BY score DESC NULLS LAST
+			ORDER BY score DESC NULLS LAST, popularity DESC NULLS LAST
 			LIMIT 200
 		) AS titles
 		WHERE ts IS NOT NULL
