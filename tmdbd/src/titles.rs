@@ -46,6 +46,7 @@ struct Videos {
 
 #[derive(Deserialize, Debug)]
 struct VideoResults {
+    iso_639_1: String,
     key: String,
     site: String,
     r#type: String,
@@ -151,7 +152,11 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         .videos
         .results
         .iter()
-        .find(|video| video.site == "YouTube" && video.r#type.contains("Trailer"))
+        .find(|video| {
+            video.site == "YouTube"
+                && video.r#type.contains("Trailer")
+                && video.iso_639_1 == title.language
+        })
         .and_then(|video| Some(&video.key));
 
     let runtime = title.runtime.or_else(|| {
