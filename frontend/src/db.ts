@@ -132,21 +132,8 @@ export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): P
 }
 
 let autocompleteQuery: null | postgres.PendingQueryModifiers<postgres.Row[]> = null;
-export const autocompleteCache: { [query: string]: Title[] } = {};
-export async function getAutocomplete(query: string): Promise<null | Title[]> {
+export async function getAutocomplete(query: string, blacklist: number[] = []): Promise<null | Title[]> {
 	autocompleteQuery?.cancel();
-
-	if (autocompleteCache[query]) {
-		return autocompleteCache[query];
-	}
-
-	// remove old search results
-	const blacklist = new Set();
-	for (let i = 1; i < query.length - 1; i++) {
-		for (const title of autocompleteCache[query.slice(0, i)]) {
-			blacklist.add(title.id);
-		}
-	}
 
 	autocompleteQuery = sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
@@ -157,7 +144,7 @@ export async function getAutocomplete(query: string): Promise<null | Title[]> {
 			LIMIT 100
 		) AS titles
 		WHERE ts IS NOT NULL
-		AND NOT id = ANY(${[...blacklist] as number[]})
+		AND NOT id = ANY(${blacklist})
 		LIMIT 2
 	`.execute();
 	let titles;
@@ -168,7 +155,6 @@ export async function getAutocomplete(query: string): Promise<null | Title[]> {
 		return null;
 	}
 
-	autocompleteCache[query] = titles;
 	cacheTitles(titles);
 
 	return titles;

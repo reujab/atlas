@@ -5,10 +5,11 @@
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
 	import MdSpaceBar from "svelte-icons/md/MdSpaceBar.svelte";
 	import state from "./State";
-	import { getAutocomplete, Title, autocompleteCache } from "../db";
+	import { getAutocomplete, Title } from "../db";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
+	const autocompleteCache: { [query: string]: Title[] } = {};
 	const keyboard = [
 		["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "<"],
 		["A", "S", "D", "F", "G", "H", "J", "K", "L", "\n"],
@@ -46,10 +47,6 @@
 				}
 				break;
 			case "B":
-				for (const key in autocompleteCache) {
-					delete autocompleteCache[key];
-				}
-
 				setTimeout(() => {
 					state.query = "";
 				});
@@ -127,8 +124,32 @@
 	}
 
 	async function update() {
-		if (state.query) {
-			autocomplete = (await getAutocomplete(state.query)) || autocomplete;
+		const { query } = state;
+
+		if (!query) {
+			return;
+		}
+
+		if (autocompleteCache[query]) {
+			autocomplete = autocompleteCache[query];
+			return;
+		}
+
+		// remove old search results
+		const blacklist = new Set();
+		for (let i = 1; i < query.length - 1; i++) {
+			const titles = autocompleteCache[query.slice(0, i)];
+			if (titles) {
+				for (const title of titles) {
+					blacklist.add(title.id);
+				}
+			}
+		}
+
+		const res = await getAutocomplete(query, [...blacklist] as number[]);
+		if (res) {
+			autocomplete = res;
+			autocompleteCache[query] = res;
 		}
 	}
 
