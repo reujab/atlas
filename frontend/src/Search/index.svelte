@@ -11,7 +11,7 @@
 
 	const keyboard = [
 		["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "<"],
-		["A", "S", "D", "F", "G", "H", "J", "K", "L", "!"],
+		["A", "S", "D", "F", "G", "H", "J", "K", "L", "\n"],
 		["Z", "X", "C", "V", "B", "N", "M", " "],
 	];
 	let activeRow = 0;
@@ -26,7 +26,7 @@
 					if (char === "<") {
 						state.query = state.query.slice(0, -1);
 						update();
-					} else if (char === "!") {
+					} else if (char === "\n") {
 						if (state.query) {
 							location.href = `#/results/${state.query}`;
 						}
@@ -179,7 +179,7 @@
 						{#if char === "<"}
 							<GamepadButton button="X" position={20} />
 							<MdChevronLeft />
-						{:else if char === "!"}
+						{:else if char === "\n"}
 							<MdSearch />
 						{:else if char === " "}
 							<GamepadButton button="Y" position={20} />
