@@ -29,7 +29,7 @@ export async function cacheGenres() {
 		genres[row.id] = row.name;
 		sortedGenres.push({ id: row.id, name: row.name });
 	}
-	sortedGenres.sort((a, b) => Number(a.name < b.name));
+	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function cacheTitles(titles: Title[]) {
