@@ -16,9 +16,9 @@ struct Title {
     #[serde(alias = "first_air_date")]
     release_date: Option<String>,
     #[serde(default)]
-    runtime: Option<i16>,
+    runtime: Option<i32>,
     #[serde(default)]
-    episode_run_time: Option<Vec<i16>>,
+    episode_run_time: Option<Vec<i32>>,
     #[serde(alias = "name")]
     title: String,
     videos: Videos,

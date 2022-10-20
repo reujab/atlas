@@ -38,7 +38,7 @@ CREATE TABLE titles (
 	popularity FLOAT,
 	rating rating,
 	released DATE,
-	runtime SMALLINT,
+	runtime INT,
 	score SMALLINT,
 	votes INT,
 	trailer VARCHAR(16),
