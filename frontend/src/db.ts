@@ -23,9 +23,7 @@ const sql = postgres({
 	username: "atlas",
 });
 
-cacheGenres();
-
-async function cacheGenres() {
+export async function cacheGenres() {
 	const rows = await sql`SELECT id::bigint, name FROM genres`;
 	for (const row of rows) {
 		genres[row.id] = row.name;

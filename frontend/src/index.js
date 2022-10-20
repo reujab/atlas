@@ -1,5 +1,4 @@
-import "./db";
-import HomeScreen from "./HomeScreen";
+import HomeScreen from "./HomeScreen/index.svelte";
 import Play from "./Play/index.svelte";
 import Router, { routes } from "svelte-hash-router";
 import Search from "./Search/index.svelte";
@@ -8,11 +7,14 @@ import Seasons from "./Seasons/index.svelte";
 import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
 import Trailer from "./Trailer/index.svelte";
+import { cacheGenres } from "./db";
 import { error } from "./log";
 
 addEventListener("error", (err) => {
 	error("Uncaught error: %O", err);
-})
+});
+
+cacheGenres();
 
 routes.set({
 	"/": HomeScreen,
