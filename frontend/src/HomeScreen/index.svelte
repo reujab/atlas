@@ -1,7 +1,8 @@
 <script lang="ts" context="module">
 	export interface Tile {
 		title: string;
-		path: string;
+		onClick?: () => void;
+		path?: string;
 		icon: any;
 	}
 </script>
@@ -11,6 +12,7 @@
 	import HomeTile from "./HomeTile.svelte";
 	import VPNStatus from "./VPNStatus.svelte";
 	import Weather from "./Weather.svelte";
+	import child_process from "child_process";
 	import state from "./State";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -33,12 +35,25 @@
 			path: "/tv",
 			icon: require("../img/tv.png"),
 		},
+		{
+			title: "Reboot",
+			onClick() {
+				child_process.execSync("/sbin/reboot");
+			},
+			icon: require("../img/shutdown.png"),
+		},
 	];
 
 	function gamepadHandler(button: string) {
 		switch (button) {
 			case "A":
-				location.hash = `#${tiles[activeTile].path}`;
+				const tile = tiles[state.activeTile];
+				if (tile.onClick) {
+					tile.onClick();
+				}
+				if (tile.path) {
+					location.hash = `#${tile.path}`;
+				}
 				break;
 			case "up":
 				if (state.activeTile % 2 == 1) {
