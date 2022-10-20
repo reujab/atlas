@@ -12,6 +12,7 @@
 
 	const query = unescape($params.query);
 	let container: HTMLDivElement;
+	let loading = true;
 	let sourceIndex = 0;
 	let sources: Source[] | File[] = [];
 	let showingFiles = false;
@@ -21,6 +22,7 @@
 	search(query)
 		.then((res) => {
 			sources = res;
+			loading = false;
 		})
 		.catch((err) => {
 			error("search error: %O", err);
@@ -40,6 +42,7 @@
 			case "A":
 				const source = activeSource;
 				const playHref = `#/results/${query}/play`;
+				loading = true;
 				sources = [];
 
 				if (showingFiles) {
@@ -55,11 +58,11 @@
 					const match = source.name.match(episodeRegex);
 					if (match?.[1] && !match?.[3]) {
 						showingFiles = true;
-						sources = [];
 						getFiles(magnet)
 							.then((files) => {
 								sourceIndex = 0;
 								sources = files;
+								loading = false;
 							})
 							.catch((err) => {
 								error("getFiles err: %O", err);
@@ -103,7 +106,7 @@
 		<Header title={query} back />
 	</div>
 
-	{#if sources.length}
+	{#if !loading}
 		<div
 			class="flex gap-8 flex-col text-2xl relative scroll-smooth overflow-scroll px-48 mt-4 py-4 items-center"
 			bind:this={container}
