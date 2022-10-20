@@ -94,20 +94,37 @@ export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 }
 
 export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): Promise<Title[]> {
-	const titles = await sql`
-		SELECT id, type, title, genres, overview, released, trailer, rating
-		FROM (
-			SELECT * FROM titles
-			WHERE type = ${type}
-			AND ${genre} = ANY(genres)
-			AND (rating >= 'PG-13' OR ${genre} = 99)
-			ORDER BY popularity DESC NULLS LAST
-			LIMIT 200
-		) AS titles
-		WHERE ts IS NOT NULL
-		AND language = 'en'
-		LIMIT 100
-	` as unknown as Title[];
+	let titles;
+	if (genre === sortedGenres.find((genre) => genre.name === "Kids").id) {
+		titles = await sql`
+			SELECT id, type, title, genres, overview, released, trailer, rating
+			FROM (
+				SELECT * FROM titles
+				WHERE type = ${type}
+				AND rating < 'PG-13'
+				ORDER BY popularity DESC NULLS LAST
+				LIMIT 200
+			) AS titles
+			WHERE ts IS NOT NULL
+			AND language = 'en'
+			LIMIT 100
+		` as unknown as Title[];
+	} else {
+		titles = await sql`
+			SELECT id, type, title, genres, overview, released, trailer, rating
+			FROM (
+				SELECT * FROM titles
+				WHERE type = ${type}
+				AND ${genre} = ANY(genres)
+				AND (rating >= 'PG-13' OR ${genre} = 99)
+				ORDER BY popularity DESC NULLS LAST
+				LIMIT 200
+			) AS titles
+			WHERE ts IS NOT NULL
+			AND language = 'en'
+			LIMIT 100
+		` as unknown as Title[];
+	}
 
 	cacheTitles(titles);
 
