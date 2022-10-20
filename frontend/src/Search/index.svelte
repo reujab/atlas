@@ -5,7 +5,7 @@
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
 	import MdSpaceBar from "svelte-icons/md/MdSpaceBar.svelte";
 	import state from "./State";
-	import { getAutocomplete, Title } from "../db";
+	import { getAutocomplete, Title, autocompleteCache } from "../db";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
@@ -46,6 +46,10 @@
 				}
 				break;
 			case "B":
+				for (const key in autocompleteCache) {
+					delete autocompleteCache[key];
+				}
+
 				setTimeout(() => {
 					state.query = "";
 				});
