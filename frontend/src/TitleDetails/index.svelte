@@ -122,6 +122,9 @@
 			})
 			.catch((err) => {
 				error("search err: %O", err);
+				buttons[0].title = "Error";
+				buttons[0].icon = null;
+				buttons[1].hidden = true;
 			});
 	}
 

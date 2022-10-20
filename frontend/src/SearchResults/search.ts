@@ -1,8 +1,8 @@
 import cheerio from "cheerio";
 import http from "http";
 import { SocksProxyAgent } from "socks-proxy-agent";
+import { get } from "..";
 import { log, error } from "../log"
-import { fetchJSON } from "..";
 
 export interface Source {
 	name: string;
@@ -110,8 +110,12 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 	}
 
 	return new Promise((resolve, reject) => {
-		fetchJSON(`https://apibay.org/${path}`, signal).then((sources) => {
-			resolve(parseSources(sources));
+		get(`https://apibay.org/${path}`, { signal }).then((res) => {
+			res.json().then((sources: any) => {
+				resolve(parseSources(sources));
+			}).catch((err) => {
+				reject(err);
+			});
 		}).catch((err) => {
 			if (signal?.aborted) {
 				reject(err);
@@ -123,7 +127,7 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 				hostname: "localhost",
 				port: 9050,
 			});
-			http.get(
+			const req = http.get(
 				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
 				{ agent },
 				(res) => {
@@ -157,13 +161,24 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 					});
 				}
 			);
+
+			req.on("error", (err) => {
+				error("socks err: %O", err);
+				reject(err);
+			});
 		});
 	});
 }
 
 async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
 	const path = type === "movie" ? `category-search/${query}/Movies/1/` : type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
-	const res = await fetch(`https://1337x.to/${path}`, { signal });
+	let res;
+	try {
+		res = await get(`https://1337x.to/${path}`, { signal });
+	} catch (err) {
+		error("error searching 1337x: %O", err);
+		return [];
+	}
 	const html = await res.text();
 	if (signal?.aborted) {
 		throw new DOMException("aborted");
@@ -171,7 +186,7 @@ async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortS
 	const $ = cheerio.load(html);
 	return Array.from($("tbody > tr")).map((ele) => ({
 		getMagnet: (async (path: string) => {
-			const res = await fetch(`https://1337x.to${path}`);
+			const res = await get(`https://1337x.to${path}`);
 			const html = await res.text();
 			const $ = cheerio.load(html);
 			return $("a[href^=magnet:]").attr("href");

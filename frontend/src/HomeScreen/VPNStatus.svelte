@@ -2,7 +2,7 @@
 	import child_process from "child_process";
 	import state from "./State";
 	import { error } from "../log";
-	import { fetchJSON } from "..";
+	import { get } from "..";
 	import { onDestroy } from "svelte";
 
 	const { vpn } = state;
@@ -36,7 +36,7 @@
 	async function getLocation() {
 		let json;
 		try {
-			json = await fetchJSON("https://ipapi.co/json/");
+			json = await (await get("https://ipapi.co/json/")).json();
 		} catch (err) {
 			error("error fetching from ipapi.co: %O", err);
 			return;

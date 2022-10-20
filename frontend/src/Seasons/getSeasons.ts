@@ -1,5 +1,5 @@
 import { Title } from "../db";
-import { fetchJSON } from "..";
+import { get } from "..";
 
 export interface Season {
 	number: number;
@@ -28,9 +28,9 @@ export default async function getSeasons(title: Title): Promise<Season[]> {
 			.fill(null)
 			.map((_, j) => `season/${i * 20 + j + 1}`)
 			.join(",");
-		const json = await fetchJSON(
+		const json = await (await get(
 			`https://api.themoviedb.org/3/tv/${title.id}?api_key=${process.env.TMDB_KEY}&append_to_response=${append}`
-		);
+		)).json();
 		keys = Object.keys(json).filter((key) => key.startsWith("season/"))
 			.length;
 

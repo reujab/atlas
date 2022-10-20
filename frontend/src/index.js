@@ -8,7 +8,7 @@ import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
 import Trailer from "./Trailer/index.svelte";
 import { cacheGenres } from "./db";
-import { error } from "./log";
+import { error, log } from "./log";
 
 addEventListener("error", (err) => {
 	error("Uncaught error: %O", err);
@@ -35,20 +35,30 @@ export default new Router({
 	target: document.body,
 });
 
-export async function fetchJSON(url, signal) {
+export async function get(...args) {
+	const start = Date.now();
 	let lastErr;
 
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < 4; i++) {
+		if (Date.now() - start > 5000) {
+			break;
+		}
+
 		try {
-			const res = await fetch(url, { signal });
+			log(`Getting ${args[0]}`);
+			const res = await fetch(...args);
 			if (res.status >= 400 && res.status < 500) {
 				return Promise.reject(`4xx status: ${res.status}`);
+			}
+			if (res.status >= 500) {
+				lastErr = new Error(`status: ${res.status}`);
+				continue;
 			}
 			if (res.status !== 200) {
 				throw new Error(`status: ${res.status}`);
 			}
 
-			return await res.json();
+			return res;
 		} catch (err) {
 			lastErr = err;
 			if (err instanceof DOMException) {

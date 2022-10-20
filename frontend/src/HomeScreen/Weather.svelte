@@ -1,7 +1,7 @@
 <script lang="ts">
 	import fs from "fs";
 	import state from "./State";
-	import { fetchJSON } from "..";
+	import { get } from "..";
 	import { log, error } from "../log";
 
 	fs.readFile("/tmp/geo.json", async (err, geo) => {
@@ -15,12 +15,15 @@
 		getWeather();
 		async function getWeather() {
 			try {
-				const meta = await fetchJSON(
-					`https://api.weather.gov/points/${coords.join(",")}`
-				);
+				const meta = await (
+					await get(
+						`https://api.weather.gov/points/${coords.join(",")}`
+					)
+				).json();
 
-				const forecast = (await fetchJSON(meta.properties.forecast))
-					.properties.periods[0];
+				const forecast = (
+					await (await get(meta.properties.forecast)).json()
+				).properties.periods[0];
 
 				state.weather = {
 					city: meta.properties.relativeLocation.properties.city,
