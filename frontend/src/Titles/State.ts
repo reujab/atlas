@@ -2,6 +2,7 @@ import Row from "./Row";
 import { getTrending, getTopRated, getTitlesWithGenre, sortedGenres } from "../db";
 
 class State {
+	ready = false
 	rows: Row[] = [new Row("Trending"), new Row("Top rated")]
 	activeRow = 0
 
@@ -20,6 +21,8 @@ class State {
 			}
 
 			clearInterval(interval);
+
+			let wg = 0;
 			for (const genre of sortedGenres) {
 				if (["Kids", "News", "Talk", "Family"].includes(genre.name)) {
 					continue;
@@ -27,11 +30,18 @@ class State {
 
 				const row = new Row(genre.name);
 				this.rows.push(row);
+
+				wg++;
 				getTitlesWithGenre(type, genre.id).then((titles) => {
 					if (titles.length >= 6) {
 						row.titles = titles;
+
 					} else {
 						this.rows.splice(this.rows.indexOf(row), 1);
+					}
+
+					if (--wg === 0) {
+						this.ready = true;
 					}
 				});
 			}

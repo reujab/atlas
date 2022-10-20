@@ -1,5 +1,6 @@
 <script lang="ts">
 	const { params } = require("svelte-hash-router");
+	import Circle2 from "svelte-loading-spinners/dist/ts/Circle2.svelte";
 	import Header from "../Header/index.svelte";
 	import store from "./State";
 	import { genres } from "../db";
@@ -7,24 +8,37 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const type = $params.type as "movie" | "tv";
-	const state = store[type];
-
+	let state = store[type];
+	let rowsEle: HTMLDivElement;
 	$: activeTitle =
 		state.rows[state.activeRow].titles[
 			state.rows[state.activeRow].activeCol
 		];
 
-	let rowsEle: HTMLDivElement;
+	if (!state.ready) {
+		const interval = setInterval(() => {
+			if (state.ready) {
+				state = state;
+				clearInterval(interval);
+			}
+		}, 100);
+	}
 
 	function gamepadHandler(button: string) {
+		if (button === "B") {
+			history.back();
+			return;
+		}
+
+		if (!state.ready) {
+			return;
+		}
+
 		const row = state.rows[state.activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
 				location.hash = `#/${title.type}/${title.id}`;
-				break;
-			case "B":
-				history.back();
 				break;
 			case "Y":
 				location.hash = "#/search";
@@ -55,12 +69,12 @@
 	}
 
 	function scroll(instant?: boolean) {
-		rowsEle.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
+		rowsEle?.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
 
 		for (const row of state.rows) {
-			row.element.querySelector(".posters").scrollTo({
+			row.element?.querySelector(".posters").scrollTo({
 				left:
-					row.element.querySelectorAll(".poster")[row.activeCol]
+					row.element?.querySelectorAll(".poster")[row.activeCol]
 						?.offsetLeft - 16,
 				top: 0,
 				behavior: instant ? "instant" : "auto",
@@ -84,45 +98,55 @@
 		search="/search"
 	/>
 
-	<div class="min-h-[9rem] flex flex-col mb-2">
-		{#if activeTitle}
-			<h3 class="text-xl mb-2">
-				{activeTitle.genres.map((genre) => genres[genre]).join(" • ")}
-			</h3>
+	{#if state.ready}
+		<div class="min-h-[9rem] flex flex-col mb-2">
+			{#if activeTitle}
+				<h3 class="text-xl mb-2">
+					{activeTitle.genres
+						.map((genre) => genres[genre])
+						.join(" • ")}
+				</h3>
 
-			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
-				{activeTitle.overview}
-			</div>
-		{/if}
-	</div>
-
-	<div
-		class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4 relative"
-		bind:this={rowsEle}
-	>
-		{#each state.rows as row, rowIndex}
-			<div class="row" bind:this={row.element}>
-				<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 				<div
-					class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[400px] items-center"
+					class="text-3xl text-ellipsis overflow-hidden grow clamp-3"
 				>
-					{#each row.titles as title, colIndex}
-						<a
-							href="#/{title.type}/{title.id}"
-							class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
-							class:active={rowIndex === state.activeRow &&
-								colIndex ===
-									state.rows[state.activeRow].activeCol}
-						>
-							{#if rowIndex === state.activeRow || Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
-								{@html title.poster?.outerHTML}
-							{/if}
-						</a>
-					{/each}
+					{activeTitle.overview}
 				</div>
-			</div>
-		{/each}
-	</div>
+			{/if}
+		</div>
+
+		<div
+			class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4 relative"
+			bind:this={rowsEle}
+		>
+			{#each state.rows as row, rowIndex}
+				<div class="row" bind:this={row.element}>
+					<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
+					<div
+						class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[400px] items-center"
+					>
+						{#each row.titles as title, colIndex}
+							<a
+								href="#/{title.type}/{title.id}"
+								class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
+								class:active={rowIndex === state.activeRow &&
+									colIndex ===
+										state.rows[state.activeRow].activeCol}
+							>
+								{#if rowIndex === state.activeRow || Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
+									{@html title.poster?.outerHTML}
+								{/if}
+							</a>
+						{/each}
+					</div>
+				</div>
+			{/each}
+		</div>
+	{:else}
+		<div class="m-auto">
+			<Circle2 size={256} />
+		</div>
+	{/if}
 </div>
 
 <style>
