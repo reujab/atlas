@@ -11,6 +11,10 @@ import { cacheGenres } from "./db";
 import { error, log } from "./log";
 
 addEventListener("error", (err) => {
+	if (err.message === "Uncaught EvalError: Possible side-effect in debug-evaluate" || err.message.startsWith("Uncaught SyntaxError")) {
+		return;
+	}
+
 	error("Uncaught error: %O", err);
 });
 
