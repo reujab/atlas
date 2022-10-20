@@ -4,6 +4,8 @@ After=network-online.target postgresql.service windscribe.service
 
 [Service]
 WorkingDirectory=/home/atlas
+ExecStartPre=/usr/bin/find /home/atlas/posters -type f -empty -delete -print
+ExecStartPre=/usr/bin/echo Done
 ExecStartPre=/usr/bin/sleep 30
 ExecStart=/usr/local/bin/tmdbd
 User=atlas

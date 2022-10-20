@@ -6,8 +6,10 @@ mod ids;
 mod titles;
 
 use env_logger::Env;
+use futures::StreamExt;
 use sqlx::postgres::PgPoolOptions;
-use std::{env, time::Duration};
+use sqlx::Row;
+use std::{env, path::Path, time::Duration};
 use tokio::time::sleep;
 
 type Pool = sqlx::Pool<sqlx::Postgres>;
@@ -43,6 +45,8 @@ async fn main() {
         .await
         .unwrap();
 
+    check(&pool).await;
+
     tokio::join!(genres::insert(&pool), ids::insert(&pool));
     info!("Done");
 
@@ -76,5 +80,52 @@ async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
             }
         }
         i += 1;
+    }
+}
+
+async fn check(pool: &Pool) {
+    println!("Consistency check...");
+
+    let posters = env::var("POSTERS_PATH").unwrap();
+    let mut missing = Vec::new();
+    let mut conn = pool.acquire().await.unwrap();
+    let mut stream = sqlx::query(
+        r#"
+        SELECT type, id FROM titles
+        WHERE ts IS NOT NULL
+    "#,
+    )
+    .fetch_many(&mut conn);
+
+    while let Some(title) = stream.next().await {
+        let title = match title.unwrap() {
+            sqlx::Either::Right(row) => row,
+            _ => continue,
+        };
+
+        let title_type = title.get::<TitleType, _>(0);
+        let id = title.get::<i32, _>(1);
+        let path = format!("{posters}/{}/{id}", title_type.to_string());
+        let path = Path::new(&path);
+        if !path.exists() {
+            println!("{:?} doesn't exist", path);
+            missing.push(id);
+        }
+    }
+
+    drop(stream);
+
+    for id in missing {
+        sqlx::query(
+            r#"
+                UPDATE titles
+                SET ts = NULL
+                WHERE id = $1
+            "#,
+        )
+        .bind(id)
+        .execute(&mut conn)
+        .await
+        .unwrap();
     }
 }
