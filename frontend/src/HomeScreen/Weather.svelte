@@ -1,16 +1,8 @@
 <script lang="ts">
 	import fs from "fs";
+	import state from "./State";
 	import { fetchJSON } from "..";
 	import { log, error } from "../log";
-
-	interface Weather {
-		city: string;
-		temp: string;
-		icon: string;
-		forecast: string;
-	}
-
-	let weather: null | Weather = null;
 
 	fs.readFile("/tmp/geo.json", async (err, geo) => {
 		if (err) {
@@ -30,13 +22,13 @@
 				const forecast = (await fetchJSON(meta.properties.forecast))
 					.properties.periods[0];
 
-				weather = {
+				state.weather = {
 					city: meta.properties.relativeLocation.properties.city,
 					temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
 					icon: forecast.icon.replace(/,\d+/g, ""),
 					forecast: forecast.shortForecast.replace(/and/gi, "&"),
 				};
-				log("%O", weather);
+				log("%O", state.weather);
 			} catch (err) {
 				error("error getting weather: %O", err);
 				setTimeout(getWeather, 1000);
@@ -45,13 +37,17 @@
 	});
 </script>
 
-{#if weather}
+{#if state.weather}
 	<hr class="m-8" />
 
-	<div class="text-3xl">{weather.city}</div>
+	<div class="text-3xl">{state.weather.city}</div>
 	<div class="text-7xl flex justify-end gap-4 my-2 items-center">
-		<img src={weather.icon} alt="" class="rounded-full inline-block" />
-		<span>{weather.temp}</span>
+		<img
+			src={state.weather.icon}
+			alt=""
+			class="rounded-full inline-block"
+		/>
+		<span>{state.weather.temp}</span>
 	</div>
-	<div class="text-4xl">{weather.forecast}</div>
+	<div class="text-4xl">{state.weather.forecast}</div>
 {/if}

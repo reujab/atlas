@@ -9,8 +9,9 @@
 <script lang="ts">
 	import Clock from "./Clock.svelte";
 	import HomeTile from "./HomeTile.svelte";
-	import Weather from "./Weather.svelte";
 	import VPNStatus from "./VPNStatus.svelte";
+	import Weather from "./Weather.svelte";
+	import state from "./State";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
@@ -33,7 +34,6 @@
 			icon: require("../img/tv.png"),
 		},
 	];
-	let activeTile = 0;
 
 	function gamepadHandler(button: string) {
 		switch (button) {
@@ -41,27 +41,30 @@
 				location.hash = `#${tiles[activeTile].path}`;
 				break;
 			case "up":
-				if (activeTile % 2 == 1) {
-					activeTile -= 1;
+				if (state.activeTile % 2 == 1) {
+					state.activeTile -= 1;
 				}
 				break;
 			case "down":
-				if (activeTile % 2 == 0) {
-					activeTile += 1;
+				if (state.activeTile % 2 == 0) {
+					state.activeTile += 1;
 				}
 				break;
 			case "left":
-				if (activeTile >= 2) {
-					activeTile -= 2;
+				if (state.activeTile >= 2) {
+					state.activeTile -= 2;
 				}
 				break;
 			case "right":
-				if (activeTile + 2 < tiles.length) {
-					activeTile += 2;
+				if (state.activeTile + 2 < tiles.length) {
+					state.activeTile += 2;
 				}
 				break;
 		}
-		activeTile = Math.max(0, Math.min(tiles.length - 1, activeTile));
+		state.activeTile = Math.max(
+			0,
+			Math.min(tiles.length - 1, state.activeTile)
+		);
 	}
 
 	subscribe(gamepadHandler);
@@ -75,9 +78,11 @@
 	style="background-image: {img}"
 >
 	<div class="flex grow h-[44rem]">
-		<div class="flex flex-col gap-48 flex-wrap text-black grow">
+		<div
+			class="flex flex-col gap-48 flex-wrap text-black grow content-start"
+		>
 			{#each tiles as tile, i}
-				<HomeTile {tile} active={activeTile === i} />
+				<HomeTile {tile} active={state.activeTile === i} />
 			{/each}
 		</div>
 		<div class="self-center">
