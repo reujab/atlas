@@ -176,7 +176,13 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
                     .unwrap()
                     .iter()
                     .find(|res| !res.certification.is_empty())
-                    .and_then(|res| Some(res.certification.trim().to_owned()))
+                    .and_then(|res| match res.certification.trim() {
+                        "G" | "TV-G" | "TV-Y" | "TV-Y7" | "TV-Y7-FV" | "PG" | "TV-PG" | "PG-13"
+                        | "TV-14" | "R" | "TV-MA" | "NC-17" | "NR" => {
+                            Some(res.certification.trim().to_owned())
+                        }
+                        _ => None,
+                    })
             })
     } else if let Some(ratings) = title.content_ratings {
         ratings
