@@ -79,6 +79,7 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
             r#"
                 SELECT id FROM titles
                 WHERE type = $1
+                AND (ts IS NULL OR popularity > 50)
                 ORDER BY ts ASC NULLS FIRST, popularity DESC NULLS LAST
                 LIMIT 1
             "#
