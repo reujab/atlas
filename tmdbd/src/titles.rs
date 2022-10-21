@@ -224,7 +224,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     .bind(runtime)
     .bind(&title.title)
     .bind(trailer)
-    .bind(title.score * 10.0)
+    .bind(title.score * 1000.0)
     .bind(title.votes)
     .bind(rating)
     .bind(id)
