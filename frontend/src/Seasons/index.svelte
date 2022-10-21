@@ -25,11 +25,10 @@
 	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
 	let carousel: any;
-	let seasonIndex = 0;
 	let seasonsEle: HTMLDivElement;
 	let controller: AbortController;
 	let loading = false;
-	$: activeSeason = seasons[seasonIndex];
+	$: activeSeason = seasons[state.seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
 	if (seasons.length) {
@@ -48,7 +47,9 @@
 		if (button === "B") {
 			if (loading) {
 				loading = false;
+				setTimeout(update);
 			} else {
+				state.seasonIndex = 0;
 				history.back();
 			}
 			return;
@@ -69,7 +70,7 @@
 							const file = files.find(
 								(file) => file.episode === activeEpisode.number
 							);
-							if (file) {
+							if (file && loading) {
 								playState.file = file.index;
 								playState.magnet = magnet.magnet;
 								location.href = `#/tv/${title.id}/play`;
@@ -85,15 +86,15 @@
 				}
 				return;
 			case "left":
-				if (seasonIndex > 0) {
-					carousel.goTo(seasonIndex - 1);
+				if (state.seasonIndex > 0) {
+					carousel.goTo(state.seasonIndex - 1);
 				} else {
 					carousel.goTo(seasons.length - 1);
 				}
 				break;
 			case "right":
-				if (seasonIndex < seasons.length - 1) {
-					carousel.goTo(seasonIndex + 1);
+				if (state.seasonIndex < seasons.length - 1) {
+					carousel.goTo(state.seasonIndex + 1);
 				} else {
 					carousel.goTo(0);
 				}
@@ -227,7 +228,7 @@
 				{#each seasons as season, i}
 					<div
 						class="season text-3xl text-black bg-[#eee] rounded-full p-4 shrink-0 relative drop-shadow"
-						class:active={seasonIndex === i}
+						class:active={state.seasonIndex === i}
 						bind:this={season.ele}
 					>
 						Season {season.number}
@@ -240,9 +241,10 @@
 			arrows={false}
 			dots={false}
 			duration={250}
+			initialPageIndex={state.seasonIndex}
 			bind:this={carousel}
 			on:pageChange={(e) => {
-				seasonIndex = e.detail;
+				state.seasonIndex = e.detail;
 			}}
 		>
 			{#each seasons as season, i}
@@ -253,11 +255,11 @@
 					{#each season.episodes as episode, j}
 						<div
 							class="episode flex bg-[#eee] rounded-xl text-black overflow-hidden text-5xl min-h-[127px] items-center relative white-shadow"
-							class:active={i === seasonIndex &&
+							class:active={i === state.seasonIndex &&
 								j === activeSeason.activeEpisode}
 							bind:this={episode.ele}
 						>
-							{#if episode.still && Math.abs(seasonIndex - i) < 2}
+							{#if episode.still && Math.abs(state.seasonIndex - i) < 2}
 								<div
 									class="max-h-[127px] min-w-[277px] max-w-[277px] overflow-hidden flex items-center justify-start drop-shadow"
 								>
@@ -282,7 +284,7 @@
 							<div
 								class="mr-8 h-full flex items-center justify-center min-w-[146px]"
 							>
-								{#if i === seasonIndex && j === activeSeason.activeEpisode}
+								{#if i === state.seasonIndex && j === activeSeason.activeEpisode}
 									{#if magnets[season.number] && magnets[season.number][episode.number] !== undefined}
 										{#if magnets[season.number][episode.number]}
 											<div class="h-1/2 flex gap-8">
