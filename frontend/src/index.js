@@ -68,15 +68,15 @@ export async function get(...args) {
 		try {
 			log(`Getting ${args[0]}`);
 			const res = await fetch(...args);
+			lastErr = new Error(`status: ${res.status}`);
 			if (res.status >= 400 && res.status < 500) {
-				return Promise.reject(`4xx status: ${res.status}`);
+				break;
 			}
 			if (res.status >= 500) {
-				lastErr = new Error(`status: ${res.status}`);
 				continue;
 			}
 			if (res.status !== 200) {
-				throw new Error(`status: ${res.status}`);
+				break;
 			}
 
 			return res;
@@ -86,8 +86,11 @@ export async function get(...args) {
 				break;
 			}
 			error("%O", err);
+			if (err.message.startsWith("status:")) {
+				break;
+			}
 		}
 	}
 
-	return Promise.reject(lastErr);
+	throw lastErr;
 }
