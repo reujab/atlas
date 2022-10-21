@@ -7,8 +7,13 @@ import Seasons from "./Seasons/index.svelte";
 import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
 import Trailer from "./Trailer/index.svelte";
+import child_process from "child_process";
 import { cacheGenres } from "./db";
 import { error, log } from "./log";
+import { subscribe } from "./gamepad";
+
+let lastKill = 0;
+let killTimeout;
 
 addEventListener("error", (err) => {
 	if (err.message === "Uncaught EvalError: Possible side-effect in debug-evaluate" || err.message.startsWith("Uncaught SyntaxError")) {
@@ -33,6 +38,18 @@ routes.set({
 	"/:type/:id/trailer": Trailer,
 
 	"*": HomeScreen,
+});
+
+subscribe(() => {
+	if (Date.now() - lastKill > 10000) {
+		child_process.exec("killall -STOP tmdbd");
+		lastKill = Date.now();
+	}
+
+	clearTimeout(killTimeout);
+	killTimeout = setTimeout(() => {
+		child_process.exec("killall -CONT tmdbd");
+	}, 1000 * 60 * 10);
 });
 
 export default new Router({
