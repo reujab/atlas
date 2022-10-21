@@ -79,9 +79,12 @@ export async function get(...args) {
 				break;
 			}
 
+			log(`Reply at ${(Date.now() - start) / 1000}s`);
+
 			return res;
 		} catch (err) {
 			lastErr = err;
+			// break if the fetch was cancelled by a signal
 			if (err instanceof DOMException) {
 				break;
 			}

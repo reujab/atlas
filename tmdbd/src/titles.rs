@@ -126,10 +126,10 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     {
         sqlx::query(
             r#"
-                    DELETE FROM titles
-                    WHERE id = $1
-                    AND type = $2
-                "#,
+                DELETE FROM titles
+                WHERE id = $1
+                AND type = $2
+            "#,
         )
         .bind(id)
         .bind(title_type)
