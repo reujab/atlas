@@ -46,6 +46,9 @@ async fn insert_category(pool: &crate::Pool, category: TitleType) {
 
     for line in s.lines() {
         let title = serde_json::from_str::<Title>(line).unwrap();
+        if title.popularity < 5.0 {
+            continue;
+        }
         sqlx::query(
             r#"
                 INSERT INTO titles (id, type, title, popularity)

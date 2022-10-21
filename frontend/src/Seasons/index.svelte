@@ -6,6 +6,7 @@
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
 	import child_process from "child_process";
+	import getFiles from "../SearchResults/getFiles";
 	import playState from "../Play/State";
 	import search, { episodeRegex, Source } from "../SearchResults/search";
 	import state from "./State";
@@ -14,7 +15,6 @@
 	import { error, log } from "../log";
 	import { onDestroy, onMount } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import getFiles from "../SearchResults/getFiles";
 
 	const title = cache.tv[$params.id];
 	const magnets: {

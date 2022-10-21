@@ -80,7 +80,6 @@ pub async fn update(pool: &sqlx::Pool<sqlx::Postgres>, title_type: TitleType) {
                 SELECT id FROM titles
                 WHERE type = $1
                 AND (ts IS NULL OR popularity > 50)
-                AND popularity > 5
                 ORDER BY ts ASC NULLS FIRST, popularity DESC NULLS LAST
                 LIMIT 1
             "#
@@ -104,10 +103,10 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     let url = format!("https://api.themoviedb.org/3/{}/{id}?api_key={key}&append_to_response=videos,release_dates,content_ratings", title_type.to_string());
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
+        eprintln!("Error: {url} returned {}", res.status());
         sqlx::query(
             r#"
-                UPDATE titles
-                SET ts = now()
+                DELETE FROM titles
                 WHERE id = $1
                 AND type = $2
             "#,
@@ -121,34 +120,41 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     }
     let title = res.json::<Title>().await.unwrap();
 
-    if let Some(poster_path) = &title.poster_path {
-        let url = format!(
-            "https://www.themoviedb.org/t/p/w300_and_h450_bestv2{}",
-            poster_path
-        );
-        let path = format!(
-            "{}/{}/{id}",
-            env::var("POSTERS_PATH").unwrap(),
-            title_type.to_string()
-        );
-        let mut file = File::create(&path).await.unwrap();
-        let mut stream = get(&url).await.unwrap().bytes_stream();
-        while let Some(chunk) = stream.next().await {
-            file.write_all(&chunk.unwrap()).await.unwrap();
-        }
-        info!("Downloaded poster to file://{path}");
+    if title.poster_path.is_none()
+        || title.release_date.is_none()
+        || title.release_date.clone().unwrap().is_empty()
+    {
+        sqlx::query(
+            r#"
+                    DELETE FROM titles
+                    WHERE id = $1
+                    AND type = $2
+                "#,
+        )
+        .bind(id)
+        .bind(title_type)
+        .execute(&mut conn)
+        .await
+        .unwrap();
+
+        return;
     }
 
-    let released = match &title.release_date {
-        None => "NULL",
-        Some(date) => {
-            if date.is_empty() {
-                "NULL"
-            } else {
-                "$5::date"
-            }
-        }
-    };
+    let url = format!(
+        "https://www.themoviedb.org/t/p/w300_and_h450_bestv2{}",
+        title.poster_path.unwrap()
+    );
+    let path = format!(
+        "{}/{}/{id}",
+        env::var("POSTERS_PATH").unwrap(),
+        title_type.to_string()
+    );
+    let mut file = File::create(&path).await.unwrap();
+    let mut stream = get(&url).await.unwrap().bytes_stream();
+    while let Some(chunk) = stream.next().await {
+        file.write_all(&chunk.unwrap()).await.unwrap();
+    }
+    info!("Downloaded poster to file://{path}");
 
     let trailer = title
         .videos
@@ -204,7 +210,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         r#"
             UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
-                released = {released}, runtime = $6, title = $7, trailer = $8,
+                released = $5::date, runtime = $6, title = $7, trailer = $8,
                 score = $9, votes = $10, rating = $11::rating
             WHERE id = $12
             AND type = $13
