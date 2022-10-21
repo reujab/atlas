@@ -56,15 +56,11 @@ export const sortedGenres: Genre[] = [];
 export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 	const trending = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
-		FROM (
-			SELECT * from titles
-			WHERE type = ${type}
-			ORDER BY popularity DESC NULLS LAST
-			LIMIT 200
-		) AS titles
-		WHERE ts IS NOT NULL
+		FROM titles
+		WHERE type = ${type}
 		AND language = 'en'
 		AND rating >= 'PG-13'
+		ORDER BY popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
 
@@ -76,15 +72,11 @@ export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 	const topRated = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
-		FROM (
-			SELECT * FROM titles
-			WHERE type = ${type}
-			AND votes >= 1000
-			ORDER BY score DESC NULLS LAST, popularity DESC NULLS LAST
-			LIMIT 200
-		) AS titles
-		WHERE ts IS NOT NULL
+		FROM titles
+		WHERE type = ${type}
+		AND votes >= 1000
 		AND language = 'en'
+		ORDER BY score DESC NULLS LAST, popularity DESC NULLS LAST
 		LIMIT 100
 	` as unknown as Title[];
 
@@ -98,15 +90,11 @@ export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): P
 	if (genre === sortedGenres.find((genre) => genre.name === "Kids").id) {
 		titles = await sql`
 			SELECT id, type, title, genres, overview, released, trailer, rating
-			FROM (
-				SELECT * FROM titles
-				WHERE type = ${type}
-				AND rating < 'PG-13'
-				ORDER BY popularity DESC NULLS LAST
-				LIMIT 200
-			) AS titles
-			WHERE ts IS NOT NULL
+			FROM titles
+			WHERE type = ${type}
 			AND language = 'en'
+			AND rating < 'PG-13'
+			ORDER BY popularity DESC NULLS LAST
 			LIMIT 100
 		` as unknown as Title[];
 	} else {
@@ -116,11 +104,10 @@ export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): P
 				SELECT * FROM titles
 				WHERE type = ${type}
 				AND ${genre} = ANY(genres)
-				AND (rating >= 'PG-13' OR ${genre} = 99)
 				ORDER BY popularity DESC NULLS LAST
-				LIMIT 200
+				LIMIT 300
 			) AS titles
-			WHERE ts IS NOT NULL
+			WHERE (rating >= 'PG-13' OR ${genre} = 99)
 			AND language = 'en'
 			LIMIT 100
 		` as unknown as Title[];
@@ -137,14 +124,10 @@ export async function getAutocomplete(query: string, blacklist: number[] = []): 
 
 	autocompleteQuery = sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
-		FROM (
-			SELECT * FROM titles
-			WHERE title ILIKE ${"%" + query.replace(/\s/g, "%") + "%"}
-			ORDER BY popularity DESC NULLS LAST
-			LIMIT 100
-		) AS titles
-		WHERE ts IS NOT NULL
+		FROM titles
+		WHERE title ILIKE ${"%" + query.replace(/\s/g, "%") + "%"}
 		AND NOT id = ANY(${blacklist})
+		ORDER BY popularity DESC NULLS LAST
 		LIMIT 2
 	`.execute();
 	let titles;

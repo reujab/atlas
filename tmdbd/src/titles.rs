@@ -210,8 +210,8 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         r#"
             UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
-                released = $5::date, runtime = $6, title = $7, trailer = $8,
-                score = $9, votes = $10, rating = $11::rating
+                released = $5::date, runtime = $6, title = $7, trailer = $8, score = $9,
+                votes = $10, rating = $11::rating
             WHERE id = $12
             AND type = $13
         "#,
