@@ -34,9 +34,9 @@ export default async function getSeasons(title: Title): Promise<Season[]> {
 		keys = Object.keys(json).filter((key) => key.startsWith("season/"))
 			.length;
 
-		for (let j = 0; j < keys; j++) {
+		for (let j = 0; j < 20; j++) {
 			const season = json[`season/${i * 20 + j + 1}`];
-			if (season.episodes.length) {
+			if (season?.episodes.length) {
 				seasons.push({
 					number: season.season_number,
 					episodes: season.episodes.map((episode: any) => ({
