@@ -5,10 +5,9 @@
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
-	import child_process from "child_process";
 	import getFiles from "../SearchResults/getFiles";
 	import playState from "../Play/State";
-	import search, { episodeRegex, Source } from "../SearchResults/search";
+	import search, { Source } from "../SearchResults/search";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
@@ -75,6 +74,7 @@
 								playState.magnet = magnet.magnet;
 								location.href = `#/tv/${title.id}/play`;
 							} else {
+								// failed or cancelled
 								loading = false;
 							}
 						});
@@ -124,69 +124,79 @@
 		const season = activeSeason;
 		const episode = activeEpisode;
 		controller?.abort();
+
+		if (!magnets[season.number]) {
+			magnets[season.number] = {};
+		}
+
+		if (
+			magnets[season.number][episode.number] &&
+			// retry on error
+			typeof magnets[season.number][episode.number].message !== "string"
+		) {
+			return;
+		}
+
 		controller = new AbortController();
+
 		try {
-			if (!magnets[season.number]?.[episode.number]) {
-				const sources = (
-					await Promise.all([
-						cachedSearch(`${title.title} Season ${season.number}`),
-						cachedSearch(
-							`${title.title} S${String(season.number).padStart(
-								2,
-								"0"
-							)}`
-						),
-						cachedSearch(
-							`${title.title} S${String(season.number).padStart(
-								2,
-								"0"
-							)}E${String(episode.number).padStart(2, "0")}`
-						),
-					])
+			const sources = (
+				await Promise.all([
+					cachedSearch(`${title.title} Season ${season.number}`),
+					cachedSearch(
+						`${title.title} S${String(season.number).padStart(
+							2,
+							"0"
+						)}`
+					),
+					cachedSearch(
+						`${title.title} S${String(season.number).padStart(
+							2,
+							"0"
+						)}E${String(episode.number).padStart(2, "0")}`
+					),
+				])
+			)
+				.flat()
+				.filter(
+					(source) =>
+						source.seasons?.includes(season.number) &&
+						[episode.number, null].includes(source.episode)
 				)
-					.flat()
-					.filter(
-						(source) =>
-							source.seasons?.includes(season.number) &&
-							[episode.number, null].includes(source.episode)
-					)
-					.sort((a, b) => b.score - a.score);
+				.sort((a, b) => b.score - a.score);
 
-				const source = sources[0];
-				log("%O", source);
-				if (!magnets[season.number]) {
-					magnets[season.number] = {};
-				}
-				if (source?.seeders >= 5) {
-					const magnet = await source.getMagnet();
-					if (source.episode) {
-						magnets[season.number][episode.number] = {
-							magnet,
-							season: false,
-						};
-					} else {
-						for (const seasonNum of source.seasons) {
-							if (!magnets[seasonNum]) {
-								magnets[seasonNum] = {};
-							}
+			const source = sources[0];
+			log("%O", source);
+			if (source?.seeders >= 5) {
+				const magnet = await source.getMagnet();
+				if (source.episode) {
+					magnets[season.number][episode.number] = {
+						magnet,
+						season: false,
+					};
+				} else {
+					for (const seasonNum of source.seasons) {
+						if (!magnets[seasonNum]) {
+							magnets[seasonNum] = {};
+						}
 
-							for (let i = 1; i <= season.episodes.length; i++) {
-								if (!magnets[seasonNum][i]) {
-									magnets[seasonNum][i] = {
-										magnet,
-										season: true,
-									};
-								}
+						for (let i = 1; i <= season.episodes.length; i++) {
+							if (!magnets[seasonNum][i]) {
+								magnets[seasonNum][i] = {
+									magnet,
+									season: true,
+								};
 							}
 						}
 					}
-				} else {
-					magnets[season.number][episode.number] = null;
 				}
+			} else {
+				magnets[season.number][episode.number] = null;
 			}
 		} catch (err) {
 			if (!(err instanceof DOMException)) {
 				error("search err: %O", err);
+				magnets[season.number][episode.number] = err;
 			}
 		}
 	}
@@ -286,7 +296,9 @@
 							>
 								{#if i === state.seasonIndex && j === activeSeason.activeEpisode}
 									{#if magnets[season.number] && magnets[season.number][episode.number] !== undefined}
-										{#if magnets[season.number][episode.number]}
+										{#if magnets[season.number][episode.number] === null}
+											Unavailable
+										{:else if magnets[season.number][episode.number].magnet}
 											<div class="h-1/2 flex gap-8">
 												<div class="relative h-full">
 													<GamepadButton button="X" />
@@ -297,8 +309,8 @@
 													<FaPlay />
 												</div>
 											</div>
-										{:else if magnets[season.number][episode.number] === null}
-											Unavailable
+										{:else}
+											Error
 										{/if}
 									{:else}
 										<Circle2 />
