@@ -1,12 +1,11 @@
 <script lang="ts">
 	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
-	import child_process from "child_process";
+	import rootState from "../State";
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { error } from "../log";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
@@ -18,47 +17,33 @@
 	function gamepadHandler(button: string) {
 		if (button === "B") {
 			cancelOverlay();
-			child_process.spawnSync(
-				"killall",
-				["overlay", "mpv", "WebTorrent"],
-				{ stdio: "inherit" }
-			);
+			rootState.torrentdSocket.write(JSON.stringify({ message: "stop" }));
 			history.back();
 			return;
 		}
 	}
 
-	const webtorrent = child_process.spawn(
-		"webtorrent",
-		[
-			"download",
-			state.magnet,
-			`--out=${process.env.HOME}/Downloads`,
-			// use mpv because it supports wayland
-			"--mpv",
-			"--player-args=--audio-device=alsa/hdmi:CARD=PCH,DEV=0 --save-position-on-quit",
-			...(state.file ? ["-s", state.file] : []),
-		],
-		{ stdio: "inherit" }
+	rootState.torrentdSocket.write(
+		JSON.stringify({
+			message: "play",
+			magnet: state.magnet,
+			file: state.file,
+		})
 	);
 
-	webtorrent.on("error", (err) => {
-		error("webtorrent err: %O", err);
-	});
+	rootState.torrentdSocket.on("data", dataHandler);
 
-	webtorrent.on("exit", (code) => {
-		if (code) {
-			error("webtorrent exit code: %O", code);
-		}
-
-		if (location.hash.endsWith("/play")) {
+	function dataHandler(chunk: Buffer) {
+		const data = JSON.parse(chunk.toString());
+		if (data.message === "player_closed") {
 			history.back();
 		}
-	});
+	}
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
+		rootState.torrentdSocket.off("data", dataHandler);
 	});
 </script>
 

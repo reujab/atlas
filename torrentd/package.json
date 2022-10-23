@@ -1,0 +1,21 @@
+{
+  "name": "torrentd",
+  "version": "0.0.0",
+  "description": "Torrent manager",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -w --sourceMap",
+    "build": "tsc --sourceMap && uglifyjs --compress --mangle --source-map content=index.js.map -o index.js index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "webtorrent": "^1.8.32"
+  },
+  "devDependencies": {
+    "@types/node-ipc": "^9.2.0",
+    "@types/webtorrent": "^0.109.3",
+    "typescript": "^4.8.4",
+    "uglify-js": "^3.17.3"
+  }
+}

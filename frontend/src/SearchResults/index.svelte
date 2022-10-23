@@ -46,7 +46,7 @@
 				sources = [];
 
 				if (showingFiles) {
-					playState.file = (source as File).index;
+					playState.file = (source as File).name;
 					location.href = playHref;
 					return;
 				}

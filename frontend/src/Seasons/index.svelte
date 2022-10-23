@@ -70,7 +70,7 @@
 								(file) => file.episode === activeEpisode.number
 							);
 							if (file && loading) {
-								playState.file = file.index;
+								playState.file = file.name;
 								playState.magnet = magnet.magnet;
 								location.href = `#/tv/${title.id}/play`;
 							} else {
@@ -132,7 +132,8 @@
 		if (
 			magnets[season.number][episode.number] &&
 			// retry on error
-			typeof magnets[season.number][episode.number].message !== "string"
+			typeof (magnets[season.number][episode.number] as any).message !==
+				"string"
 		) {
 			return;
 		}
