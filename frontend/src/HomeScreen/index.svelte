@@ -13,6 +13,7 @@
 	import VPNStatus from "./VPNStatus.svelte";
 	import Weather from "./Weather.svelte";
 	import child_process from "child_process";
+	import seedrandom from "seedrandom";
 	import state from "./State";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -20,7 +21,9 @@
 	// set background based on time of day
 	const hour = new Date().getHours();
 	const timeOfDay = hour >= 7 && hour <= 17 ? "day" : "night";
-	const index = Math.floor(Math.random() * (timeOfDay === "day" ? 4 : 23));
+	const max = timeOfDay === "day" ? 4 : 23;
+	const rng = seedrandom(new Date().getDay().toString());
+	const index = Math.floor(rng() * max);
 	const img = `url(./backgrounds/${timeOfDay}/${index}.webp)`;
 
 	// home tiles
