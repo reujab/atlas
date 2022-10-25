@@ -17,7 +17,7 @@
 	function gamepadHandler(button: string) {
 		if (button === "B") {
 			cancelOverlay();
-			rootState.torrentdSocket.write(JSON.stringify({ message: "stop" }));
+			rootState.torrentd.send({ message: "stop" });
 			history.back();
 			return;
 		}
