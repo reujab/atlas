@@ -21,7 +21,7 @@ export default function spawnOverlay(cb?: (code?: number) => void): () => void {
 					if (cb) {
 						overlay.on("exit", cb);
 					}
-				}, 2000);
+				}, 4000);
 			}
 		});
 		child.on("exit", () => {
