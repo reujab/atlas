@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export WAYLAND_DISPLAY=wayland-99
+export WAYLAND_DISPLAY=wayland-0
+export GTK_USE_PORTAL=0
 
 rm -f $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY*
 
