@@ -1,14 +1,27 @@
-import { log, error } from "./log";
+import readline from "readline";
 import net from "net";
+import { EventEmitter } from "events";
+import { log, error } from "./log";
+
+class TorrentdEmitter extends EventEmitter {
+	send: (msg: any) => void;
+}
 
 class State {
 	torrentdSocket: net.Socket = new net.Socket();
+	torrentd: TorrentdEmitter = new TorrentdEmitter();
+	reader: readline.Interface = null;
 
 	constructor() {
 		this.init();
+		this.torrentd.send = (msg: any) => {
+			this.torrentdSocket.write(JSON.stringify(msg) + "\n");
+		}
 	}
 
 	init() {
+		this.reader?.close();
+
 		this.torrentdSocket.on("error", (err) => {
 			error("torrentd err: %O", err);
 		});
@@ -17,21 +30,26 @@ class State {
 			log("Connected to torrentd");
 		});
 
-		this.torrentdSocket.on("data", (chunk) => {
-			try {
-				console.log(JSON.parse(`${chunk}`));
-			} catch (err) {
-				console.error(err);
-				console.log(`${chunk}`);
-			}
-		});
-
 		this.torrentdSocket.on("close", () => {
 			error("Socket closed. Reconnecting");
 			setTimeout(() => {
 				this.torrentdSocket = new net.Socket();
 				this.init();
 			}, 1000);
+		});
+
+		this.reader = readline.createInterface({
+			input: this.torrentdSocket,
+		});
+
+		this.reader.on("line", (line) => {
+			try {
+				const msg = JSON.parse(line);
+				console.log(msg)
+				this.torrentd.emit("message", msg);
+			} catch (err) {
+				console.error(err);
+			}
 		});
 	}
 }

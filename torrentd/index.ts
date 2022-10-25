@@ -1,6 +1,7 @@
 import WebTorrent from "webtorrent";
 import child_process from "child_process";
 import net from "net";
+import readline from "readline";
 
 interface Info {
 	title: null | string,
@@ -27,6 +28,8 @@ server.on("connection", (socket) => {
 
 	clients.push(socket);
 
+	const reader = readline.createInterface({ input: socket });
+
 	socket.on("error", (err) => {
 		console.error(err);
 	});
@@ -34,16 +37,17 @@ server.on("connection", (socket) => {
 	socket.on("close", () => {
 		console.log("Connection closed");
 		clients.splice(clients.indexOf(socket), 1);
+		reader.close();
 	});
 
-	socket.on("data", (chunk) => {
-		console.log(`${chunk}`);
+	reader.on("line", (line) => {
+		console.log(`${line}`);
 
 		let data;
 		try {
-			data = JSON.parse(chunk.toString());
+			data = JSON.parse(line);
 		} catch (err) {
-			console.error(`Could not parse: ${chunk}`);
+			console.error(`Could not parse: ${line}`);
 			socket.destroy();
 			return;
 		}
@@ -56,7 +60,7 @@ server.on("connection", (socket) => {
 				socket.write(JSON.stringify(Object.assign({
 					message: "info",
 					speed: Math.floor(webtorrent.downloadSpeed),
-				}, info)));
+				}, info)) + "\n");
 				break;
 			case "stop":
 				mpv?.kill();
@@ -130,6 +134,6 @@ function play(magnet: string, fileName?: string) {
 
 function emit(message: any) {
 	for (const client of clients) {
-		client.write(JSON.stringify(message));
+		client.write(JSON.stringify(message) + "\n");
 	}
 }

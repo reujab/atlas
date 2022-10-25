@@ -23,19 +23,16 @@
 		}
 	}
 
-	rootState.torrentdSocket.write(
-		JSON.stringify({
-			message: "play",
-			magnet: state.magnet,
-			file: state.file,
-		})
-	);
+	rootState.torrentd.send({
+		message: "play",
+		magnet: state.magnet,
+		file: state.file,
+	});
 
-	rootState.torrentdSocket.on("data", dataHandler);
+	rootState.torrentd.on("message", msgHandler);
 
-	function dataHandler(chunk: Buffer) {
-		const data = JSON.parse(chunk.toString());
-		if (data.message === "player_closed") {
+	function msgHandler(msg: any) {
+		if (msg.message === "player_closed") {
 			history.back();
 		}
 	}
@@ -43,7 +40,7 @@
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
-		rootState.torrentdSocket.off("data", dataHandler);
+		rootState.torrentdSocket.off("message", msgHandler);
 	});
 </script>
 

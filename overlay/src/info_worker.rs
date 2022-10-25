@@ -1,7 +1,12 @@
 use super::{Info, Msg};
 use relm4::prelude::*;
 use serde::Serialize;
-use std::{io::prelude::*, os::unix::net::UnixStream, thread::sleep, time::Duration};
+use std::{
+    io::{prelude::*, BufReader},
+    os::unix::net::UnixStream,
+    thread::sleep,
+    time::Duration,
+};
 
 #[derive(Serialize)]
 struct Message {
@@ -10,20 +15,22 @@ struct Message {
 
 pub(crate) fn update_info(sender: ComponentSender<super::App>) {
     let mut stream = UnixStream::connect("/tmp/torrentd").unwrap();
-    let message = Message {
+    let mut reader = BufReader::new(stream.try_clone().unwrap());
+    let get_info = Message {
         message: "get_info".to_owned(),
     };
-    let message = serde_json::to_string(&message).unwrap();
+    let get_info = serde_json::to_string(&get_info).unwrap() + "\n";
+    let get_info = get_info.as_bytes();
 
     loop {
-        stream.write_all(message.as_bytes()).unwrap();
-        stream.flush().unwrap();
+        stream.write(get_info).unwrap();
 
-        let mut res = [0; 1024];
-        stream.read(&mut res).unwrap();
-        let res = String::from_utf8(res.to_vec()).unwrap();
-        let res = res.trim_matches(0 as char);
-        println!("{res}");
+        let mut res = String::new();
+        if reader.read_line(&mut res).unwrap() == 0 {
+            eprintln!("read_line() returned 0");
+            continue;
+        }
+        print!("{res}");
         let info = serde_json::from_str::<Info>(&res).unwrap();
         sender.input(Msg::UpdateInfo(info));
 
