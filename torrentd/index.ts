@@ -23,6 +23,10 @@ server.listen("/tmp/torrentd", () => {
 	console.log("Started");
 });
 
+server.on("error", (err) => {
+	console.error(err);
+})
+
 server.on("connection", (socket) => {
 	console.log("New connection");
 
@@ -34,7 +38,7 @@ server.on("connection", (socket) => {
 		console.error(err);
 	});
 
-	socket.on("close", () => {
+	socket.once("close", () => {
 		console.log("Connection closed");
 		clients.splice(clients.indexOf(socket), 1);
 		reader.close();
@@ -59,6 +63,7 @@ server.on("connection", (socket) => {
 			case "get_info":
 				socket.write(JSON.stringify(Object.assign({
 					message: "info",
+					peers: currentTorrent?.numPeers,
 					speed: Math.floor(webtorrent.downloadSpeed),
 				}, info)) + "\n");
 				break;

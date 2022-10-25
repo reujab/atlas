@@ -23,6 +23,7 @@ pub(crate) struct App {
 #[derive(Deserialize, Debug, Default, PartialEq)]
 pub struct Info {
     name: Option<String>,
+    peers: Option<u32>,
     speed: Option<u32>,
     buffered: Option<f64>,
 }
@@ -94,10 +95,19 @@ impl SimpleComponent for App {
                                 },
                             },
 
-                            Label {
-                                add_css_class: "speed",
-                                #[watch]
-                                set_label: &(human_bytes::human_bytes(model.info.speed.unwrap_or(0)) + "/s"),
+                            Box {
+                                add_css_class: "info",
+                                set_orientation: Orientation::Vertical,
+
+                                Label {
+                                    #[watch]
+                                    set_label: &format!("Peers: {}", model.info.peers.unwrap_or(0)),
+                                },
+
+                                Label {
+                                    #[watch]
+                                    set_label: &(human_bytes::human_bytes(model.info.speed.unwrap_or(0)) + "/s"),
+                                },
                             },
                         },
                     },

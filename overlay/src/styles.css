@@ -1,16 +1,12 @@
 window {
 	background: transparent;
+	font-family: Cantarell;
+	font-weight: 200;
 }
 
 revealer {
-	padding: 0 2em;
-	margin: 0 4em;
-}
-
-label {
-	font-family: Cantarell;
-	font-size: 7em;
-	font-weight: 200;
+	padding: 0 2rem;
+	margin: 0 4rem;
 }
 
 image {
@@ -19,28 +15,28 @@ image {
 
 .container {
 	background: #222;
-	border-radius: 3em;
-	box-shadow: 0 -0.5em 1.5em #222;
+	border-radius: 3rem;
+	box-shadow: 0 -0.5rem 1.5rem #222;
 	color: white;
-	font-weight: 100;
 }
 
 .container.top {
-	margin-top: -3em;
-	padding: 4em 1.5em 1em 1.5em;
+	margin-top: -3rem;
+	padding: 4rem 1.5rem 1rem 1.5rem;
 }
 
 .container.bottom {
-	margin-bottom: -3em;
-	padding: 1em 1.5em 4em 1.5em;
+	margin-bottom: -3rem;
+	padding: 1rem 1.5rem 4rem 1.5rem;
+	font-size: 7rem;
 }
 
 .title {
-	font-size: 4em;
+	font-size: 4rem;
 }
 
-.speed {
-	font-size: 2em;
+.info {
+	font-size: 2rem;
 	min-width: 12rem;
 }
 
