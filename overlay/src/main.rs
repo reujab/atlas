@@ -51,7 +51,7 @@ struct Format {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Init = Option<bool>;
+    type Init = ();
     type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -308,7 +308,7 @@ fn main() {
 
     let app = RelmApp::new("atlas.overlay");
     println!("running app");
-    app.run::<App>(None);
+    app.run::<App>(());
 
     println!("killing mpv and continuing frontend");
     Command::new("killall")
