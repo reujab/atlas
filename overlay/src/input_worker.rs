@@ -1,8 +1,8 @@
 use gilrs::{ev::Button, Event, Gilrs};
-use relm4::{send, Sender};
+use relm4::prelude::*;
 use std::{process::Command, thread::sleep, time::Duration};
 
-pub fn handle_gamepad(sender: Sender<super::Msg>) {
+pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>) {
     let mut gilrs = Gilrs::new().unwrap();
     loop {
         while let Some(Event { event, .. }) = gilrs.next_event() {
@@ -16,7 +16,7 @@ pub fn handle_gamepad(sender: Sender<super::Msg>) {
                             .unwrap();
                     }
                     Button::East => {
-                        send!(sender, super::Msg::Quit);
+                        sender.input(super::Msg::Quit);
                     }
                     _ => {}
                 }
@@ -37,6 +37,6 @@ pub fn handle_gamepad(sender: Sender<super::Msg>) {
             }
         }
 
-        sleep(Duration::from_millis(10));
+        sleep(Duration::from_millis(20));
     }
 }

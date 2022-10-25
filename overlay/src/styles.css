@@ -3,24 +3,8 @@ window {
 }
 
 revealer {
-	padding-bottom: 0;
-	padding: 2em;
+	padding: 0 2em;
 	margin: 0 4em;
-}
-
-.container {
-	background: #222;
-	border-radius: 3em;
-	box-shadow: 0 -0.5em 1.5em #222;
-	color: white;
-	font-weight: 100;
-	margin-bottom: -5em;
-	margin-top: 3em;
-	padding: 1em 1.5em 4.5em 1.5em;
-}
-
-.mono {
-	font-family: Noto Sans Mono;
 }
 
 label {
@@ -30,14 +14,50 @@ label {
 }
 
 image {
-	margin-right: 2em;
+	margin-right: 2rem;
+}
+
+.container {
+	background: #222;
+	border-radius: 3em;
+	box-shadow: 0 -0.5em 1.5em #222;
+	color: white;
+	font-weight: 100;
+}
+
+.container.top {
+	margin-top: -3em;
+	padding: 4em 1.5em 1em 1.5em;
+}
+
+.container.bottom {
+	margin-bottom: -3em;
+	padding: 1em 1.5em 4em 1.5em;
+}
+
+.title {
+	font-size: 4em;
+}
+
+.speed {
+	font-size: 2em;
+	min-width: 12rem;
+}
+
+.mono {
+	font-family: Noto Sans Mono;
 }
 
 .progress-bar {
 	background: gray;
-	border-radius: 2em;
+	border-radius: 2rem;
 	min-height: 48px;
 	min-width: 750px;
+}
+
+.buffered {
+	background: darkgray;
+	border-radius: 2rem;
 }
 
 .progress {
