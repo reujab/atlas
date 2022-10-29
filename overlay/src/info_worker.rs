@@ -23,7 +23,7 @@ pub(crate) fn update_info(sender: ComponentSender<super::App>) {
     let get_info = get_info.as_bytes();
 
     loop {
-        stream.write(get_info).unwrap();
+        stream.write_all(get_info).unwrap();
 
         let mut res = String::new();
         if reader.read_line(&mut res).unwrap() == 0 {

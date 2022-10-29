@@ -44,9 +44,11 @@ server.on("connection", (socket) => {
 		reader.close();
 	});
 
-	reader.on("line", (line) => {
-		console.log(`${line}`);
+	reader.on("error", (err) => {
+		console.error(err);
+	});
 
+	reader.on("line", (line) => {
 		let data;
 		try {
 			data = JSON.parse(line);

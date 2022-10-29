@@ -40,7 +40,7 @@
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
-		rootState.torrentdSocket.off("message", msgHandler);
+		rootState.torrentd.off("message", msgHandler);
 	});
 </script>
 
