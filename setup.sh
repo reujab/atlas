@@ -9,11 +9,9 @@ apt install -y \
 	iw \
 	libgtk-4-dev \
 	mpv \
-	mpv-mpris \
 	netctl \
 	npm \
 	openvpn \
-	playerctl \
 	plymouth \
 	postgresql-14 \
 	snapd \

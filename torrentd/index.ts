@@ -4,7 +4,6 @@ import net from "net";
 import readline from "readline";
 
 interface Info {
-	title: null | string,
 	buffered: null | number,
 }
 
@@ -15,7 +14,6 @@ const clients: net.Socket[] = [];
 let currentTorrent: null | WebTorrent.Torrent = null;
 let mpv: null | child_process.ChildProcess = null;
 let info: Info = {
-	title: null,
 	buffered: null,
 };
 
@@ -103,7 +101,6 @@ function play(magnet: string, fileName?: string) {
 		}
 
 		const file = torrent.files[index];
-		info.title = file.name;
 		console.log(`Selecting "${file.name}"`);
 		file.select();
 
@@ -128,7 +125,6 @@ function play(magnet: string, fileName?: string) {
 			currentTorrent = null;
 			mpv = null;
 			info = {
-				title: null,
 				buffered: null,
 			};
 			torrentServer.close();

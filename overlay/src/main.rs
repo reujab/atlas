@@ -1,20 +1,24 @@
 mod info_worker;
 mod input_worker;
-mod position_worker;
+mod mpv_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
 use relm4::prelude::*;
 use serde::Deserialize;
-use std::{cmp::max, process::Command, thread};
+use std::{
+    cmp::max, io::BufReader, os::unix::net::UnixStream, process::Command, thread, time::Duration,
+};
 
 const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
 
 pub(crate) struct App {
+    title: String,
     info: Info,
     duration: u32,
     position: u32,
-    status: Status,
+    paused: bool,
+    dropped: u64,
 
     buffered_width: i32,
     progress_width: i32,
@@ -22,24 +26,19 @@ pub(crate) struct App {
 
 #[derive(Deserialize, Debug, Default, PartialEq)]
 pub struct Info {
-    name: Option<String>,
     peers: Option<u32>,
     speed: Option<u32>,
     buffered: Option<f64>,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Status {
-    Playing,
-    Paused,
-}
-
 #[derive(Debug)]
 pub enum Msg {
+    UpdateTitle(String),
     UpdateInfo(Info),
     UpdateDuration(u32),
     UpdatePosition(u32),
-    UpdateStatus(Status),
+    UpdatePaused(bool),
+    UpdateDropped(u64),
     Quit,
 }
 
@@ -51,7 +50,7 @@ struct Format {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Init = ();
+    type Init = UnixStream;
     type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -72,7 +71,7 @@ impl SimpleComponent for App {
                         set_transition_duration: 1000,
                         set_transition_type: gtk::RevealerTransitionType::SlideDown,
                         #[watch]
-                        set_reveal_child: model.status == Status::Paused,
+                        set_reveal_child: model.paused,
 
                         Box {
                             add_css_class: "container",
@@ -83,6 +82,7 @@ impl SimpleComponent for App {
                             Box {
                                 set_orientation: Orientation::Vertical,
                                 set_hexpand: true,
+                                set_valign: Align::Center,
                                 set_size_request: (500, -1),
 
                                 Label {
@@ -91,13 +91,14 @@ impl SimpleComponent for App {
                                     set_wrap_mode: gtk::pango::WrapMode::WordChar,
                                     set_max_width_chars: 32,
                                     #[watch]
-                                    set_label: &model.info.name.clone().unwrap_or("Untitled".to_owned()),
+                                    set_label: &model.title,
                                 },
                             },
 
                             Box {
                                 add_css_class: "info",
                                 set_orientation: Orientation::Vertical,
+                                set_valign: Align::Center,
 
                                 Label {
                                     #[watch]
@@ -108,6 +109,11 @@ impl SimpleComponent for App {
                                     #[watch]
                                     set_label: &(human_bytes::human_bytes(model.info.speed.unwrap_or(0)) + "/s"),
                                 },
+
+                                Label {
+                                    #[watch]
+                                    set_label: &format!("Dropped: {}", model.dropped),
+                                },
                             },
                         },
                     },
@@ -117,7 +123,7 @@ impl SimpleComponent for App {
                     set_transition_duration: 1000,
                     set_transition_type: gtk::RevealerTransitionType::SlideUp,
                     #[watch]
-                    set_reveal_child: model.status == Status::Paused,
+                    set_reveal_child: model.paused,
 
                     Box {
                         add_css_class: "container",
@@ -157,9 +163,9 @@ impl SimpleComponent for App {
                         Image {
                             set_pixel_size: 100,
                             #[watch]
-                            set_icon_name: Some(match model.status {
-                                Status::Playing => "media-playback-start",
-                                Status::Paused => "media-playback-pause",
+                            set_icon_name: Some(match model.paused {
+                                true => "media-playback-pause",
+                                false => "media-playback-start",
                             }),
                         },
 
@@ -226,16 +232,17 @@ impl SimpleComponent for App {
     }
 
     fn init(
-        _: Self::Init,
+        stream: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        println!("init");
         let model = App {
+            title: "Loading...".to_owned(),
             info: Info::default(),
-            status: Status::Playing,
             duration: 0,
             position: 0,
+            paused: false,
+            dropped: 0,
 
             buffered_width: 0,
             progress_width: 0,
@@ -245,19 +252,21 @@ impl SimpleComponent for App {
         relm4::set_global_css(include_bytes!("styles.css"));
 
         let sender_clone = sender.clone();
+        let stream_clone = stream.try_clone().unwrap();
+        thread::spawn(move || mpv_worker::mpv_worker(sender_clone, stream_clone));
+        let sender_clone = sender.clone();
         thread::spawn(move || info_worker::update_info(sender_clone));
         let sender_clone = sender.clone();
-        thread::spawn(move || input_worker::handle_gamepad(sender_clone));
-        let sender_clone = sender.clone();
-        thread::spawn(move || position_worker::update_position(sender_clone));
+        thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream));
 
-        println!("init done");
         ComponentParts { model, widgets }
     }
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
-        println!("update");
         match msg {
+            Msg::UpdateTitle(title) => {
+                self.title = title;
+            }
             Msg::UpdateInfo(info) => {
                 self.info = info;
             }
@@ -267,8 +276,11 @@ impl SimpleComponent for App {
             Msg::UpdatePosition(position) => {
                 self.position = position;
             }
-            Msg::UpdateStatus(status) => {
-                self.status = status;
+            Msg::UpdatePaused(paused) => {
+                self.paused = paused;
+            }
+            Msg::UpdateDropped(dropped) => {
+                self.dropped = dropped;
             }
             Msg::Quit => {
                 relm4::main_application().quit();
@@ -281,10 +293,6 @@ impl SimpleComponent for App {
         self.progress_width = PROGRESS_BAR_HEIGHT
             + (self.position as f64 / self.duration as f64
                 * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
-    }
-
-    fn post_view() {
-        println!("post_view");
     }
 }
 
@@ -300,17 +308,31 @@ fn format(secs: u32) -> Format {
 }
 
 fn main() {
-    println!("suspending frontend");
+    println!("Connecting to mpv");
+    let stream = loop {
+        match UnixStream::connect("/tmp/mpv") {
+            Ok(stream) => break stream,
+            Err(_) => {
+                thread::sleep(Duration::from_millis(100));
+                continue;
+            }
+        }
+    };
+    let mut reader = BufReader::new(stream.try_clone().unwrap());
+    println!("Waiting for file to load");
+    mpv_worker::wait_for_event(&mut reader, "file-loaded");
+    drop(reader);
+
+    thread::sleep(Duration::from_secs(3));
     Command::new("killall")
         .args(&["-STOP", "atlas-frontend"])
         .output()
         .unwrap();
 
+    println!("Starting overlay");
     let app = RelmApp::new("atlas.overlay");
-    println!("running app");
-    app.run::<App>(());
+    app.run::<App>(stream);
 
-    println!("killing mpv and continuing frontend");
     Command::new("killall")
         .args(&["-CONT", "atlas-frontend"])
         .output()
