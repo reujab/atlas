@@ -32,8 +32,8 @@ server.on("connection", (socket) => {
 
 	const reader = readline.createInterface({ input: socket });
 
-	socket.on("error", (err) => {
-		console.error(err);
+	socket.on("error", (err: any) => {
+		console.error(err.code);
 	});
 
 	socket.once("close", () => {

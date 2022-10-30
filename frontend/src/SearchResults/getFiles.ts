@@ -32,7 +32,6 @@ export default function getFiles(magnet: string): Promise<File[]> {
 				return;
 			}
 
-			log("stdout: %O", stdout);
 			const matches = stdout.matchAll(
 				/^\d+ *(.+\.(?:mkv|mp4|avi)) \(([\d.,]+ .+)\)$/gm
 			);

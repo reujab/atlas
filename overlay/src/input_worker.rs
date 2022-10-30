@@ -1,5 +1,6 @@
 use crate::mpv_worker::get_command;
 use gilrs::{ev::Button, Event, Gilrs};
+use log::debug;
 use relm4::prelude::*;
 use std::{io::prelude::*, os::unix::net::UnixStream, thread::sleep, time::Duration};
 
@@ -11,7 +12,7 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mut stream: Un
 
     loop {
         while let Some(Event { event, .. }) = gilrs.next_event() {
-            println!("{:?}", event);
+            debug!("{:?}", event);
             if let gilrs::ev::EventType::ButtonPressed(button, _) = event {
                 match button {
                     Button::South => {

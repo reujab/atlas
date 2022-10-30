@@ -51,10 +51,10 @@ class State {
 		this.reader.on("line", (line) => {
 			try {
 				const msg = JSON.parse(line);
-				log("%O", msg);
+				log("torrentd: %O", msg);
 				this.torrentd.emit("message", msg);
 			} catch (err) {
-				error("%O", err);
+				error("torrentd error: %O", err);
 			}
 		});
 	}

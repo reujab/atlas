@@ -1,4 +1,5 @@
 use super::{Info, Msg};
+use log::{debug, warn};
 use relm4::prelude::*;
 use serde::Serialize;
 use std::{
@@ -27,10 +28,10 @@ pub(crate) fn update_info(sender: ComponentSender<super::App>) {
 
         let mut res = String::new();
         if reader.read_line(&mut res).unwrap() == 0 {
-            eprintln!("read_line() returned 0");
-            continue;
+            warn!("Socket closed");
+            break;
         }
-        print!("{res}");
+        debug!("{}", res.trim());
         let info = serde_json::from_str::<Info>(&res).unwrap();
         sender.input(Msg::UpdateInfo(info));
 

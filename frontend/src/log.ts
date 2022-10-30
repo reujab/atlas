@@ -3,7 +3,7 @@ export function log(format: string, ...args: any[]): void {
 	for (const arg of args) {
 		format = format.replace("%O", JSON.stringify(arg, null, 2));
 	}
-	process.stdout.write(`${format}\n`);
+	process.stdout.write(`[${new Date().toISOString()}] ${format}\n`);
 }
 
 export function error(format: string, ...args: any[]): void {
@@ -12,5 +12,5 @@ export function error(format: string, ...args: any[]): void {
 		const err = arg?.error ? arg.error : arg;
 		format = format.replace("%O", `${err} at ${arg?.filename}:${arg?.lineno}`);
 	}
-	process.stderr.write(`${format}\n`);
+	process.stderr.write(`[${new Date().toISOString()}] ${format}\n`);
 }

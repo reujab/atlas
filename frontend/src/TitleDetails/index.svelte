@@ -24,7 +24,7 @@
 	}
 
 	const title = cache[$params.type][$params.id];
-	log("%O", title);
+	log("title: %O", title);
 
 	const buttons: IButton[] = [];
 	let activeButton = 0;
@@ -105,8 +105,7 @@
 			"movie"
 		)
 			.then((sources: Source[]) => {
-				log("sources: %O", sources);
-
+				log("source: %O", sources[0]);
 				if (sources[0]?.seeders >= 10) {
 					sources[0].getMagnet().then((magnet) => {
 						playState.file = null;

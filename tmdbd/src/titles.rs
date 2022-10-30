@@ -1,5 +1,6 @@
 use crate::{get, TitleType};
 use futures::stream::StreamExt;
+use log::error;
 use serde::Deserialize;
 use sqlx::Row;
 use std::{env, time::Duration};
@@ -103,7 +104,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     let url = format!("https://api.themoviedb.org/3/{}/{id}?api_key={key}&append_to_response=videos,release_dates,content_ratings", title_type.to_string());
     let res = get(&url).await.unwrap();
     if res.status() != 200 {
-        eprintln!("Error: {url} returned {}", res.status());
+        error!("{url} returned {}", res.status());
         sqlx::query(
             r#"
                 DELETE FROM titles

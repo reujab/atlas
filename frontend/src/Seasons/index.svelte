@@ -164,7 +164,7 @@
 				.sort((a, b) => b.score - a.score);
 
 			const source = sources[0];
-			log("%O", source);
+			log("source: %O", source);
 			if (source?.seeders >= 5) {
 				const magnet = await source.getMagnet();
 				if (source.episode) {

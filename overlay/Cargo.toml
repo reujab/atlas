@@ -6,9 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+env_logger = "0.9"
 gilrs = "0.9"
 gtk = { version = "0.5", package = "gtk4" }
 human_bytes = "0.3"
+log = "0.4"
 relm4 = { git = "https://github.com/Relm4/Relm4" }
 relm4-components = { git = "https://github.com/Relm4/Relm4" }
 relm4-macros = { git = "https://github.com/Relm4/Relm4" }

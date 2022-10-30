@@ -7,6 +7,7 @@ mod titles;
 
 use env_logger::Env;
 use futures::StreamExt;
+use log::{info, warn};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::Row;
 use std::{env, path::Path, time::Duration};
@@ -84,7 +85,7 @@ async fn get(url: &str) -> Result<reqwest::Response, reqwest::Error> {
 }
 
 async fn check(pool: &Pool) {
-    println!("Consistency check...");
+    info!("Consistency check...");
 
     let posters = env::var("POSTERS_PATH").unwrap();
     let mut missing = Vec::new();
@@ -108,7 +109,7 @@ async fn check(pool: &Pool) {
         let path = format!("{posters}/{}/{id}", title_type.to_string());
         let path = Path::new(&path);
         if !path.exists() {
-            println!("{:?} doesn't exist", path);
+            warn!("{:?} doesn't exist", path);
             missing.push(id);
         }
     }

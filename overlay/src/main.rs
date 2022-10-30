@@ -3,6 +3,7 @@ mod input_worker;
 mod mpv_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
+use log::info;
 use relm4::prelude::*;
 use serde::Deserialize;
 use std::{
@@ -308,7 +309,7 @@ fn format(secs: u32) -> Format {
 }
 
 fn main() {
-    println!("Connecting to mpv");
+    info!("Connecting to mpv");
     let stream = loop {
         match UnixStream::connect("/tmp/mpv") {
             Ok(stream) => break stream,
@@ -319,7 +320,7 @@ fn main() {
         }
     };
     let mut reader = BufReader::new(stream.try_clone().unwrap());
-    println!("Waiting for file to load");
+    info!("Waiting for file to load");
     mpv_worker::wait_for_event(&mut reader, "file-loaded");
     drop(reader);
 
@@ -329,7 +330,7 @@ fn main() {
         .output()
         .unwrap();
 
-    println!("Starting overlay");
+    info!("Starting overlay");
     let app = RelmApp::new("atlas.overlay");
     app.run::<App>(stream);
 

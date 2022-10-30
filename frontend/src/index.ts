@@ -68,19 +68,22 @@ export async function get(...args: Parameters<typeof fetch>): Promise<Response> 
 			log(`Getting ${args[0]}`);
 			// eslint-disable-next-line no-await-in-loop
 			const res = await fetch(...args);
+			log(`Reply at ${(Date.now() - start) / 1000}s`);
+
 			lastErr = new Error(`status: ${res.status}`);
-			if (res.status >= 400 && res.status < 500) break;
+
 			if (res.status >= 500) continue;
 			if (res.status !== 200) break;
-
-			log(`Reply at ${(Date.now() - start) / 1000}s`);
 
 			return res;
 		} catch (err) {
 			lastErr = err;
+
 			// break if the fetch was cancelled by a signal
 			if (err instanceof DOMException) break;
+
 			error("%O", err);
+
 			if (err.message.startsWith("status:")) break;
 		}
 	}

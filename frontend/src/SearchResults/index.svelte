@@ -18,7 +18,7 @@
 	let showingFiles = false;
 	$: activeSource = sources[sourceIndex];
 
-	log(query);
+	log("search: %O", query);
 	search(query)
 		.then((res) => {
 			sources = res;

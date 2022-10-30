@@ -31,7 +31,7 @@
 					icon: forecast.icon.replace(/,\d+/g, ""),
 					forecast: forecast.shortForecast.replace(/and/gi, "&"),
 				};
-				log("%O", state.weather);
+				log("weather: %O", state.weather);
 			} catch (err) {
 				error("error getting weather: %O", err);
 				setTimeout(updateWeather, 1000);
