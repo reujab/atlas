@@ -154,6 +154,8 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     while let Some(chunk) = stream.next().await {
         file.write_all(&chunk.unwrap()).await.unwrap();
     }
+    file.sync_all().await.unwrap();
+    drop(file);
     info!("Downloaded poster to file://{path}");
 
     let trailer = title
