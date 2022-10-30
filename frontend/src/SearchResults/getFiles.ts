@@ -1,17 +1,17 @@
-import child_process from "child_process";
+import childProcess from "child_process";
 import { log } from "../log";
 import { parseName } from "./search";
 
 export interface File {
-	name: string,
-	size: string,
-	seasons: null | number[],
-	episode: null | number,
+	name: string
+	size: string
+	seasons: null | number[]
+	episode: null | number
 }
 
 export default function getFiles(magnet: string): Promise<File[]> {
 	return new Promise((resolve, reject) => {
-		const webtorrent = child_process.spawn("webtorrent", [magnet, "-s"]);
+		const webtorrent = childProcess.spawn("webtorrent", [magnet, "-s"]);
 		let stdout = "";
 
 		webtorrent.on("error", (err) => {
@@ -28,7 +28,7 @@ export default function getFiles(magnet: string): Promise<File[]> {
 
 		webtorrent.on("exit", (code) => {
 			if (code !== 0) {
-				reject(`webtorrent exit code: ${code}`);
+				reject(new Error(`webtorrent exit code: ${code}`));
 				return;
 			}
 
@@ -37,12 +37,11 @@ export default function getFiles(magnet: string): Promise<File[]> {
 				/^\d+ *(.+\.(?:mkv|mp4|avi)) \(([\d.,]+ .+)\)$/gm
 			);
 
-			resolve([...matches].map((match) => (
-				Object.assign({
-					name: match[1],
-					size: match[2],
-				}, parseName(match[1]))
-			)).sort(
+			resolve([...matches].map((match) => ({
+				name: match[1],
+				size: match[2],
+				...parseName(match[1]),
+			})).sort(
 				(a, b) => {
 					if (a.seasons && b.seasons && a.seasons[0] !== b.seasons[0])
 						if (a.seasons[0] < b.seasons[0])
@@ -55,6 +54,7 @@ export default function getFiles(magnet: string): Promise<File[]> {
 						return 1;
 					if (a.episode && !b.episode)
 						return -1;
+					// @ts-ignore:next-line
 					return a.episode - b.episode;
 				}
 			));

@@ -1,13 +1,13 @@
-const CopyPlugin = require("copy-webpack-plugin")
-const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin")
-const SveltePreprocess = require("svelte-preprocess")
-const dist = __dirname + "/http"
-const src = __dirname + "/src"
+const CopyPlugin = require("copy-webpack-plugin");
+const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin");
+const SveltePreprocess = require("svelte-preprocess");
+const dist = `${__dirname}/http`;
+const src = `${__dirname}/src`;
 
 module.exports = {
 	target: "electron-renderer",
 	entry: {
-		index: "./src/index.js",
+		index: "./src/index.ts",
 	},
 	output: {
 		path: dist,
@@ -24,7 +24,7 @@ module.exports = {
 				use: {
 					loader: "svelte-loader",
 					options: {
-						preprocess: SveltePreprocess(),
+						preprocess: new SveltePreprocess(),
 					},
 				},
 			},
@@ -74,4 +74,4 @@ module.exports = {
 			}),
 		],
 	},
-}
+};

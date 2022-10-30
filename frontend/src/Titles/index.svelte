@@ -1,10 +1,10 @@
 <script lang="ts">
-	const { params } = require("svelte-hash-router");
 	import Circle2 from "svelte-loading-spinners/dist/ts/Circle2.svelte";
 	import Header from "../Header/index.svelte";
 	import store from "./State";
 	import { genres } from "../db";
 	import { onDestroy, onMount } from "svelte";
+	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const type = $params.type as "movie" | "tv";
@@ -24,15 +24,13 @@
 		}, 100);
 	}
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		if (button === "B") {
 			history.back();
 			return;
 		}
 
-		if (!state.ready) {
-			return;
-		}
+		if (!state.ready) return;
 
 		const row = state.rows[state.activeRow];
 		const title = row.titles[row.activeCol];
@@ -68,15 +66,14 @@
 		scroll();
 	}
 
-	function scroll(instant?: boolean) {
+	function scroll(instant?: boolean): void {
 		rowsEle?.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
 
 		for (const row of state.rows) {
 			row.element?.querySelector(".posters").scrollTo({
-				left:
-					row.element?.querySelectorAll(".poster")[row.activeCol]
-						?.offsetLeft - 16,
+				left: (row.element?.querySelectorAll(".poster")[row.activeCol] as any)?.offsetLeft - 16,
 				top: 0,
+				// @ts-ignore:next-line
 				behavior: instant ? "instant" : "auto",
 			});
 		}

@@ -1,23 +1,20 @@
-import { log } from "./log"
+import { log } from "./log";
+import { GamepadListener } from "gamepad.js";
 
 interface Axis {
-	interval?: NodeJS.Timeout,
-	lastButton?: "up" | "down" | "left" | "right" | null,
+	interval?: NodeJS.Timeout
+	lastButton?: "up" | "down" | "left" | "right" | null
 }
-
-const GamepadListener = require("gamepad.js").GamepadListener;
 
 const listener = new GamepadListener();
 const handlers: ((button: string) => void)[] = [];
-let axes: { [id: number]: Axis } = { 0: {}, 1: {} };
+const axes: { [id: number]: Axis } = { 0: {}, 1: {} };
 let buttonInterval: NodeJS.Timeout;
 
 listener.start();
 
 listener.on("gamepad:axis", ({ detail }: any) => {
-	if (detail.stick !== 0) {
-		return;
-	}
+	if (detail.stick !== 0) return;
 
 	const axis = axes[detail.axis];
 
@@ -27,27 +24,20 @@ listener.on("gamepad:axis", ({ detail }: any) => {
 		return;
 	}
 
-	let button: "left" | "right" | "up" | "down";
-	if (detail.axis === 0 && detail.value < 0) {
-		button = "left";
-	} else if (detail.axis === 0 && detail.value > 0) {
-		button = "right";
-	} else if (detail.axis === 1 && detail.value < 0) {
-		button = "up";
-	} else if (detail.axis === 1 && detail.value > 0) {
-		button = "down";
-	}
+	let button: null | "left" | "right" | "up" | "down" = null;
+	if (detail.axis === 0 && detail.value < 0) button = "left";
+	else if (detail.axis === 0 && detail.value > 0) button = "right";
+	else if (detail.axis === 1 && detail.value < 0) button = "up";
+	else if (detail.axis === 1 && detail.value > 0) button = "down";
 
-	if (button === axis.lastButton) {
-		return;
-	}
+	if (button === axis.lastButton) return;
 
 	axis.lastButton = button;
 
 	clearInterval(axis.interval);
 
-	function dispatchButton() {
-		dispatch(button);
+	function dispatchButton(): void {
+		if (button) dispatch(button);
 	}
 
 	dispatchButton();
@@ -55,18 +45,16 @@ listener.on("gamepad:axis", ({ detail }: any) => {
 });
 
 listener.on("gamepad:button", ({ detail }: any) => {
-	const button = getButtonName(detail.button)
+	const button = getButtonName(detail.button);
 
-	function dispatchButton() {
-		dispatch(button);
+	function dispatchButton(): void {
+		if (button) dispatch(button);
 	}
 
 	if (detail.pressed) {
 		log("%O %O", button, detail.button);
 
-		if (button === null) {
-			return;
-		}
+		if (button === null) return;
 
 		dispatchButton();
 	}
@@ -114,7 +102,7 @@ onkeydown = (e) => {
 	}
 
 	e.preventDefault();
-}
+};
 
 function getButtonName(id: number): string | null {
 	switch (id) {
@@ -139,17 +127,15 @@ function getButtonName(id: number): string | null {
 	}
 }
 
-function dispatch(e: string) {
-	for (const cb of handlers) {
-		cb(e);
-	}
+function dispatch(e: string): void {
+	for (const cb of handlers) cb(e);
 }
 
-export function subscribe(cb: (button: string) => void) {
+export function subscribe(cb: (button: string) => void): void {
 	handlers.push(cb);
-};
+}
 
-export function unsubscribe(cb: (button: string) => void) {
+export function unsubscribe(cb: (button: string) => void): void {
 	const index = handlers.indexOf(cb);
 	if (index === -1) {
 		throw new Error("cannot unsubscribe: handler not found");

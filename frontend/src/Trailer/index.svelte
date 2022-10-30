@@ -1,15 +1,15 @@
 <script lang="ts">
-	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
-	import child_process from "child_process";
+	import childProcess from "child_process";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { onDestroy } from "svelte";
-	import { subscribe, unsubscribe } from "../gamepad";
 	import { error, log } from "../log";
+	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
+	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = cache[$params.type][$params.id];
-	const mpv = child_process.spawn(
+	const mpv = childProcess.spawn(
 		"mpv",
 		[
 			"--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
@@ -18,7 +18,7 @@
 		],
 		{ stdio: "inherit" }
 	);
-	const overlay = child_process.spawn("atlas-overlay", {
+	const overlay = childProcess.spawn("atlas-overlay", {
 		stdio: "inherit",
 	});
 
@@ -28,13 +28,10 @@
 
 	overlay.on("exit", (code) => {
 		log("overlay exit code: %O", code);
-
-		if (location.hash.includes("/trailer")) {
-			history.back();
-		}
+		if (location.hash.includes("/trailer")) history.back();
 	});
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		if (button === "B") {
 			mpv.kill();
 			overlay.kill();

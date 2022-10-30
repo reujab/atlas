@@ -1,6 +1,5 @@
 <script lang="ts">
-	const Carousel = require("svelte-carousel").default;
-	const { params } = require("svelte-hash-router");
+	import Carousel from "svelte-carousel";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
@@ -13,13 +12,14 @@
 	import { cache } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy, onMount } from "svelte";
+	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = cache.tv[$params.id];
 	const magnets: {
 		[season: number]: {
-			[episode: number]: null | { magnet: string; season: boolean };
-		};
+			[episode: number]: null | { magnet: string; season: boolean }
+		}
 	} = {};
 	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
@@ -42,7 +42,7 @@
 		}, 50);
 	}
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		if (button === "B") {
 			if (loading) {
 				loading = false;
@@ -54,9 +54,7 @@
 			return;
 		}
 
-		if (!seasons.length) {
-			return;
-		}
+		if (!seasons.length) return;
 
 		switch (button) {
 			case "A":
@@ -67,7 +65,7 @@
 						loading = true;
 						getFiles(magnet.magnet).then((files) => {
 							const file = files.find(
-								(file) => file.episode === activeEpisode.number
+								(f) => f.episode === activeEpisode.number
 							);
 							if (file && loading) {
 								playState.file = file.name;
@@ -117,7 +115,7 @@
 		setTimeout(update);
 	}
 
-	async function update() {
+	async function update(): Promise<void> {
 		seasonsEle.scrollTo(activeSeason.ele.offsetLeft - 16, 0);
 		activeSeason.episodesEle.scrollTo(0, activeEpisode.ele.offsetTop - 20);
 
@@ -160,8 +158,7 @@
 			)
 				.flat()
 				.filter(
-					(source) =>
-						source.seasons?.includes(season.number) &&
+					(source) => source.seasons?.includes(season.number) &&
 						[episode.number, null].includes(source.episode)
 				)
 				.sort((a, b) => b.score - a.score);
@@ -209,7 +206,7 @@
 		return searchCache[query];
 	}
 
-	function retry(e: any) {
+	function retry(e: any): void {
 		e.srcElement.src = e.srcElement.src;
 	}
 
@@ -296,7 +293,7 @@
 								class="mr-8 h-full flex items-center justify-center min-w-[146px]"
 							>
 								{#if i === state.seasonIndex && j === activeSeason.activeEpisode}
-									{#if magnets[season.number] && magnets[season.number][episode.number] !== undefined}
+									{#if magnets[season.number]?.[episode.number] !== undefined}
 										{#if magnets[season.number][episode.number] === null}
 											Unavailable
 										{:else if magnets[season.number][episode.number].magnet}

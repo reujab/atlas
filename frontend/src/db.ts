@@ -2,20 +2,20 @@ import postgres from "postgres";
 import { error } from "./log";
 
 interface Genre {
-	id: number,
-	name: string,
+	id: number
+	name: string
 }
 
 export interface Title {
-	type: "movie" | "tv",
-	id: number,
-	title: string,
-	genres: number[],
-	overview: string,
-	released: Date,
-	trailer: string | null,
-	rating: null | string,
-	poster: HTMLImageElement,
+	type: "movie" | "tv"
+	id: number
+	title: string
+	genres: number[]
+	overview: string
+	released: Date
+	trailer: string | null
+	rating: null | string
+	poster: HTMLImageElement
 }
 
 const sql = postgres({
@@ -23,7 +23,16 @@ const sql = postgres({
 	username: "atlas",
 });
 
-export async function cacheGenres() {
+export const genres: { [id: number]: string } = {};
+
+export const cache: { [type: string]: { [id: number]: Title } } = {
+	movie: {},
+	tv: {},
+};
+
+export const sortedGenres: Genre[] = [];
+
+export async function cacheGenres(): Promise<void> {
 	const rows = await sql`SELECT id::bigint, name FROM genres`;
 	for (const row of rows) {
 		genres[row.id] = row.name;
@@ -32,7 +41,7 @@ export async function cacheGenres() {
 	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function cacheTitles(titles: Title[]) {
+function cacheTitles(titles: Title[]): void {
 	for (const title of titles) {
 		cache[title.type][title.id] = title;
 		title.poster = new Image();
@@ -43,15 +52,6 @@ function cacheTitles(titles: Title[]) {
 		title.poster.src = `file://${process.env.POSTERS_PATH}/${title.type}/${title.id}`;
 	}
 }
-
-export const genres: { [id: number]: string } = {};
-
-export const cache: { [type: string]: { [id: number]: Title } } = {
-	movie: {},
-	tv: {},
-};
-
-export const sortedGenres: Genre[] = [];
 
 export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 	const trending = await sql`
@@ -87,7 +87,7 @@ export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 
 export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): Promise<Title[]> {
 	let titles;
-	if (genre === sortedGenres.find((genre) => genre.name === "Kids").id) {
+	if (genre === sortedGenres.find((g) => g.name === "Kids")?.id) {
 		titles = await sql`
 			SELECT id, type, title, genres, overview, released, trailer, rating
 			FROM titles
@@ -125,7 +125,7 @@ export async function getAutocomplete(query: string, blacklist: number[] = []): 
 	autocompleteQuery = sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
-		WHERE title ILIKE ${"%" + query.replace(/\s/g, "%") + "%"}
+		WHERE title ILIKE ${`%${query.replace(/\s/g, "%")}%`}
 		AND NOT id = ANY(${blacklist})
 		ORDER BY popularity DESC NULLS LAST
 		LIMIT 2

@@ -7,18 +7,19 @@ import Seasons from "./Seasons/index.svelte";
 import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
 import Trailer from "./Trailer/index.svelte";
-import child_process from "child_process";
+import childProcess from "child_process";
 import { cacheGenres } from "./db";
 import { error, log } from "./log";
 import { subscribe } from "./gamepad";
 
 let lastKill = 0;
-let killTimeout;
+let killTimeout: NodeJS.Timer;
 
 addEventListener("error", (err) => {
-	if (err.message === "Uncaught EvalError: Possible side-effect in debug-evaluate" || err.message.startsWith("Uncaught SyntaxError")) {
-		return;
-	}
+	if (
+		err.message === "Uncaught EvalError: Possible side-effect in debug-evaluate" ||
+		err.message.startsWith("Uncaught SyntaxError")
+	) return;
 
 	error("Uncaught error: %O", err);
 });
@@ -42,13 +43,13 @@ routes.set({
 
 subscribe(() => {
 	if (Date.now() - lastKill > 10000) {
-		child_process.exec("killall -STOP tmdbd");
+		childProcess.exec("killall -STOP tmdbd");
 		lastKill = Date.now();
 	}
 
 	clearTimeout(killTimeout);
 	killTimeout = setTimeout(() => {
-		child_process.exec("killall -CONT tmdbd");
+		childProcess.exec("killall -CONT tmdbd");
 	}, 1000 * 60 * 10);
 });
 
@@ -56,28 +57,21 @@ export default new Router({
 	target: document.body,
 });
 
-export async function get(...args) {
+export async function get(...args: Parameters<typeof fetch>): Promise<Response> {
 	const start = Date.now();
 	let lastErr;
 
 	for (let i = 0; i < 4; i++) {
-		if (Date.now() - start > 5000) {
-			break;
-		}
+		if (Date.now() - start > 5000) break;
 
 		try {
 			log(`Getting ${args[0]}`);
+			// eslint-disable-next-line no-await-in-loop
 			const res = await fetch(...args);
 			lastErr = new Error(`status: ${res.status}`);
-			if (res.status >= 400 && res.status < 500) {
-				break;
-			}
-			if (res.status >= 500) {
-				continue;
-			}
-			if (res.status !== 200) {
-				break;
-			}
+			if (res.status >= 400 && res.status < 500) break;
+			if (res.status >= 500) continue;
+			if (res.status !== 200) break;
 
 			log(`Reply at ${(Date.now() - start) / 1000}s`);
 
@@ -85,13 +79,9 @@ export async function get(...args) {
 		} catch (err) {
 			lastErr = err;
 			// break if the fetch was cancelled by a signal
-			if (err instanceof DOMException) {
-				break;
-			}
+			if (err instanceof DOMException) break;
 			error("%O", err);
-			if (err.message.startsWith("status:")) {
-				break;
-			}
+			if (err.message.startsWith("status:")) break;
 		}
 	}
 

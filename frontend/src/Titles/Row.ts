@@ -1,15 +1,15 @@
 import { Title } from "../db";
 
 export default class Row {
-	name: string = null
+	name = "";
 
-	titles: Title[] = []
+	titles: Title[] = [];
 
-	activeCol = 0
+	activeCol = 0;
 
-	element: HTMLDivElement = null
+	element: null | HTMLDivElement = null;
 
 	constructor(name: string) {
-		this.name = name
+		this.name = name;
 	}
 }

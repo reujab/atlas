@@ -1,5 +1,5 @@
 class State {
-	query = ""
+	query = "";
 }
 
 export default new State();

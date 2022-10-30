@@ -1,5 +1,5 @@
-import readline from "readline";
 import net from "net";
+import readline from "readline";
 import { EventEmitter } from "events";
 import { log, error } from "./log";
 
@@ -9,21 +9,23 @@ class TorrentdEmitter extends EventEmitter {
 
 class State {
 	torrentdSocket: net.Socket = new net.Socket();
+
 	torrentd: TorrentdEmitter = new TorrentdEmitter();
-	reader: readline.Interface = null;
+
+	reader: null | readline.Interface = null;
 
 	constructor() {
 		this.init();
 		this.torrentd.send = (msg: any) => {
-			this.torrentdSocket.write(JSON.stringify(msg) + "\n");
-		}
+			this.torrentdSocket.write(`${JSON.stringify(msg)}\n`);
+		};
 	}
 
-	init() {
+	init(): void {
 		this.reader?.close();
 
-		this.torrentdSocket.on("error", (err) => {
-			error("torrentd err: %O", err);
+		this.torrentdSocket.on("error", (err: any) => {
+			if (err.code !== "ENOENT") error("torrentd err: %O", err);
 		});
 
 		this.torrentdSocket.connect("/tmp/torrentd", () => {
@@ -42,10 +44,14 @@ class State {
 			input: this.torrentdSocket,
 		});
 
+		this.reader.on("error", (err) => {
+			if (err.code !== "ENOENT") error("reader err: %O", err);
+		});
+
 		this.reader.on("line", (line) => {
 			try {
 				const msg = JSON.parse(line);
-				log("%O", msg)
+				log("%O", msg);
 				this.torrentd.emit("message", msg);
 			} catch (err) {
 				error("%O", err);

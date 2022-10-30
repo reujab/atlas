@@ -2,39 +2,35 @@ import cheerio from "cheerio";
 import http from "http";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { get } from "..";
-import { log, error } from "../log"
+import { log, error } from "../log";
 
 export interface Source {
-	name: string;
-	score: number;
-	seeders: number;
-	leechers: number;
-	size: number;
+	name: string
+	score: number
+	seeders: number
+	leechers: number
+	size: number
 
-	seasons: null | number[];
-	episode: null | number;
+	seasons: null | number[]
+	episode: null | number
 
-	element: null | HTMLDivElement;
-	getMagnet: () => Promise<string>;
+	element: null | HTMLDivElement
+	getMagnet: () => Promise<string>
 }
 
 export interface ParsedName {
-	seasons: null | number[];
-	episode: null | number;
+	seasons: null | number[]
+	episode: null | number
 }
 
 export const episodeRegex = /\b(?:seasons?|s)[ .]*(\d+)[ .,&s-]*(?:\d+0p)?(\d+)?[ .]*(?:(?:episode|ep?)[ .]*(\d+))?/i;
 
 export function parseName(name: string): null | ParsedName {
 	const match = name.match(episodeRegex);
-	if (!match) {
-		return null;
-	}
+	if (!match) return null;
 	const season = Number(match[1]);
 	const seasonRangeLast = Number(match[2]) || season;
-	if (season > seasonRangeLast) {
-		return null;
-	}
+	if (season > seasonRangeLast) return null;
 	const seasons = season ? [...Array(seasonRangeLast - season + 1).keys()].map((i) => i + season) : null;
 	const episode = Number(match[3]) || null;
 	return { seasons, episode };
@@ -84,7 +80,7 @@ export default async function search(query: string, type?: "movie" | "tv", signa
 
 		const parsed = parseName(name);
 		if (parsed) {
-			log("%O %O %O", source.name, source.seeders, parsed)
+			log("%O %O %O", source.name, source.seeders, parsed);
 		} else {
 			log("source doesn't match: %O", source.name);
 		}
@@ -95,11 +91,12 @@ export default async function search(query: string, type?: "movie" | "tv", signa
 }
 
 function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
-	const cat = type === "movie" ? "201,207" : type === "tv" ? "205,208" : "200"
+	const cat = type === "movie" ? "201,207" : type === "tv" ? "205,208" : "200";
 	const path = `q.php?cat=${cat}&q=${query}`;
 
 	function parseSources(sources: any): Source[] {
 		return sources.map((source: any) => ({
+			// eslint-disable-next-line require-await
 			getMagnet: async () => `magnet:?xt=urn:btih:${source.info_hash}&dn=${encodeURIComponent(source.name)}&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce`,
 			name: source.name,
 			seeders: Number(source.seeders),
@@ -185,16 +182,18 @@ async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortS
 	}
 	const $ = cheerio.load(html);
 	return Array.from($("tbody > tr")).map((ele) => ({
-		getMagnet: (async (path: string) => {
-			const res = await get(`https://1337x.to${path}`);
-			const html = await res.text();
+		getMagnet: (async (p: string) => {
+			const r = await get(`https://1337x.to${p}`);
+			// eslint-disable-next-line no-shadow
+			const html = await r.text();
+			// eslint-disable-next-line no-shadow
 			const $ = cheerio.load(html);
 			return $("a[href^=magnet:]").attr("href");
 		}).bind(null, $(ele).find(".name > a:nth-child(2)").attr("href")),
 		name: $(ele).find(".name > a:nth-child(2)").text(),
 		seeders: Number($(ele).find("td.seeds").text()),
 		leechers: Number($(ele).find("td.leeches").text()),
-		size: parse_size($(ele).find("td.size").text().replace(/B.*/, "B")),
+		size: parseSize($(ele).find("td.size").text().replace(/B.*/, "B")),
 		element: null,
 		score: 0,
 		seasons: null,
@@ -202,7 +201,7 @@ async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortS
 	}));
 }
 
-function parse_size(size: string): number {
+function parseSize(size: string): number {
 	const dens = ["KB", "MB", "GB"];
 	const [num, den] = size.split(" ");
 	const multiplier = 1000 ** (dens.indexOf(den) + 1);

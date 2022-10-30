@@ -1,9 +1,9 @@
 <script lang="ts" context="module">
 	export interface Tile {
-		title: string;
-		onClick?: () => void;
-		path?: string;
-		icon: any;
+		title: string
+		onClick?: () => void
+		path?: string
+		icon: any
 	}
 </script>
 
@@ -12,7 +12,7 @@
 	import HomeTile from "./HomeTile.svelte";
 	import VPNStatus from "./VPNStatus.svelte";
 	import Weather from "./Weather.svelte";
-	import child_process from "child_process";
+	import childProcess from "child_process";
 	import seedrandom from "seedrandom";
 	import state from "./State";
 	import { onDestroy } from "svelte";
@@ -41,42 +41,30 @@
 		{
 			title: "Reboot",
 			onClick() {
-				child_process.execSync("/sbin/reboot");
+				childProcess.execSync("/sbin/reboot");
 			},
 			icon: require("../img/shutdown.png"),
 		},
 	];
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		switch (button) {
 			case "A":
 				const tile = tiles[state.activeTile];
-				if (tile.onClick) {
-					tile.onClick();
-				}
-				if (tile.path) {
-					location.hash = `#${tile.path}`;
-				}
+				tile.onClick?.();
+				if (tile.path) location.hash = `#${tile.path}`;
 				break;
 			case "up":
-				if (state.activeTile % 2 == 1) {
-					state.activeTile -= 1;
-				}
+				if (state.activeTile % 2 === 1) state.activeTile -= 1;
 				break;
 			case "down":
-				if (state.activeTile % 2 == 0) {
-					state.activeTile += 1;
-				}
+				if (state.activeTile % 2 === 0) state.activeTile += 1;
 				break;
 			case "left":
-				if (state.activeTile >= 2) {
-					state.activeTile -= 2;
-				}
+				if (state.activeTile >= 2) state.activeTile -= 2;
 				break;
 			case "right":
-				if (state.activeTile + 2 < tiles.length) {
-					state.activeTile += 2;
-				}
+				if (state.activeTile + 2 < tiles.length) state.activeTile += 2;
 				break;
 		}
 		state.activeTile = Math.max(

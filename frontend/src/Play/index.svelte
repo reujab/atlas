@@ -1,19 +1,19 @@
 <script lang="ts">
-	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
-	import child_process from "child_process";
+	import childProcess from "child_process";
 	import rootState from "../State";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = $params.type
 		? cache[$params.type][$params.id].title
 		: unescape($params.query);
-	const overlay = child_process.spawn("atlas-overlay", {
+	const overlay = childProcess.spawn("atlas-overlay", {
 		stdio: "inherit",
 	});
 
@@ -33,19 +33,16 @@
 
 	rootState.torrentd.on("message", msgHandler);
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		if (button === "B") {
 			overlay.kill();
 			rootState.torrentd.send({ message: "stop" });
 			history.back();
-			return;
 		}
 	}
 
-	function msgHandler(msg: any) {
-		if (msg.message === "player_closed") {
-			history.back();
-		}
+	function msgHandler(msg: any): void {
+		if (msg.message === "player_closed") history.back();
 	}
 
 	subscribe(gamepadHandler);

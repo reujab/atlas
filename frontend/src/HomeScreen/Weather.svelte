@@ -4,7 +4,7 @@
 	import { get } from "..";
 	import { log, error } from "../log";
 
-	fs.readFile("/tmp/geo.json", async (err, geo) => {
+	fs.readFile("/tmp/geo.json", (err, geo) => {
 		if (err) {
 			error("error reading geo.json: %O", err);
 			return;
@@ -12,8 +12,8 @@
 
 		const coords = JSON.parse(geo.toString());
 
-		getWeather();
-		async function getWeather() {
+		updateWeather();
+		async function updateWeather(): Promise<void> {
 			try {
 				const meta = await (
 					await get(
@@ -34,7 +34,7 @@
 				log("%O", state.weather);
 			} catch (err) {
 				error("error getting weather: %O", err);
-				setTimeout(getWeather, 1000);
+				setTimeout(updateWeather, 1000);
 			}
 		}
 	});

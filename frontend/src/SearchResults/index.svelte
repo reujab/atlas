@@ -1,5 +1,4 @@
 <script lang="ts">
-	const { params } = require("svelte-hash-router");
 	import Header from "../Header/index.svelte";
 	import getFiles, { File } from "./getFiles";
 	import playState from "../Play/State";
@@ -8,6 +7,7 @@
 	import { Circle2 } from "svelte-loading-spinners";
 	import { log, error } from "../log";
 	import { onDestroy } from "svelte";
+	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const query = unescape($params.query);
@@ -28,15 +28,13 @@
 			error("search error: %O", err);
 		});
 
-	function gamepadHandler(button: string) {
+	function gamepadHandler(button: string): void {
 		if (button === "B") {
 			history.back();
 			return;
 		}
 
-		if (!sources.length) {
-			return;
-		}
+		if (!sources.length) return;
 
 		switch (button) {
 			case "A":
@@ -67,7 +65,6 @@
 							.catch((err) => {
 								error("getFiles err: %O", err);
 								history.back();
-								return;
 							});
 					} else {
 						playState.file = null;
@@ -76,14 +73,10 @@
 				});
 				break;
 			case "up":
-				if (sourceIndex > 0) {
-					sourceIndex--;
-				}
+				if (sourceIndex > 0) sourceIndex--;
 				break;
 			case "down":
-				if (sourceIndex < sources.length - 1) {
-					sourceIndex++;
-				}
+				if (sourceIndex < sources.length - 1) sourceIndex++;
 				break;
 		}
 

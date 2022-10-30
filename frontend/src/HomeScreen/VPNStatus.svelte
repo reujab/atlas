@@ -1,5 +1,5 @@
 <script lang="ts">
-	import child_process from "child_process";
+	import childProcess from "child_process";
 	import state from "./State";
 	import { error } from "../log";
 	import { get } from "..";
@@ -7,8 +7,8 @@
 
 	const { vpn } = state;
 
-	function getStatus() {
-		child_process.exec("windscribe status", (err, stdout, stderr) => {
+	function updateStatus(): void {
+		childProcess.exec("windscribe status", (err, stdout, stderr) => {
 			if (err) {
 				error("error running 'windscribe status': %O", err);
 				vpn.connected = false;
@@ -21,19 +21,15 @@
 			vpn.connected = lastLine.slice(0, 9) === "CONNECTED";
 
 			if (
-				(vpn.connected !== lastStatus && lastStatus !== null) ||
+				vpn.connected !== lastStatus && lastStatus !== null ||
 				!vpn.location
-			) {
-				getLocation();
-			}
+			) updateLocation();
 
-			if (!vpn.connected) {
-				error(`disconnected from vpn: ${stdout}${stderr}`);
-			}
+			if (!vpn.connected) error(`disconnected from vpn: ${stdout}${stderr}`);
 		});
 	}
 
-	async function getLocation() {
+	async function updateLocation(): Promise<void> {
 		let json;
 		try {
 			json = await (await get("https://ipapi.co/json/")).json();
@@ -49,10 +45,10 @@
 		}
 	}
 
-	getStatus();
-	getLocation();
+	updateStatus();
+	updateLocation();
 
-	const interval = setInterval(getStatus, 5000);
+	const interval = setInterval(updateStatus, 5000);
 	onDestroy(() => {
 		clearInterval(interval);
 	});
