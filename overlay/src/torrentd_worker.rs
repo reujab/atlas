@@ -1,4 +1,4 @@
-use super::{Info, Msg};
+use super::{Msg, TorrentdInfo};
 use log::{debug, warn};
 use relm4::prelude::*;
 use serde::Serialize;
@@ -14,7 +14,7 @@ struct Message {
     message: String,
 }
 
-pub(crate) fn update_info(sender: ComponentSender<super::App>) {
+pub(crate) fn start(sender: ComponentSender<super::App>) {
     let mut stream = UnixStream::connect("/tmp/torrentd").unwrap();
     let mut reader = BufReader::new(stream.try_clone().unwrap());
     let get_info = Message {
@@ -32,8 +32,11 @@ pub(crate) fn update_info(sender: ComponentSender<super::App>) {
             break;
         }
         debug!("{}", res.trim());
-        let info = serde_json::from_str::<Info>(&res).unwrap();
-        sender.input(Msg::UpdateInfo(info));
+        let info = serde_json::from_str::<TorrentdInfo>(&res).unwrap();
+        if let Some(speed) = info.speed {
+            sender.input(Msg::SetSpeed(speed));
+        }
+        sender.input(Msg::SetTorrentdInfo(info));
 
         sleep(Duration::from_secs(1));
     }

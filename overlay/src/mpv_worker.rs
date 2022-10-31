@@ -1,4 +1,4 @@
-use super::Msg;
+use super::{MPVInfo, Msg};
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -27,41 +27,53 @@ struct Event {
     event: String,
 }
 
-pub(crate) fn mpv_worker(sender: ComponentSender<super::App>, mut stream: UnixStream) {
+pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream) {
+    let is_torrent = &std::env::args().nth(1).unwrap_or("".to_owned()) == "--torrent";
     let mut reader = BufReader::new(stream.try_clone().unwrap());
 
     let command = get_command(1, vec!["get_property", "media-title"]);
     stream.write_all(&command).unwrap();
-    let data = get_data(1, &mut reader, &sender);
-    sender.input(Msg::UpdateTitle(data.as_str().unwrap().to_owned()));
+    let title = get_data(1, &mut reader, &sender)
+        .as_str()
+        .unwrap()
+        .to_owned();
+    sender.input(Msg::SetTitle(title));
 
     let command = get_command(1, vec!["get_property", "duration"]);
     stream.write_all(&command).unwrap();
-    let data = get_data(1, &mut reader, &sender);
-    sender.input(Msg::UpdateDuration(data.as_f64().unwrap() as u32));
+    let duration = get_data(1, &mut reader, &sender).as_f64().unwrap() as u32;
+    sender.input(Msg::SetDuration(duration));
 
     loop {
         let command = get_command(1, vec!["get_property", "time-pos"]);
         stream.write_all(&command).unwrap();
-        let data = get_data(1, &mut reader, &sender);
-        sender.input(Msg::UpdatePosition(data.as_f64().unwrap() as u32));
+        let position = get_data(1, &mut reader, &sender).as_f64().unwrap() as u32;
 
         let command = get_command(1, vec!["get_property", "paused-for-cache"]);
         stream.write_all(&command).unwrap();
-        let data = get_data(1, &mut reader, &sender);
-        if data.as_bool().unwrap() {
-            sender.input(Msg::UpdatePaused(true));
-        } else {
-            let command = get_command(1, vec!["get_property", "pause"]);
-            stream.write_all(&command).unwrap();
-            let data = get_data(1, &mut reader, &sender);
-            sender.input(Msg::UpdatePaused(data.as_bool().unwrap()));
-        }
+        let buffering = get_data(1, &mut reader, &sender).as_bool().unwrap();
+
+        let command = get_command(1, vec!["get_property", "pause"]);
+        stream.write_all(&command).unwrap();
+        let paused = get_data(1, &mut reader, &sender).as_bool().unwrap();
 
         let command = get_command(1, vec!["get_property", "frame-drop-count"]);
         stream.write_all(&command).unwrap();
-        let data = get_data(1, &mut reader, &sender);
-        sender.input(Msg::UpdateDropped(data.as_u64().unwrap()));
+        let dropped = get_data(1, &mut reader, &sender).as_u64().unwrap();
+
+        sender.input(Msg::SetMPVInfo(MPVInfo {
+            position,
+            paused,
+            buffering,
+            dropped,
+        }));
+
+        if !is_torrent {
+            let command = get_command(1, vec!["get_property", "cache-speed"]);
+            stream.write_all(&command).unwrap();
+            let speed = get_data(1, &mut reader, &sender).as_u64().unwrap() as u32;
+            sender.input(Msg::SetSpeed(speed));
+        }
 
         sleep(Duration::from_millis(200));
     }
