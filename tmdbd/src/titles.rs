@@ -124,6 +124,8 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     if title.poster_path.is_none()
         || title.release_date.is_none()
         || title.release_date.clone().unwrap().is_empty()
+        // News
+        || title.genres.iter().find(|g| g.id == 10763 || g.id == 10767).is_some()
     {
         sqlx::query(
             r#"

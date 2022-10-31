@@ -24,7 +24,7 @@ class State {
 
 			let wg = 0;
 			for (const genre of sortedGenres) {
-				if (["News", "Talk", "Family"].includes(genre.name)) continue;
+				if (genre.name === "Family") continue;
 
 				const row = new Row(genre.name);
 				this.rows.push(row);
