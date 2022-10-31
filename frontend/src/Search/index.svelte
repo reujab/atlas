@@ -4,6 +4,7 @@
 	import MdChevronLeft from "svelte-icons/md/MdChevronLeft.svelte";
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
 	import MdSpaceBar from "svelte-icons/md/MdSpaceBar.svelte";
+	import seasonsState from "../Seasons/State";
 	import state from "./State";
 	import { getAutocomplete, Title } from "../db";
 	import { onDestroy } from "svelte";
@@ -22,6 +23,9 @@
 	function gamepadHandler(button: string): void {
 		switch (button) {
 			case "A":
+				seasonsState.seasonIndex = 0;
+				seasonsState.seasons = [];
+
 				if (activeRow >= 0) {
 					let char = keyboard[activeRow][activeCol];
 					if (char === "<") {

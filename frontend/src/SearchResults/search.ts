@@ -23,16 +23,24 @@ export interface ParsedName {
 	episode: null | number
 }
 
-export const episodeRegex = /\b(?:seasons?|s)[ .]*(\d+)[ .,&s-]*(?:\d+0p)?(\d+)?[ .]*(?:(?:episode|ep?)[ .]*(\d+))?/i;
+export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?/i;
 
 export function parseName(name: string): null | ParsedName {
 	const match = name.match(episodeRegex);
 	if (!match) return null;
-	const season = Number(match[1]);
-	const seasonRangeLast = Number(match[2]) || season;
-	if (season > seasonRangeLast) return null;
-	const seasons = season ? [...Array(seasonRangeLast - season + 1).keys()].map((i) => i + season) : null;
-	const episode = Number(match[3]) || null;
+
+	const seasons = match[1]
+		.replace(/[ .,&s-]+/gi, " ")
+		.trim()
+		.split(" ")
+		.map(Number)
+		.filter((s) => s < 256);
+	if (seasons.length === 2) {
+		for (let i = seasons[0] + 1; i < seasons[1]; i++) {
+			seasons.push(i);
+		}
+	}
+	const episode = Number(match[2]) || null;
 	return { seasons, episode };
 }
 
@@ -57,18 +65,14 @@ export default async function search(query: string, type?: "movie" | "tv", signa
 		let score = source.seeders;
 
 		if (name.includes("1080p")) {
-			score *= 2;
+			score *= 1.8;
 		} else if (name.includes("720p")) {
-			score *= 0.5;
+			score *= 0.8;
 		} else if (name.includes("480p")) {
-			score *= 0.3;
+			score *= 0.5;
 		}
 
-		if (name.includes("bluray") || name.includes("brrip") || name.includes("bdrip")) {
-			score *= 1.5;
-		} else if (name.includes("web") || name.includes("hdrip")) {
-			score *= 1.4;
-		} else if (name.includes("hdcam") || name.includes("camrip")) {
+		if (name.includes("hdcam") || name.includes("camrip")) {
 			score *= 0.5;
 		}
 

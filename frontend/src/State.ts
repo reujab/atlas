@@ -37,7 +37,7 @@ class State {
 			setTimeout(() => {
 				this.torrentdSocket = new net.Socket();
 				this.init();
-			}, 1000);
+			}, 5000);
 		});
 
 		this.reader = readline.createInterface({

@@ -63,9 +63,16 @@
 					if (magnet.season) {
 						loading = true;
 						getFiles(magnet.magnet).then((files) => {
-							const file = files.find(
-								(f) => f.episode === activeEpisode.number
-							);
+							const file =
+								files.find(
+									(f) =>
+										f.seasons.includes(
+											activeSeason.number
+										) && f.episode === activeEpisode.number
+								) ||
+								files.find(
+									(f) => f.episode === activeEpisode.number
+								);
 							if (file && loading) {
 								playState.file = file.name;
 								playState.magnet = magnet.magnet;

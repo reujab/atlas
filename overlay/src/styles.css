@@ -9,6 +9,14 @@ revealer {
 	margin: 0 4rem;
 }
 
+revealer.top {
+	padding-bottom: 1px;
+}
+
+revealer.bottom {
+	padding-top: 1px;
+}
+
 image {
 	margin-right: 2rem;
 }

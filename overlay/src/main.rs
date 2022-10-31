@@ -80,6 +80,7 @@ impl SimpleComponent for App {
                     set_vexpand: true,
 
                     Revealer {
+                        add_css_class: "top",
                         set_transition_duration: 1000,
                         set_transition_type: gtk::RevealerTransitionType::SlideDown,
                         #[watch]
@@ -133,6 +134,7 @@ impl SimpleComponent for App {
                 },
 
                 Revealer {
+                    add_css_class: "bottom",
                     set_transition_duration: 1000,
                     set_transition_type: gtk::RevealerTransitionType::SlideUp,
                     #[watch]
