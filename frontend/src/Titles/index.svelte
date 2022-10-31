@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Circle2 from "svelte-loading-spinners/dist/ts/Circle2.svelte";
 	import Header from "../Header/index.svelte";
+	import seasonsState from "../Seasons/State";
 	import store from "./State";
 	import { genres } from "../db";
 	import { onDestroy, onMount } from "svelte";
@@ -36,6 +37,8 @@
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
+				seasonsState.seasonIndex = 0;
+				seasonsState.seasons = [];
 				location.hash = `#/${title.type}/${title.id}`;
 				break;
 			case "Y":

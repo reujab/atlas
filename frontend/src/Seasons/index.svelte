@@ -48,7 +48,6 @@
 				loading = false;
 				setTimeout(update);
 			} else {
-				state.seasonIndex = 0;
 				history.back();
 			}
 			return;

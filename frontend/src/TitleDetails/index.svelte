@@ -24,10 +24,10 @@
 	}
 
 	const title = cache[$params.type][$params.id];
-	log("title: %O", title);
-
 	const buttons: IButton[] = [];
 	let activeButton = 0;
+
+	log("title: %O", title);
 
 	if ($params.type === "movie") {
 		buttons.push({
@@ -79,7 +79,6 @@
 				buttons[activeButton].onClick();
 				break;
 			case "B":
-				seasonsState.seasons = [];
 				history.back();
 				break;
 			case "left":
