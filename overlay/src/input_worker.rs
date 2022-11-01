@@ -1,14 +1,11 @@
-use crate::mpv_worker::get_command;
+use crate::mpv_worker::{send_command, Command};
 use gilrs::{ev::Button, Event, Gilrs};
 use log::debug;
 use relm4::prelude::*;
-use std::{io::prelude::*, os::unix::net::UnixStream, thread::sleep, time::Duration};
+use std::{os::unix::net::UnixStream, thread::sleep, time::Duration};
 
 pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mut stream: UnixStream) {
     let mut gilrs = Gilrs::new().unwrap();
-    let pause_command = get_command(0, vec!["cycle", "pause"]);
-    let rewind_command = get_command(0, vec!["seek", "-10"]);
-    let ffw_command = get_command(0, vec!["seek", "10"]);
 
     loop {
         while let Some(Event { event, .. }) = gilrs.next_event() {
@@ -16,7 +13,15 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mut stream: Un
             if let gilrs::ev::EventType::ButtonPressed(button, _) = event {
                 match button {
                     Button::South => {
-                        stream.write_all(&pause_command).unwrap();
+                        send_command(
+                            Command {
+                                id: 0,
+                                command: vec!["cycle", "pause"],
+                            },
+                            &mut stream,
+                            &sender,
+                        )
+                        .unwrap();
                     }
                     Button::East => {
                         sender.input(super::Msg::Quit);
@@ -28,9 +33,26 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mut stream: Un
 
         for (_, gamepad) in gilrs.gamepads() {
             if gamepad.is_pressed(Button::DPadLeft) {
-                stream.write_all(&rewind_command).unwrap();
+                // stream.write_all(&rewind_command).unwrap();
+                send_command(
+                    Command {
+                        id: 0,
+                        command: vec!["seek", "-10"],
+                    },
+                    &mut stream,
+                    &sender,
+                )
+                .unwrap();
             } else if gamepad.is_pressed(Button::DPadRight) {
-                stream.write_all(&ffw_command).unwrap();
+                send_command(
+                    Command {
+                        id: 0,
+                        command: vec!["seek", "10"],
+                    },
+                    &mut stream,
+                    &sender,
+                )
+                .unwrap();
             }
         }
 

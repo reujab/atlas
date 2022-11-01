@@ -9,10 +9,10 @@ use std::{
 };
 
 #[derive(Serialize)]
-struct Command {
+pub struct Command {
     #[serde(rename = "request_id")]
-    id: u32,
-    command: Vec<&'static str>,
+    pub id: u32,
+    pub command: Vec<&'static str>,
 }
 
 #[derive(Deserialize)]
@@ -20,6 +20,7 @@ struct Data {
     #[serde(rename = "request_id")]
     id: u32,
     data: serde_json::Value,
+    error: String,
 }
 
 #[derive(Deserialize)]
@@ -29,37 +30,37 @@ struct Event {
 
 pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream) {
     let is_torrent = &std::env::args().nth(1).unwrap_or("".to_owned()) == "--torrent";
-    let mut reader = BufReader::new(stream.try_clone().unwrap());
 
-    let command = get_command(1, vec!["get_property", "media-title"]);
-    stream.write_all(&command).unwrap();
-    let title = get_data(1, &mut reader, &sender)
+    let title = get_property("media-title", &mut stream, &sender)
+        .unwrap()
         .as_str()
         .unwrap()
         .to_owned();
     sender.input(Msg::SetTitle(title));
 
-    let command = get_command(1, vec!["get_property", "duration"]);
-    stream.write_all(&command).unwrap();
-    let duration = get_data(1, &mut reader, &sender).as_f64().unwrap() as u32;
+    let duration = get_property("duration", &mut stream, &sender)
+        .unwrap()
+        .as_f64()
+        .unwrap() as u32;
     sender.input(Msg::SetDuration(duration));
 
     loop {
-        let command = get_command(1, vec!["get_property", "time-pos"]);
-        stream.write_all(&command).unwrap();
-        let position = get_data(1, &mut reader, &sender).as_f64().unwrap() as u32;
-
-        let command = get_command(1, vec!["get_property", "paused-for-cache"]);
-        stream.write_all(&command).unwrap();
-        let buffering = get_data(1, &mut reader, &sender).as_bool().unwrap();
-
-        let command = get_command(1, vec!["get_property", "pause"]);
-        stream.write_all(&command).unwrap();
-        let paused = get_data(1, &mut reader, &sender).as_bool().unwrap();
-
-        let command = get_command(1, vec!["get_property", "frame-drop-count"]);
-        stream.write_all(&command).unwrap();
-        let dropped = get_data(1, &mut reader, &sender).as_u64().unwrap();
+        let position = get_property("time-pos", &mut stream, &sender)
+            .unwrap()
+            .as_f64()
+            .unwrap() as u32;
+        let buffering = get_property("paused-for-cache", &mut stream, &sender)
+            .unwrap()
+            .as_bool()
+            .unwrap();
+        let paused = get_property("pause", &mut stream, &sender)
+            .unwrap()
+            .as_bool()
+            .unwrap();
+        let dropped = get_property("frame-drop-count", &mut stream, &sender)
+            .unwrap()
+            .as_u64()
+            .unwrap();
 
         sender.input(Msg::SetMPVInfo(MPVInfo {
             position,
@@ -69,9 +70,10 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream)
         }));
 
         if !is_torrent {
-            let command = get_command(1, vec!["get_property", "cache-speed"]);
-            stream.write_all(&command).unwrap();
-            let speed = get_data(1, &mut reader, &sender).as_u64().unwrap() as u32;
+            let speed = get_property("cache-speed", &mut stream, &sender)
+                .unwrap()
+                .as_u64()
+                .unwrap() as u32;
             sender.input(Msg::SetSpeed(speed));
         }
 
@@ -79,35 +81,55 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream)
     }
 }
 
-pub fn get_command(id: u32, command: Vec<&'static str>) -> Vec<u8> {
-    let command = Command { id, command };
-    let str = serde_json::to_string(&command).unwrap() + "\n";
-    str.into_bytes()
-}
-
-fn get_data<R: Read>(
-    id: u32,
-    reader: &mut BufReader<R>,
+pub(crate) fn send_command(
+    command: Command,
+    stream: &mut UnixStream,
     sender: &ComponentSender<super::App>,
-) -> serde_json::Value {
+) -> Result<serde_json::Value, String> {
+    let mut reader = BufReader::new(stream.try_clone().unwrap());
+    let command_str = serde_json::to_string(&command).unwrap() + "\n";
+    stream.write_all(&command_str.into_bytes()).unwrap();
+
     loop {
         let mut res = String::new();
         if reader.read_line(&mut res).unwrap() == 0 {
             sender.input(Msg::Quit);
-            panic!("socket closed");
-        };
+            panic!("socket closed, quitting");
+        }
+
         match serde_json::from_str::<Data>(&res) {
             Ok(data) => {
-                if data.id == id {
-                    return data.data;
+                if data.id == command.id {
+                    if data.error != "success" {
+                        sender.input(Msg::Quit);
+                        return Err(data.error);
+                    }
+                    return Ok(data.data);
                 }
             }
             Err(_) => continue,
-        };
+        }
     }
 }
 
-pub(crate) fn wait_for_event<R: Read>(reader: &mut BufReader<R>, event: &str) {
+fn get_property(
+    property: &'static str,
+    stream: &mut UnixStream,
+    sender: &ComponentSender<super::App>,
+) -> Result<serde_json::Value, String> {
+    return send_command(
+        Command {
+            id: 1,
+            command: vec!["get_property", property],
+        },
+        stream,
+        sender,
+    );
+}
+
+pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {
+    let mut reader = BufReader::new(stream);
+
     loop {
         let mut res = String::new();
         if reader.read_line(&mut res).unwrap() == 0 {

@@ -6,9 +6,7 @@ use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, 
 use log::info;
 use relm4::prelude::*;
 use serde::Deserialize;
-use std::{
-    cmp::max, io::BufReader, os::unix::net::UnixStream, process::Command, thread, time::Duration,
-};
+use std::{cmp::max, os::unix::net::UnixStream, process::Command, thread, time::Duration};
 
 const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
@@ -336,10 +334,8 @@ fn main() {
             }
         }
     };
-    let mut reader = BufReader::new(stream.try_clone().unwrap());
     info!("Waiting for file to load");
-    mpv_worker::wait_for_event(&mut reader, "file-loaded");
-    drop(reader);
+    mpv_worker::wait_for_event(&stream, "file-loaded");
 
     thread::sleep(Duration::from_secs(3));
     Command::new("killall")
