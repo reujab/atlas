@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
 	import MdChevronLeft from "svelte-icons/md/MdChevronLeft.svelte";
@@ -148,6 +149,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen flex flex-col">
 	<div class="px-48 grow">

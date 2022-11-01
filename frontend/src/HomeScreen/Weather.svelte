@@ -6,7 +6,7 @@
 
 	fs.readFile("/tmp/geo.json", (err, geo) => {
 		if (err) {
-			error("error reading geo.json: %O", err);
+			error("Unable to get coordinates", err);
 			return;
 		}
 
@@ -33,7 +33,7 @@
 				};
 				log("weather: %O", state.weather);
 			} catch (err) {
-				error("error getting weather: %O", err);
+				error("Weather error", err);
 				setTimeout(updateWeather, 1000);
 			}
 		}

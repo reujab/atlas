@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import childProcess from "child_process";
 	import { Circle2 } from "svelte-loading-spinners";
@@ -23,7 +24,7 @@
 	});
 
 	overlay.on("error", (err) => {
-		error("%O", err);
+		error("Overlay", err);
 	});
 
 	overlay.on("exit", (code) => {
@@ -44,6 +45,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen px-48 flex flex-col">
 	<Header title={title.title} back />

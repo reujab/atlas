@@ -25,7 +25,7 @@ class State {
 		this.reader?.close();
 
 		this.torrentdSocket.on("error", (err: any) => {
-			if (err.code !== "ENOENT") error("torrentd err: %O", err);
+			if (err.code !== "ENOENT") error("torrentd socket", err);
 		});
 
 		this.torrentdSocket.connect("/tmp/torrentd", () => {
@@ -45,7 +45,7 @@ class State {
 		});
 
 		this.reader.on("error", (err) => {
-			if (err.code !== "ENOENT") error("reader err: %O", err);
+			if (err.code !== "ENOENT") error("reader", err);
 		});
 
 		this.reader.on("line", (line) => {
@@ -54,7 +54,7 @@ class State {
 				log("torrentd: %O", msg);
 				this.torrentd.emit("message", msg);
 			} catch (err) {
-				error("torrentd error: %O", err);
+				error("torrentd msg", err);
 			}
 		});
 	}

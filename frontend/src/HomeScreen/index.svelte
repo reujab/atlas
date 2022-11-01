@@ -9,6 +9,7 @@
 
 <script lang="ts">
 	import Clock from "./Clock.svelte";
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import HomeTile from "./HomeTile.svelte";
 	import VPNStatus from "./VPNStatus.svelte";
 	import Weather from "./Weather.svelte";
@@ -78,6 +79,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div
 	class="h-screen px-48 rounded-[25px] bg-cover flex items-center"

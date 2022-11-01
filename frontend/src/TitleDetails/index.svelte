@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from "./Button.svelte";
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
@@ -119,7 +120,7 @@
 				}
 			})
 			.catch((err) => {
-				error("search err: %O", err);
+				error("search err", err);
 				buttons[0].title = "Error";
 				buttons[0].icon = null;
 				buttons[1].hidden = true;
@@ -133,7 +134,7 @@
 				seasonsState.seasons = seasons;
 			})
 			.catch((err) => {
-				error("%O", err);
+				error("getSeasons error:", err);
 			});
 	}
 
@@ -142,6 +143,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen px-48 flex flex-col">
 	<Header title={title.title} back />

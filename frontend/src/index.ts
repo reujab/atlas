@@ -21,7 +21,7 @@ addEventListener("error", (err) => {
 		err.message.startsWith("Uncaught SyntaxError")
 	) return;
 
-	error("Uncaught error: %O", err);
+	error("Uncaught error", err);
 });
 
 cacheGenres();
@@ -70,7 +70,7 @@ export async function get(...args: Parameters<typeof fetch>): Promise<Response> 
 			const res = await fetch(...args);
 			log(`Reply at ${(Date.now() - start) / 1000}s`);
 
-			lastErr = new Error(`status: ${res.status}`);
+			lastErr = new Error(`Status: ${res.status}`);
 
 			if (res.status >= 500) continue;
 			if (res.status !== 200) break;
@@ -82,7 +82,7 @@ export async function get(...args: Parameters<typeof fetch>): Promise<Response> 
 			// break if the fetch was cancelled by a signal
 			if (err instanceof DOMException) break;
 
-			error("%O", err);
+			error("Fetch error", err);
 
 			if (err.message.startsWith("status:")) break;
 		}

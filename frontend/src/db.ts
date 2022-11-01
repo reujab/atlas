@@ -47,7 +47,7 @@ function cacheTitles(titles: Title[]): void {
 		title.poster = new Image();
 		title.poster.className = "rounded-md";
 		title.poster.addEventListener("error", (err) => {
-			error("failed to load poster: %O", err);
+			error("Failed to load poster", err);
 		});
 		title.poster.src = `file://${process.env.POSTERS_PATH}/${title.type}/${title.id}`;
 	}

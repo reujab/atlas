@@ -1,3 +1,5 @@
+import { error as errorStore } from "./ErrorBanner/store";
+
 export function log(format: string, ...args: any[]): void {
 	console.log(format, ...args);
 	for (const arg of args) {
@@ -6,11 +8,8 @@ export function log(format: string, ...args: any[]): void {
 	process.stdout.write(`[${new Date().toISOString()}] ${format}\n`);
 }
 
-export function error(format: string, ...args: any[]): void {
-	console.error(format, ...args);
-	for (const arg of args) {
-		const err = arg?.error ? arg.error : arg;
-		format = format.replace("%O", `${err} at ${arg?.filename}:${arg?.lineno}`);
-	}
-	process.stderr.write(`[${new Date().toISOString()}] ${format}\n`);
+export function error(msg: string, err?: string | Error | ErrorEvent): void {
+	console.error(msg, err);
+	process.stderr.write(`[${new Date().toISOString()}] ${msg}${err ? `: ${err}` : ""}\n`);
+	errorStore.update(() => ({ msg, err }));
 }

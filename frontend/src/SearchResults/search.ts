@@ -123,7 +123,7 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 				return;
 			}
 
-			error("error searching pb: %O", err);
+			error("pb error", err);
 			const agent = new SocksProxyAgent({
 				hostname: "localhost",
 				port: 9050,
@@ -152,19 +152,19 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 							resolve(parseSources(JSON.parse(data)));
 						} catch (err) {
 							log("%O", data);
-							error("error parsing json: %O", err);
+							error("error parsing json", err);
 							reject(err);
 						}
 					});
 					res.on("error", (err) => {
-						error("pb onion err: %O", err);
+						error("pb onion error", err);
 						reject(err);
 					});
 				}
 			);
 
 			req.on("error", (err) => {
-				error("socks err: %O", err);
+				error("socks error", err);
 				reject(err);
 			});
 		});
@@ -177,7 +177,7 @@ async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortS
 	try {
 		res = await get(`https://1337x.to/${path}`, { signal });
 	} catch (err) {
-		error("error searching 1337x: %O", err);
+		error("1337x error", err);
 		return [];
 	}
 	const html = await res.text();

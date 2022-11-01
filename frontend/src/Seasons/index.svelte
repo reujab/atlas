@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Carousel from "svelte-carousel";
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
@@ -200,7 +201,7 @@
 			}
 		} catch (err) {
 			if (!(err instanceof DOMException)) {
-				error("search err: %O", err);
+				error("search error", err);
 				magnets[season.number][episode.number] = err;
 			}
 		}
@@ -222,6 +223,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen flex flex-col">
 	<div class="px-48">

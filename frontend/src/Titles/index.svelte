@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Circle2 from "svelte-loading-spinners/dist/ts/Circle2.svelte";
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import seasonsState from "../Seasons/State";
 	import store from "./State";
@@ -93,6 +94,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen px-48 flex flex-col">
 	<Header

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import childProcess from "child_process";
 	import rootState from "../State";
@@ -18,7 +19,7 @@
 	});
 
 	overlay.on("error", (err: Error) => {
-		error("%O", err);
+		error("Overlay", err);
 	});
 
 	overlay.once("exit", (code) => {
@@ -51,6 +52,8 @@
 		rootState.torrentd.off("message", msgHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen flex flex-col px-48">
 	<Header back {title} />

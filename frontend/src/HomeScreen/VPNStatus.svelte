@@ -10,7 +10,7 @@
 	function updateStatus(): void {
 		childProcess.exec("windscribe status", (err, stdout, stderr) => {
 			if (err) {
-				error("error running 'windscribe status': %O", err);
+				error("windscribe status", err);
 				vpn.connected = false;
 				return;
 			}
@@ -26,7 +26,7 @@
 			)
 				updateLocation();
 
-			if (!vpn.connected) error(`disconnected from vpn: ${stdout}${stderr}`);
+			if (!vpn.connected) error("Windscribe", stdout + stderr);
 		});
 	}
 
@@ -35,7 +35,7 @@
 		try {
 			json = await (await get("https://ipapi.co/json/")).json();
 		} catch (err) {
-			error("error fetching from ipapi.co: %O", err);
+			error("Location error", err);
 			return;
 		}
 

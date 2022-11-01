@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import getFiles, { File } from "./getFiles";
 	import playState from "../Play/State";
@@ -25,7 +26,7 @@
 			loading = false;
 		})
 		.catch((err) => {
-			error("search error: %O", err);
+			error("Search error", err);
 		});
 
 	function gamepadHandler(button: string): void {
@@ -63,7 +64,7 @@
 								loading = false;
 							})
 							.catch((err) => {
-								error("getFiles err: %O", err);
+								error("getFiles error", err);
 								history.back();
 							});
 					} else {
@@ -93,6 +94,8 @@
 		unsubscribe(gamepadHandler);
 	});
 </script>
+
+<ErrorBanner />
 
 <div class="h-screen flex flex-col">
 	<div class="px-48">
