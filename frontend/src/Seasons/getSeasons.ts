@@ -2,21 +2,21 @@ import { Title } from "../db";
 import { get } from "..";
 
 export interface Season {
-	number: number
-	episodes: Episode[]
-	activeEpisode: number
-	ele: null | HTMLDivElement
-	episodesEle: null | HTMLDivElement
+	number: number;
+	episodes: Episode[];
+	activeEpisode: number;
+	ele: null | HTMLDivElement;
+	episodesEle: null | HTMLDivElement;
 }
 
 export interface Episode {
-	number: number
-	date: Date
-	name: string
-	overview: string
-	runtime: number
-	still: string
-	ele: null | HTMLDivElement
+	number: number;
+	date: Date;
+	name: string;
+	overview: string;
+	runtime: number;
+	still: string;
+	ele: null | HTMLDivElement;
 }
 
 export default async function getSeasons(title: Title): Promise<Season[]> {

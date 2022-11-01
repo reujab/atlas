@@ -74,7 +74,10 @@
 
 		for (const row of state.rows) {
 			row.element?.querySelector(".posters").scrollTo({
-				left: (row.element?.querySelectorAll(".poster")[row.activeCol] as any)?.offsetLeft - 16,
+				left:
+					(row.element?.querySelectorAll(".poster")[
+						row.activeCol
+					] as any)?.offsetLeft - 16,
 				top: 0,
 				// @ts-ignore:next-line
 				behavior: instant ? "instant" : "auto",

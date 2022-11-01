@@ -17,10 +17,10 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface IButton {
-		hidden?: boolean
-		icon: any
-		title: string
-		onClick: () => void
+		hidden?: boolean;
+		icon: any;
+		title: string;
+		onClick: () => void;
 	}
 
 	const title = cache[$params.type][$params.id];

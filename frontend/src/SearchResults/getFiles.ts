@@ -1,12 +1,11 @@
 import childProcess from "child_process";
-import { log } from "../log";
 import { parseName } from "./search";
 
 export interface File {
-	name: string
-	size: string
-	seasons: null | number[]
-	episode: null | number
+	name: string;
+	size: string;
+	seasons: null | number[];
+	episode: null | number;
 }
 
 export default function getFiles(magnet: string): Promise<File[]> {

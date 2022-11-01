@@ -3,8 +3,6 @@ root: true
 parser: "@typescript-eslint/parser"
 
 parserOptions:
-  ecmaFeatures:
-    jsx: true
   sourceType: module
 
 env:
@@ -14,10 +12,6 @@ env:
 
 plugins:
   - "@typescript-eslint"
-
-settings:
-  react:
-    version: detect
 
 globals:
   JSX: readonly
@@ -44,11 +38,7 @@ rules:
   no-empty-character-class: warn
   no-ex-assign: off
   no-extra-boolean-cast: warn
-  "@typescript-eslint/no-extra-parens":
-    - warn
-    - all
-    - ignoreJSX: all
-      enforceForArrowConditionals: false
+  "@typescript-eslint/no-extra-parens": off
   "@typescript-eslint/no-extra-semi": warn
   no-func-assign: warn
   no-import-assign: warn
@@ -67,7 +57,9 @@ rules:
   no-unsafe-finally: warn
   no-unsafe-negation: warn
   # no-useless-backreference: warn
-  require-atomic-updates: warn
+  require-atomic-updates:
+    - warn
+    - allowProperties: true
   use-isnan: warn
   valid-typeof: warn
 
@@ -81,11 +73,13 @@ rules:
       - render
   complexity: off
   consistent-return: off
-  curly: warn
+  curly: off
   default-case: off
   # default-case-last: warn
   "@typescript-eslint/default-param-last": off
-  dot-location: warn
+  dot-location:
+    - warn
+    - property
   dot-notation: warn
   eqeqeq: warn
   grouped-accessor-pairs: warn
@@ -93,7 +87,7 @@ rules:
   max-classes-per-file: off
   no-alert: off
   no-caller: warn
-  no-case-declarations: warn
+  no-case-declarations: off
   no-constructor-return: warn
   no-div-regex: off
   no-else-return: warn
@@ -130,7 +124,7 @@ rules:
   no-return-assign: warn
   no-return-await: warn
   no-script-url: warn
-  no-self-assign: warn
+  no-self-assign: off
   no-self-compare: warn
   no-sequences: warn
   no-throw-literal: warn
@@ -145,7 +139,7 @@ rules:
   no-void: off
   no-warning-comments: off
   no-with: warn
-  prefer-named-capture-group: warn
+  prefer-named-capture-group: off
   prefer-promise-reject-errors: warn
   prefer-regex-literals: warn
   radix:
@@ -183,7 +177,7 @@ rules:
     - functions: false
 
   # Node.js and CommonJS
-  callback-return: warn
+  callback-return: off
   global-require: off
   handle-callback-err: warn
   no-buffer-constructor: warn
@@ -282,7 +276,7 @@ rules:
   no-underscore-dangle: warn
   no-unneeded-ternary: warn
   no-whitespace-before-property: warn
-  nonblock-statement-body-position: warn
+  nonblock-statement-body-position: off
   object-curly-newline:
     - warn
     - consistent: true
@@ -292,14 +286,10 @@ rules:
   object-property-newline:
     - warn
     - allowAllPropertiesOnSameLine: true
-  one-var:
-    - warn
-    - never
+  one-var: off
   one-var-declaration-per-line: warn
   operator-assignment: warn
-  operator-linebreak:
-    - warn
-    - after
+  operator-linebreak: warn
   padded-blocks:
     - warn
     - never
@@ -370,7 +360,7 @@ rules:
   "@typescript-eslint/adjacent-overload-signatures": warn
   "@typescript-eslint/array-type": warn
   # "@typescript-eslint/await-thenable": warn
-  "@typescript-eslint/ban-ts-comment": warn
+  "@typescript-eslint/ban-ts-comment": off
   "@typescript-eslint/ban-types": warn
   "@typescript-eslint/class-literal-property-style": off
   "@typescript-eslint/consistent-type-assertions": warn
@@ -382,10 +372,7 @@ rules:
     - warn
     - accessibility: no-public
   "@typescript-eslint/explicit-module-boundary-types": off
-  "@typescript-eslint/member-delimiter-style":
-    - warn
-    - multiline:
-        delimiter: "none"
+  "@typescript-eslint/member-delimiter-style": warn
   "@typescript-eslint/member-ordering": off
   "@typescript-eslint/naming-convention": off
   # "@typescript-eslint/no-base-to-string": warn
@@ -417,7 +404,7 @@ rules:
   "@typescript-eslint/no-unsafe-member-access": off
   "@typescript-eslint/no-unsafe-return": off
   # "@typescript-eslint/no-unused-vars-experimental": warn
-  "@typescript-eslint/no-var-requires": warn
+  "@typescript-eslint/no-var-requires": off
   "@typescript-eslint/prefer-as-const": warn
   "@typescript-eslint/prefer-for-of": warn
   "@typescript-eslint/prefer-function-type": warn

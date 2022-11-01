@@ -18,8 +18,8 @@
 	const title = cache.tv[$params.id];
 	const magnets: {
 		[season: number]: {
-			[episode: number]: null | { magnet: string; season: boolean }
-		}
+			[episode: number]: null | { magnet: string; season: boolean };
+		};
 	} = {};
 	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
@@ -164,7 +164,8 @@
 			)
 				.flat()
 				.filter(
-					(source) => source.seasons?.includes(season.number) &&
+					(source) =>
+						source.seasons?.includes(season.number) &&
 						[episode.number, null].includes(source.episode)
 				)
 				.sort((a, b) => b.score - a.score);

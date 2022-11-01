@@ -4,7 +4,7 @@ import net from "net";
 import readline from "readline";
 
 interface Info {
-	buffered: null | number
+	buffered: null | number;
 }
 
 const server = net.createServer();

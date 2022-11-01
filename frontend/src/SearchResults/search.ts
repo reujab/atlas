@@ -5,22 +5,22 @@ import { get } from "..";
 import { log, error } from "../log";
 
 export interface Source {
-	name: string
-	score: number
-	seeders: number
-	leechers: number
-	size: number
+	name: string;
+	score: number;
+	seeders: number;
+	leechers: number;
+	size: number;
 
-	seasons: null | number[]
-	episode: null | number
+	seasons: null | number[];
+	episode: null | number;
 
-	element: null | HTMLDivElement
-	getMagnet: () => Promise<string>
+	element: null | HTMLDivElement;
+	getMagnet: () => Promise<string>;
 }
 
 export interface ParsedName {
-	seasons: null | number[]
-	episode: null | number
+	seasons: null | number[];
+	episode: null | number;
 }
 
 export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?/i;

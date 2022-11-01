@@ -21,9 +21,10 @@
 			vpn.connected = lastLine.slice(0, 9) === "CONNECTED";
 
 			if (
-				vpn.connected !== lastStatus && lastStatus !== null ||
+				(vpn.connected !== lastStatus && lastStatus !== null) ||
 				!vpn.location
-			) updateLocation();
+			)
+				updateLocation();
 
 			if (!vpn.connected) error(`disconnected from vpn: ${stdout}${stderr}`);
 		});

@@ -2,20 +2,20 @@ import postgres from "postgres";
 import { error } from "./log";
 
 interface Genre {
-	id: number
-	name: string
+	id: number;
+	name: string;
 }
 
 export interface Title {
-	type: "movie" | "tv"
-	id: number
-	title: string
-	genres: number[]
-	overview: string
-	released: Date
-	trailer: string | null
-	rating: null | string
-	poster: HTMLImageElement
+	type: "movie" | "tv";
+	id: number;
+	title: string;
+	genres: number[];
+	overview: string;
+	released: Date;
+	trailer: string | null;
+	rating: null | string;
+	poster: HTMLImageElement;
 }
 
 const sql = postgres({

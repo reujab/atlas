@@ -1,13 +1,13 @@
 interface VPN {
-	connected: null | boolean
-	location: null | string
+	connected: null | boolean;
+	location: null | string;
 }
 
 interface Weather {
-	city: string
-	temp: string
-	icon: string
-	forecast: string
+	city: string;
+	temp: string;
+	icon: string;
+	forecast: string;
 }
 
 class State {

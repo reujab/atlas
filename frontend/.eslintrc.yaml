@@ -52,11 +52,7 @@ rules:
   no-empty-character-class: warn
   no-ex-assign: off
   no-extra-boolean-cast: warn
-  "@typescript-eslint/no-extra-parens":
-    - warn
-    - all
-    - ignoreJSX: all
-      enforceForArrowConditionals: false
+  "@typescript-eslint/no-extra-parens": off
   "@typescript-eslint/no-extra-semi": warn
   no-func-assign: warn
   no-import-assign: warn
@@ -390,10 +386,7 @@ rules:
     - warn
     - accessibility: no-public
   "@typescript-eslint/explicit-module-boundary-types": off
-  "@typescript-eslint/member-delimiter-style":
-    - warn
-    - multiline:
-        delimiter: "none"
+  "@typescript-eslint/member-delimiter-style": warn
   "@typescript-eslint/member-ordering": off
   "@typescript-eslint/naming-convention": off
   # "@typescript-eslint/no-base-to-string": warn

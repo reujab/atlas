@@ -1,9 +1,9 @@
 <script lang="ts" context="module">
 	export interface Tile {
-		title: string
-		onClick?: () => void
-		path?: string
-		icon: any
+		title: string;
+		onClick?: () => void;
+		path?: string;
+		icon: any;
 	}
 </script>
 
