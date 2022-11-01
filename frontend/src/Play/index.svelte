@@ -23,7 +23,7 @@
 	});
 
 	overlay.once("exit", (code) => {
-		log("overlay exit code: %O", code);
+		if (code) error("Overlay exit code", `${code}`);
 	});
 
 	rootState.torrentd.send({

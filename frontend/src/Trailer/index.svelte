@@ -28,7 +28,7 @@
 	});
 
 	overlay.on("exit", (code) => {
-		log("overlay exit code: %O", code);
+		if (code) error("Overlay exit code", `${code}`);
 		if (location.hash.includes("/trailer")) history.back();
 	});
 

@@ -33,7 +33,6 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mut stream: Un
 
         for (_, gamepad) in gilrs.gamepads() {
             if gamepad.is_pressed(Button::DPadLeft) {
-                // stream.write_all(&rewind_command).unwrap();
                 send_command(
                     Command {
                         id: 0,

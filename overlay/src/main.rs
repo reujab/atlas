@@ -136,7 +136,7 @@ impl SimpleComponent for App {
                     set_transition_duration: 1000,
                     set_transition_type: gtk::RevealerTransitionType::SlideUp,
                     #[watch]
-                    set_reveal_child: model.mpv.paused || model.mpv.buffering,
+                    set_reveal_child: model.mpv.paused,
 
                     Box {
                         add_css_class: "container",
