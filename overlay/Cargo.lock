@@ -37,6 +37,7 @@ dependencies = [
  "gtk4",
  "human_bytes",
  "log",
+ "regex",
  "relm4",
  "relm4-components",
  "relm4-macros",

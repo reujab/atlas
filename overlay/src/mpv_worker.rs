@@ -1,4 +1,5 @@
 use super::{MPVInfo, Msg};
+use regex::Regex;
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -31,11 +32,13 @@ struct Event {
 pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream) {
     let is_torrent = &std::env::args().nth(1).unwrap_or("".to_owned()) == "--torrent";
 
+    let censor = Regex::new(r"(?i)fuck").unwrap();
     let title = get_property("media-title", &mut stream, &sender)
         .unwrap()
         .as_str()
         .unwrap()
         .to_owned();
+    let title = censor.replace_all(&title, "****").to_string();
     sender.input(Msg::SetTitle(title));
 
     let duration = get_property("duration", &mut stream, &sender)
