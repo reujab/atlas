@@ -3,19 +3,13 @@ import childProcess from "child_process";
 import net from "net";
 import readline from "readline";
 
-interface Info {
-	buffered: null | number;
-}
-
 const server = net.createServer();
 const webtorrent = new WebTorrent();
 const torrentPath = `${process.env.HOME}/Downloads`;
 const clients: net.Socket[] = [];
 let currentTorrent: null | WebTorrent.Torrent = null;
 let mpv: null | childProcess.ChildProcess = null;
-let info: Info = {
-	buffered: null,
-};
+let buffered: null | number = null;
 
 server.listen("/tmp/torrentd", () => {
 	console.log("Started");
@@ -32,6 +26,11 @@ server.on("connection", (socket) => {
 
 	const reader = readline.createInterface({ input: socket });
 
+	function cleanup(): void {
+		reader.close();
+		socket.destroy();
+	}
+
 	socket.on("error", (err: any) => {
 		console.error(err.code);
 	});
@@ -39,11 +38,11 @@ server.on("connection", (socket) => {
 	socket.once("close", () => {
 		console.log("Connection closed");
 		clients.splice(clients.indexOf(socket), 1);
-		reader.close();
+		cleanup();
 	});
 
 	reader.on("error", (err) => {
-		console.error(err);
+		console.error(err.code);
 	});
 
 	reader.on("line", (line) => {
@@ -52,7 +51,7 @@ server.on("connection", (socket) => {
 			data = JSON.parse(line);
 		} catch (err) {
 			console.error(`Could not parse: ${line}`);
-			socket.destroy();
+			cleanup();
 			return;
 		}
 
@@ -65,7 +64,7 @@ server.on("connection", (socket) => {
 					message: "info",
 					peers: currentTorrent?.numPeers,
 					speed: Math.floor(webtorrent.downloadSpeed),
-					...info,
+					buffered,
 				})}\n`);
 				break;
 			case "stop":
@@ -91,15 +90,12 @@ function play(magnet: string, fileName?: string): void {
 	currentTorrent = webtorrent.add(magnet, { path: torrentPath }, (torrent) => {
 		console.log("Connected");
 
-		/* eslint-disable-next-line */
 		let torrentServer: any, interval: NodeJS.Timer;
 
 		function cleanup(): void {
 			currentTorrent = null;
 			mpv = null;
-			info = {
-				buffered: null,
-			};
+			buffered = null;
 			torrentServer?.close();
 			torrent.destroy();
 			clearInterval(interval);
@@ -110,12 +106,12 @@ function play(magnet: string, fileName?: string): void {
 			console.error(err);
 		});
 
-		const index = fileName ?
-			torrent.files.findIndex((file) => file.name === fileName) :
-			torrent.files.
-				map((file, originalIndex) => ({ file, originalIndex })).
-				sort((a, b) => b.file.length - a.file.length).
-				find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name))?.originalIndex;
+		const index = fileName
+			? torrent.files.findIndex((file) => file.name === fileName)
+			: torrent.files
+				.map((file, originalIndex) => ({ file, originalIndex }))
+				.sort((a, b) => b.file.length - a.file.length)
+				.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name))?.originalIndex;
 		if (index === undefined || index === -1) {
 			console.error("File not found");
 			cleanup();
@@ -127,7 +123,7 @@ function play(magnet: string, fileName?: string): void {
 		file.select();
 
 		interval = setInterval(() => {
-			info.buffered = file.progress;
+			buffered = file.progress;
 		}, 1000);
 
 		torrentServer = torrent.createServer();

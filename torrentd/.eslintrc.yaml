@@ -341,7 +341,9 @@ rules:
   no-var: warn
   object-shorthand: warn
   prefer-arrow-callback: warn
-  prefer-const: warn
+  prefer-const:
+    - warn
+    - ignoreReadBeforeAssign: true
   prefer-destructuring:
     - warn
     - array: false
