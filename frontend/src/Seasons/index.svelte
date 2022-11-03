@@ -123,8 +123,11 @@
 	}
 
 	async function update(): Promise<void> {
-		seasonsEle.scrollTo(activeSeason.ele.offsetLeft - 16, 0);
-		activeSeason.episodesEle.scrollTo(0, activeEpisode.ele.offsetTop - 20);
+		seasonsEle.scrollTo(activeSeason.ele?.offsetLeft - 16, 0);
+		activeSeason.episodesEle?.scrollTo(
+			0,
+			activeEpisode.ele?.offsetTop - 20
+		);
 
 		const season = activeSeason;
 		const episode = activeEpisode;
@@ -207,7 +210,7 @@
 		}
 	}
 
-	async function cachedSearch(query: string): Promise<null | Source[]> {
+	async function cachedSearch(query: string): Promise<Source[]> {
 		if (!searchCache[query]) {
 			searchCache[query] = await search(query, "tv", controller.signal);
 		}

@@ -19,15 +19,15 @@ export interface Source {
 }
 
 export interface ParsedName {
-	seasons: null | number[];
+	seasons: number[];
 	episode: null | number;
 }
 
 export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?/i;
 
-export function parseName(name: string): null | ParsedName {
+export function parseName(name: string): ParsedName {
 	const match = name.match(episodeRegex);
-	if (!match) return null;
+	if (!match) return { seasons: [], episode: null };
 
 	const seasons = match[1]
 		.replace(/[ .,&s-]+/gi, " ")
@@ -114,10 +114,10 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 		get(`https://apibay.org/${path}`, { signal }).then((res) => {
 			res.json().then((sources: any) => {
 				resolve(parseSources(sources));
-			}).catch((err) => {
+			}).catch((err: any) => {
 				reject(err);
 			});
-		}).catch((err) => {
+		}).catch((err: any) => {
 			if (signal?.aborted) {
 				reject(err);
 				return;
@@ -186,13 +186,13 @@ async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortS
 	}
 	const $ = cheerio.load(html);
 	return Array.from($("tbody > tr")).map((ele) => ({
-		getMagnet: (async (p: string) => {
+		getMagnet: (async (p?: string) => {
 			const r = await get(`https://1337x.to${p}`);
 			// eslint-disable-next-line no-shadow
 			const html = await r.text();
 			// eslint-disable-next-line no-shadow
 			const $ = cheerio.load(html);
-			return $("a[href^=magnet:]").attr("href");
+			return $("a[href^=magnet:]").attr("href") || "";
 		}).bind(null, $(ele).find(".name > a:nth-child(2)").attr("href")),
 		name: $(ele).find(".name > a:nth-child(2)").text(),
 		seeders: Number($(ele).find("td.seeds").text()),

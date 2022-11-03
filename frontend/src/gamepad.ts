@@ -2,8 +2,8 @@ import { log } from "./log";
 import { GamepadListener } from "gamepad.js";
 
 interface Axis {
-	interval?: NodeJS.Timeout
-	lastButton?: "up" | "down" | "left" | "right" | null
+	interval?: NodeJS.Timeout;
+	lastButton?: "up" | "down" | "left" | "right" | null;
 }
 
 const listener = new GamepadListener();

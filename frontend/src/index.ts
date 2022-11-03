@@ -84,7 +84,7 @@ export async function get(...args: Parameters<typeof fetch>): Promise<Response> 
 
 			error("Fetch error", err);
 
-			if (err.message.startsWith("status:")) break;
+			if ((err as Error).message?.startsWith("status:")) break;
 		}
 	}
 

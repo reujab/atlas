@@ -4,7 +4,7 @@
 
 	let active = false;
 	let error: null | ErrorMessage;
-	let timeout: null | NodeJS.Timer;
+	let timeout: NodeJS.Timer;
 
 	errorStore.subscribe((err) => {
 		if (err) {

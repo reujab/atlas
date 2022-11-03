@@ -8,7 +8,7 @@ export function log(format: string, ...args: any[]): void {
 	process.stdout.write(`[${new Date().toISOString()}] ${format}\n`);
 }
 
-export function error(msg: string, err?: string | Error | ErrorEvent): void {
+export function error(msg: string, err?: any): void {
 	console.error(msg, err);
 	process.stderr.write(`[${new Date().toISOString()}] ${msg}${err ? `: ${err}` : ""}\n`);
 	errorStore.update(() => ({ msg, err }));

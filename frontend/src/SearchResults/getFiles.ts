@@ -4,7 +4,7 @@ import { parseName } from "./search";
 export interface File {
 	name: string;
 	size: string;
-	seasons: null | number[];
+	seasons: number[];
 	episode: null | number;
 }
 

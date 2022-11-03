@@ -4,7 +4,7 @@
 	import childProcess from "child_process";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { error, log } from "../log";
+	import { error } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";

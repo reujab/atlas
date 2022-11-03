@@ -84,7 +84,7 @@
 		setTimeout(() => {
 			container?.scrollTo(
 				0,
-				(activeSource as Source)?.element.offsetTop - 16
+				(activeSource as Source)?.element?.offsetTop - 16
 			);
 		});
 	}
