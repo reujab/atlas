@@ -91,7 +91,10 @@ pub(crate) fn send_command(
 ) -> Result<serde_json::Value, String> {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
     let command_str = serde_json::to_string(&command).unwrap() + "\n";
-    stream.write_all(&command_str.into_bytes()).unwrap();
+    if let Err(err) = stream.write_all(&command_str.into_bytes()) {
+        sender.input(Msg::Quit);
+        panic!("{err}");
+    }
 
     loop {
         let mut res = String::new();

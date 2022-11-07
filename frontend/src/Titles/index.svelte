@@ -4,12 +4,12 @@
 	import Header from "../Header/index.svelte";
 	import seasonsState from "../Seasons/State";
 	import store from "./State";
-	import { genres } from "../db";
+	import { genres, TitleType } from "../db";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const type = $params.type as "movie" | "tv";
+	const type = $params.type as TitleType;
 	let state = store[type];
 	let rowsEle: HTMLDivElement;
 	$: activeTitle =

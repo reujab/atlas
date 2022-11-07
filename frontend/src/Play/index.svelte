@@ -43,7 +43,8 @@
 	}
 
 	function msgHandler(msg: any): void {
-		if (msg.message === "player_closed") history.back();
+		if (msg.message === "player_closed" && location.hash.includes("/play"))
+			history.back();
 	}
 
 	subscribe(gamepadHandler);

@@ -1,13 +1,15 @@
 import postgres from "postgres";
 import { error } from "./log";
 
+export type TitleType = "movie" | "tv";
+
 interface Genre {
 	id: number;
 	name: string;
 }
 
 export interface Title {
-	type: "movie" | "tv";
+	type: TitleType;
 	id: number;
 	title: string;
 	genres: number[];
@@ -53,7 +55,7 @@ function cacheTitles(titles: Title[]): void {
 	}
 }
 
-export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
+export async function getTrending(type: TitleType): Promise<Title[]> {
 	const trending = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
@@ -69,7 +71,7 @@ export async function getTrending(type: "movie" | "tv"): Promise<Title[]> {
 	return trending;
 }
 
-export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
+export async function getTopRated(type: TitleType): Promise<Title[]> {
 	const topRated = await sql`
 		SELECT id, type, title, genres, overview, released, trailer, rating
 		FROM titles
@@ -85,7 +87,7 @@ export async function getTopRated(type: "movie" | "tv"): Promise<Title[]> {
 	return topRated;
 }
 
-export async function getTitlesWithGenre(type: "movie" | "tv", genre: number): Promise<Title[]> {
+export async function getTitlesWithGenre(type: TitleType, genre: number): Promise<Title[]> {
 	let titles;
 	if (genre === sortedGenres.find((g) => g.name === "Kids")?.id) {
 		titles = await sql`

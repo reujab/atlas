@@ -2,6 +2,7 @@ import cheerio from "cheerio";
 import http from "http";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { get } from "..";
+import { TitleType } from "../db";
 import { log, error } from "../log";
 
 export interface Source {
@@ -44,7 +45,7 @@ export function parseName(name: string): ParsedName {
 	return { seasons, episode };
 }
 
-export default async function search(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
+export default async function search(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
 	let sources = (await Promise.all([searchPB(query, type, signal), search1337x(query, type, signal)])).flat();
 
@@ -94,7 +95,7 @@ export default async function search(query: string, type?: "movie" | "tv", signa
 	return sources;
 }
 
-function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
+function searchPB(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
 	const cat = type === "movie" ? "201,207" : type === "tv" ? "205,208" : "200";
 	const path = `q.php?cat=${cat}&q=${query}`;
 
@@ -171,7 +172,7 @@ function searchPB(query: string, type?: "movie" | "tv", signal?: AbortSignal): P
 	});
 }
 
-async function search1337x(query: string, type?: "movie" | "tv", signal?: AbortSignal): Promise<Source[]> {
+async function search1337x(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
 	const path = type === "movie" ? `category-search/${query}/Movies/1/` : type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
 	let res;
 	try {
