@@ -2,14 +2,17 @@
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import childProcess from "child_process";
+	import spawnOverlay from "../spawnOverlay";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { error } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const title = cache[$params.type][$params.id];
+	const overlay = spawnOverlay(false, () => {
+		if (location.hash.includes("/trailer")) history.back();
+	});
 	const mpv = childProcess.spawn(
 		"mpv",
 		[
@@ -19,18 +22,6 @@
 		],
 		{ stdio: "inherit" }
 	);
-	const overlay = childProcess.spawn("atlas-overlay", {
-		stdio: "inherit",
-	});
-
-	overlay.on("error", (err) => {
-		error("Overlay", err);
-	});
-
-	overlay.on("exit", (code) => {
-		if (code) error("Overlay exit code", `${code}`);
-		if (location.hash.includes("/trailer")) history.back();
-	});
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {

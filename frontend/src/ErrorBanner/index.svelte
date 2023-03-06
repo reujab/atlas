@@ -28,7 +28,7 @@
 		<div class="flex flex-col">
 			<div class="text-5xl">{error?.msg}</div>
 			{#if error?.err}
-				<div class="text-3xl">{error?.err}</div>
+				<div class="text-3xl">{`${error?.err}`}</div>
 			{/if}
 		</div>
 	</div>

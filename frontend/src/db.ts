@@ -18,6 +18,8 @@ export interface Title {
 	trailer: string | null;
 	rating: null | string;
 	poster: HTMLImageElement;
+
+	progress?: number;
 }
 
 const sql = postgres({
@@ -43,8 +45,10 @@ export async function cacheGenres(): Promise<void> {
 	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function cacheTitles(titles: Title[]): void {
-	for (const title of titles) {
+export function cacheTitles(titles: Title[]): Title[] {
+	return titles.map((title) => {
+		if (cache[title.type][title.id])
+			return cache[title.type][title.id];
 		cache[title.type][title.id] = title;
 		title.poster = new Image();
 		title.poster.className = "rounded-md";
@@ -52,7 +56,8 @@ function cacheTitles(titles: Title[]): void {
 			error("Failed to load poster", err);
 		});
 		title.poster.src = `file://${process.env.POSTERS_PATH}/${title.type}/${title.id}`;
-	}
+		return title;
+	});
 }
 
 export async function getTrending(type: TitleType): Promise<Title[]> {
@@ -66,9 +71,7 @@ export async function getTrending(type: TitleType): Promise<Title[]> {
 		LIMIT 100
 	` as unknown as Title[];
 
-	cacheTitles(trending);
-
-	return trending;
+	return cacheTitles(trending);
 }
 
 export async function getTopRated(type: TitleType): Promise<Title[]> {
@@ -82,9 +85,7 @@ export async function getTopRated(type: TitleType): Promise<Title[]> {
 		LIMIT 100
 	` as unknown as Title[];
 
-	cacheTitles(topRated);
-
-	return topRated;
+	return cacheTitles(topRated);
 }
 
 export async function getTitlesWithGenre(type: TitleType, genre: number): Promise<Title[]> {
@@ -115,9 +116,7 @@ export async function getTitlesWithGenre(type: TitleType, genre: number): Promis
 		` as unknown as Title[];
 	}
 
-	cacheTitles(titles);
-
-	return titles;
+	return cacheTitles(titles);
 }
 
 let autocompleteQuery: null | postgres.PendingQueryModifiers<postgres.Row[]> = null;
@@ -140,7 +139,5 @@ export async function getAutocomplete(query: string, blacklist: number[] = []): 
 		return null;
 	}
 
-	cacheTitles(titles);
-
-	return titles;
+	return cacheTitles(titles);
 }

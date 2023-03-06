@@ -6,7 +6,10 @@ use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, 
 use log::info;
 use relm4::prelude::*;
 use serde::Deserialize;
-use std::{cmp::max, os::unix::net::UnixStream, process::Command, thread, time::Duration};
+use std::{
+    cmp::max, fs::File, io::prelude::*, os::unix::net::UnixStream, process::Command, thread,
+    time::Duration,
+};
 
 const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
@@ -297,6 +300,11 @@ impl SimpleComponent for App {
                 self.speed = speed;
             }
             Msg::Quit => {
+                let progress = self.mpv.position as f64 / self.duration as f64;
+                let mut file = File::create("/tmp/progress").unwrap();
+                file.write_all(progress.to_string().as_bytes()).unwrap();
+                file.sync_all().unwrap();
+                drop(file);
                 relm4::main_application().quit();
             }
         }

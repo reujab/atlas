@@ -1,29 +1,32 @@
 <script lang="ts">
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
-	import childProcess from "child_process";
-	import torrentd from "../torrentd";
+	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
+	import titlesState from "../Titles/State";
+	import torrentd from "../torrentd";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache } from "../db";
-	import { error } from "../log";
+	import { cache, TitleType } from "../db";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 
-	const title = $params.type
-		? cache[$params.type][$params.id].title
-		: unescape($params.query);
-	const overlay = childProcess.spawn("atlas-overlay", ["--torrent"], {
-		stdio: "inherit",
-	});
-
-	overlay.on("error", (err: Error) => {
-		error("Overlay", err);
-	});
-
-	overlay.once("exit", (code) => {
-		if (code) error("Overlay exit code", `${code}`);
+	const type: TitleType = $params.type;
+	const id = Number($params.id);
+	const title = cache[type][id];
+	const header = $params.type ? title.title : unescape($params.query);
+	const overlay = spawnOverlay(true, (progress) => {
+		console.log("Progress", progress);
+		title.progress = progress;
+		titlesState[type].rows.update((rows) => {
+			const index = rows[0].titles.indexOf(title);
+			if (index === -1) {
+				rows[0].titles.unshift(title);
+			} else if (index !== 0) {
+				rows[0].titles.unshift(rows[0].titles.splice(index, 1)[0]);
+			}
+			return rows;
+		});
 	});
 
 	torrentd.send({
@@ -57,7 +60,7 @@
 <ErrorBanner />
 
 <div class="h-screen flex flex-col px-48">
-	<Header back {title} />
+	<Header back title={header} />
 
 	<div class="flex justify-center items-center h-full">
 		<Circle2 size={256} />

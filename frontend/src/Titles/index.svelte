@@ -2,6 +2,8 @@
 	import Circle2 from "svelte-loading-spinners/dist/ts/Circle2.svelte";
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
+	import Poster from "../Poster";
+	import Row from "./Row";
 	import seasonsState from "../Seasons/State";
 	import store from "./State";
 	import { genres, TitleType } from "../db";
@@ -10,20 +12,20 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const type = $params.type as TitleType;
-	let state = store[type];
+	const state = store[type];
+	const { ready } = state;
+	const rowsStore = state.rows;
+	let rows: Row[] = [];
 	let rowsEle: HTMLDivElement;
 	$: activeTitle =
-		state.rows[state.activeRow].titles[
-			state.rows[state.activeRow].activeCol
-		];
+		rows[state.activeRow]?.titles[rows[state.activeRow].activeCol];
 
-	if (!state.ready) {
-		const interval = setInterval(() => {
-			if (state.ready) {
-				state = state;
-				clearInterval(interval);
-			}
-		}, 100);
+	const unsubscribeReady = ready.subscribe((isReady) => {
+		if (isReady) onReady();
+	});
+
+	function onReady(): void {
+		rows = $rowsStore.filter((row) => Boolean(row.titles.length));
 	}
 
 	function gamepadHandler(button: string): void {
@@ -32,9 +34,9 @@
 			return;
 		}
 
-		if (!state.ready) return;
+		if (!$ready) return;
 
-		const row = state.rows[state.activeRow];
+		const row = rows[state.activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
@@ -47,23 +49,21 @@
 				break;
 			case "up":
 				state.activeRow =
-					(state.rows.length + state.activeRow - 1) %
-					state.rows.length;
+					(rows.length + state.activeRow - 1) % rows.length;
 				break;
 			case "down":
 				state.activeRow =
-					(state.rows.length + state.activeRow + 1) %
-					state.rows.length;
+					(rows.length + state.activeRow + 1) % rows.length;
 				break;
 			case "left":
 				row.activeCol =
 					(row.titles.length + row.activeCol - 1) % row.titles.length;
-				state.rows = state.rows;
+				rows = rows;
 				break;
 			case "right":
 				row.activeCol =
 					(row.titles.length + row.activeCol + 1) % row.titles.length;
-				state.rows = state.rows;
+				rows = rows;
 				break;
 		}
 
@@ -71,9 +71,9 @@
 	}
 
 	function scroll(instant?: boolean): void {
-		rowsEle?.scrollTo(0, state.rows[state.activeRow].element.offsetTop);
+		rowsEle?.scrollTo(0, rows[state.activeRow].element.offsetTop);
 
-		for (const row of state.rows) {
+		for (const row of rows) {
 			row.element?.querySelector(".posters").scrollTo({
 				left:
 					(row.element?.querySelectorAll(".poster")[
@@ -92,6 +92,7 @@
 	});
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
+		unsubscribeReady();
 	});
 </script>
 
@@ -104,7 +105,7 @@
 		search="/search"
 	/>
 
-	{#if state.ready}
+	{#if $ready}
 		<div class="min-h-[9rem] flex flex-col mb-2">
 			{#if activeTitle}
 				<h3 class="text-xl mb-2">
@@ -125,22 +126,22 @@
 			class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4 relative"
 			bind:this={rowsEle}
 		>
-			{#each state.rows as row, rowIndex}
+			{#each rows as row, rowIndex}
 				<div class="row" bind:this={row.element}>
 					<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
 					<div
-						class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 p-4 relative min-h-[400px] items-center"
+						class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 px-4 py-6 relative min-h-[400px] items-center"
 					>
 						{#each row.titles as title, colIndex}
 							<a
 								href="#/{title.type}/{title.id}"
-								class="poster shrink-0 w-[15rem] border-4 border-transparent white-shadow rounded-lg"
+								class="poster shrink-0 w-[15rem]"
 								class:active={rowIndex === state.activeRow &&
 									colIndex ===
-										state.rows[state.activeRow].activeCol}
+										rows[state.activeRow].activeCol}
 							>
-								{#if rowIndex === state.activeRow || Math.abs(colIndex - state.rows[rowIndex].activeCol) < 10}
-									{@html title.poster?.outerHTML}
+								{#if rowIndex === state.activeRow || Math.abs(colIndex - rows[rowIndex].activeCol) < 10}
+									<Poster {title} />
 								{/if}
 							</a>
 						{/each}

@@ -5,6 +5,7 @@
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
 	import Header from "../Header/index.svelte";
+	import Poster from "../Poster";
 	import Rating from "./Rating.svelte";
 	import getSeasons from "../Seasons/getSeasons";
 	import playState from "../Play/State";
@@ -152,12 +153,7 @@
 	<div class="flex grow items-center">
 		<div class="flex gap-4 my-4">
 			<div class="shrink-0 flex flex-col gap-4">
-				<img
-					src="file:///{process.env
-						.POSTERS_PATH}/{title.type}/{title.id}"
-					alt="Poster"
-					class="rounded-md white-shadow"
-				/>
+				<Poster {title} />
 
 				<span class="text-3xl text-center">{releaseDate}</span>
 			</div>
