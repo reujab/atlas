@@ -5,24 +5,21 @@
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
-	import getFiles from "../SearchResults/getFiles";
 	import playState from "../Play/State";
-	import search, { Source } from "../SearchResults/search";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache } from "../db";
-	import { error, log } from "../log";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
+	import { get } from "..";
 
 	const title = cache.tv[$params.id];
 	const magnets: {
 		[season: number]: {
-			[episode: number]: null | { magnet: string; season: boolean };
+			[episode: number]: null | string;
 		};
 	} = {};
-	const searchCache: { [query: string]: Source[] } = {};
 	let seasons = state.seasons;
 	let carousel: any;
 	let seasonsEle: HTMLDivElement;
@@ -60,35 +57,14 @@
 			case "A":
 				const magnet =
 					magnets[activeSeason.number]?.[activeEpisode.number];
-				if (magnet) {
-					if (magnet.season) {
-						loading = true;
-						getFiles(magnet.magnet).then((files) => {
-							const file =
-								files.find(
-									(f) =>
-										f.seasons.includes(
-											activeSeason.number
-										) && f.episode === activeEpisode.number
-								) ||
-								files.find(
-									(f) => f.episode === activeEpisode.number
-								);
-							if (file && loading) {
-								playState.file = file.name;
-								playState.magnet = magnet.magnet;
-								location.href = `#/tv/${title.id}/play`;
-							} else {
-								// failed or cancelled
-								loading = false;
-							}
-						});
-					} else {
-						playState.file = null;
-						playState.magnet = magnet.magnet;
-						location.href = `#/tv/${title.id}/play`;
-					}
+				if (!magnet) {
+					return;
 				}
+
+				playState.magnet = magnet;
+				playState.season = activeSeason.number;
+				playState.episode = activeEpisode.number;
+				location.href = `#/tv/${title.id}/play`;
 				return;
 			case "left":
 				if (state.seasonIndex > 0) {
@@ -137,84 +113,34 @@
 			magnets[season.number] = {};
 		}
 
-		if (
-			magnets[season.number][episode.number] &&
-			// retry on error
-			typeof (magnets[season.number][episode.number] as any).message !==
-				"string"
-		) {
-			return;
-		}
-
-		controller = new AbortController();
-
-		try {
-			const sources = (
-				await Promise.all([
-					cachedSearch(`${title.title} Season ${season.number}`),
-					cachedSearch(
-						`${title.title} S${String(season.number).padStart(
-							2,
-							"0"
-						)}`
-					),
-					cachedSearch(
-						`${title.title} S${String(season.number).padStart(
-							2,
-							"0"
-						)}E${String(episode.number).padStart(2, "0")}`
-					),
-				])
-			)
-				.flat()
-				.filter(
-					(source) =>
-						source.seasons?.includes(season.number) &&
-						[episode.number, null].includes(source.episode)
-				)
-				.sort((a, b) => b.score - a.score);
-
-			const source = sources[0];
-			log("source: %O", source);
-			if (source?.seeders >= 5) {
-				const magnet = await source.getMagnet();
-				if (source.episode) {
-					magnets[season.number][episode.number] = {
-						magnet,
-						season: false,
-					};
-				} else {
-					for (const seasonNum of source.seasons) {
-						if (!magnets[seasonNum]) {
-							magnets[seasonNum] = {};
-						}
-
-						for (let i = 1; i <= season.episodes.length; i++) {
-							if (!magnets[seasonNum][i]) {
-								magnets[seasonNum][i] = {
-									magnet,
-									season: true,
-								};
-							}
-						}
-					}
-				}
-			} else {
-				magnets[season.number][episode.number] = null;
-			}
-		} catch (err) {
-			if (!(err instanceof DOMException)) {
-				error("search error", err);
-				magnets[season.number][episode.number] = err;
-			}
+		if (!magnets[season.number][episode.number]) {
+			magnets[season.number][episode.number] = await search(
+				title.title,
+				season.number,
+				episode.number
+			);
 		}
 	}
 
-	async function cachedSearch(query: string): Promise<Source[]> {
-		if (!searchCache[query]) {
-			searchCache[query] = await search(query, "tv", controller.signal);
+	async function search(
+		query: string,
+		season: number,
+		episode: number
+	): Promise<null | string> {
+		try {
+			return (
+				await get(
+					`${
+						process.env.SEEDBOX_HOST
+					}:8000/search/tv?q=${encodeURIComponent(
+						query
+					)}&s=${season}&e=${episode}`
+				)
+			).text();
+		} catch (err) {
+			console.error(err);
+			return null;
 		}
-		return searchCache[query];
 	}
 
 	function retry(e: any): void {
@@ -309,7 +235,7 @@
 									{#if magnets[season.number]?.[episode.number] !== undefined}
 										{#if magnets[season.number][episode.number] === null}
 											Unavailable
-										{:else if magnets[season.number][episode.number].magnet}
+										{:else}
 											<div class="h-1/2 flex gap-8">
 												<div class="relative h-full">
 													<GamepadButton button="X" />
@@ -320,8 +246,6 @@
 													<FaPlay />
 												</div>
 											</div>
-										{:else}
-											Error
 										{/if}
 									{:else}
 										<Circle2 />

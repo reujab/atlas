@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import getFiles, { File } from "./getFiles";
@@ -45,7 +45,8 @@
 				sources = [];
 
 				if (showingFiles) {
-					playState.file = (source as File).name;
+					// playState.file = (source as File).name;
+					// TODO
 					location.href = playHref;
 					return;
 				}
@@ -68,7 +69,8 @@
 								history.back();
 							});
 					} else {
-						playState.file = null;
+						playState.season = null;
+						playState.episode = null;
 						location.href = playHref;
 					}
 				});
@@ -141,4 +143,4 @@
 	.source.active {
 		min-width: 105%;
 	}
-</style>
+</style> -->

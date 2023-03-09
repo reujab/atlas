@@ -9,11 +9,11 @@
 	import Rating from "./Rating.svelte";
 	import getSeasons from "../Seasons/getSeasons";
 	import playState from "../Play/State";
-	import search, { Source } from "../SearchResults/search";
 	import seasonsState from "../Seasons/State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache, genres } from "../db";
 	import { error, log } from "../log";
+	import { get } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -96,33 +96,31 @@
 		}
 	}
 
-	playState.file = null;
 	playState.magnet = null;
+	playState.season = null;
+	playState.episode = null;
 	if (title.type === "movie") {
-		search(
-			`${title.title} ${
-				title.released ? title.released.getFullYear() : ""
-			}`,
-			"movie"
+		get(
+			`${
+				process.env.SEEDBOX_HOST
+			}:8000/search/movie?q=${encodeURIComponent(
+				`${title.title} ${
+					title.released ? title.released.getFullYear() : ""
+				}`
+			)}`
 		)
-			.then((sources: Source[]) => {
-				log("source: %O", sources[0]);
-				if (sources[0]?.seeders >= 10) {
-					sources[0].getMagnet().then((magnet) => {
-						playState.file = null;
-						playState.magnet = magnet;
-						buttons[0].icon = FaPlay;
-						buttons[1].icon = FaDownload;
-					});
-				} else {
-					buttons[0].title = "Unavailable";
-					buttons[0].icon = null;
-					buttons[1].hidden = true;
-				}
+			.then(async (res) => {
+				const magnet = await res.text();
+				console.log(magnet);
+				playState.magnet = magnet;
+				playState.season = null;
+				playState.episode = null;
+				buttons[0].icon = FaPlay;
+				buttons[1].icon = FaDownload;
 			})
 			.catch((err) => {
-				error("search err", err);
-				buttons[0].title = "Error";
+				console.error(err);
+				buttons[0].title = "Unavailable";
 				buttons[0].icon = null;
 				buttons[1].hidden = true;
 			});

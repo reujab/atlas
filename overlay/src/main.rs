@@ -1,11 +1,9 @@
 mod input_worker;
 mod mpv_worker;
-mod torrentd_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
 use log::info;
 use relm4::prelude::*;
-use serde::Deserialize;
 use std::{
     cmp::max, fs::File, io::prelude::*, os::unix::net::UnixStream, process::Command, thread,
     time::Duration,
@@ -15,10 +13,7 @@ const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
 
 pub(crate) struct App {
-    is_torrent: bool,
-
     mpv: MPVInfo,
-    torrentd: TorrentdInfo,
 
     title: String,
     duration: u32,
@@ -36,17 +31,9 @@ pub struct MPVInfo {
     dropped: u64,
 }
 
-#[derive(Deserialize, Debug, Default)]
-pub struct TorrentdInfo {
-    peers: Option<u32>,
-    buffered: Option<f64>,
-    speed: Option<u32>,
-}
-
 #[derive(Debug)]
 pub enum Msg {
     SetMPVInfo(MPVInfo),
-    SetTorrentdInfo(TorrentdInfo),
 
     SetTitle(String),
     SetDuration(u32),
@@ -113,12 +100,6 @@ impl SimpleComponent for App {
                                 add_css_class: "info",
                                 set_orientation: Orientation::Vertical,
                                 set_valign: Align::Center,
-
-                                Label {
-                                    set_visible: model.is_torrent,
-                                    #[watch]
-                                    set_label: &format!("Peers: {}", model.torrentd.peers.unwrap_or(0)),
-                                },
 
                                 Label {
                                     #[watch]
@@ -252,12 +233,8 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let is_torrent = &std::env::args().nth(1).unwrap_or("".to_owned()) == "--torrent";
         let model = App {
-            is_torrent,
-
             mpv: MPVInfo::default(),
-            torrentd: TorrentdInfo::default(),
 
             title: "Loading...".to_owned(),
             duration: 0,
@@ -275,9 +252,6 @@ impl SimpleComponent for App {
         thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream_clone));
         let sender_clone = sender.clone();
         thread::spawn(move || mpv_worker::start(sender_clone, stream));
-        if is_torrent {
-            thread::spawn(move || torrentd_worker::start(sender));
-        }
 
         ComponentParts { model, widgets }
     }
@@ -286,9 +260,6 @@ impl SimpleComponent for App {
         match msg {
             Msg::SetMPVInfo(info) => {
                 self.mpv = info;
-            }
-            Msg::SetTorrentdInfo(info) => {
-                self.torrentd = info;
             }
             Msg::SetTitle(title) => {
                 self.title = title;
@@ -309,9 +280,9 @@ impl SimpleComponent for App {
             }
         }
 
-        self.buffered_width = PROGRESS_BAR_HEIGHT
-            + (self.torrentd.buffered.unwrap_or(0.0)
-                * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
+        // self.buffered_width = PROGRESS_BAR_HEIGHT
+        //     + (self.torrentd.buffered.unwrap_or(0.0)
+        //         * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
         self.progress_width = PROGRESS_BAR_HEIGHT
             + (self.mpv.position as f64 / self.duration as f64
                 * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
@@ -345,7 +316,7 @@ fn main() {
     info!("Waiting for file to load");
     mpv_worker::wait_for_event(&stream, "file-loaded");
 
-    thread::sleep(Duration::from_secs(3));
+    thread::sleep(Duration::from_secs(4));
     Command::new("killall")
         .args(&["-STOP", "atlas-frontend"])
         .output()

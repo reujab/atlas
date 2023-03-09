@@ -2,7 +2,6 @@ import HomeScreen from "./HomeScreen/index.svelte";
 import Play from "./Play/index.svelte";
 import Router, { routes } from "svelte-hash-router";
 import Search from "./Search/index.svelte";
-import SearchResults from "./SearchResults/index.svelte";
 import Seasons from "./Seasons/index.svelte";
 import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
@@ -29,7 +28,6 @@ cacheGenres();
 routes.set({
 	"/": HomeScreen,
 	"/search": Search,
-	"/results/:query": SearchResults,
 	"/results/:query/play": Play,
 	"/tv/:id/view": Seasons,
 
@@ -78,9 +76,6 @@ export async function get(...args: Parameters<typeof fetch>): Promise<Response> 
 			return res;
 		} catch (err) {
 			lastErr = err;
-
-			// break if the fetch was cancelled by a signal
-			if (err instanceof DOMException) break;
 
 			error("Fetch error", err);
 

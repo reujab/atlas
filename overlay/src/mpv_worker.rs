@@ -30,8 +30,6 @@ struct Event {
 }
 
 pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream) {
-    let is_torrent = &std::env::args().nth(1).unwrap_or("".to_owned()) == "--torrent";
-
     let censor = Regex::new(r"(?i)fuck").unwrap();
     let title = get_property("media-title", &mut stream, &sender)
         .unwrap()
@@ -72,13 +70,11 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream)
             dropped,
         }));
 
-        if !is_torrent {
-            let speed = get_property("cache-speed", &mut stream, &sender)
-                .unwrap()
-                .as_u64()
-                .unwrap() as u32;
-            sender.input(Msg::SetSpeed(speed));
-        }
+        let speed = get_property("cache-speed", &mut stream, &sender)
+            .unwrap()
+            .as_u64()
+            .unwrap() as u32;
+        sender.input(Msg::SetSpeed(speed));
 
         sleep(Duration::from_millis(200));
     }

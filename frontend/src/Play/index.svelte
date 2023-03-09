@@ -4,12 +4,14 @@
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
 	import titlesState from "../Titles/State";
-	import torrentd from "../torrentd";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache, TitleType } from "../db";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
+	import childProcess from "child_process";
+	import { get } from "..";
+	import { error } from "../log";
 
 	const type: TitleType = $params.type;
 	const id = Number($params.id);
@@ -18,6 +20,7 @@
 	const overlay = spawnOverlay(true, (progress) => {
 		console.log("Progress", progress);
 		title.progress = progress;
+		// update downloaded titles
 		titlesState[type].rows.update((rows) => {
 			const index = rows[0].titles.indexOf(title);
 			if (index === -1) {
@@ -29,31 +32,55 @@
 		});
 	});
 
-	torrentd.send({
-		message: "play",
-		magnet: state.magnet,
-		file: state.file,
-	});
+	let mpv: childProcess.ChildProcess;
 
-	torrentd.on("message", msgHandler);
+	get(
+		`${process.env.SEEDBOX_HOST}:8000/stream?magnet=${encodeURIComponent(
+			state.magnet
+		)}${state.season ? `&s=${state.season}&e=${state.episode}` : ""}`
+	).then(async (res) => {
+		if (res.status !== 200) {
+			error(`Stream failed with ${res.status}`);
+			cleanup();
+			return;
+		}
+
+		const stream = await res.text();
+
+		mpv = childProcess.spawn(
+			"mpv",
+			[
+				"--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
+				"--input-ipc-server=/tmp/mpv",
+				"--save-position-on-quit",
+				"--network-timeout=300",
+				process.env.SEEDBOX_HOST + stream,
+			],
+			{ stdio: "inherit" }
+		);
+
+		mpv.on("error", (err) => {
+			console.error(err);
+		});
+
+		mpv.on("exit", cleanup);
+	});
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {
-			overlay.kill();
-			torrentd.send({ message: "stop" });
-			history.back();
+			cleanup();
 		}
 	}
 
-	function msgHandler(msg: any): void {
-		if (msg.message === "player_closed" && location.hash.includes("/play"))
-			history.back();
+	function cleanup(): void {
+		overlay.kill();
+		mpv?.kill();
+		history.back();
 	}
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
-		torrentd.off("message", msgHandler);
 	});
 </script>
 

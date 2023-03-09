@@ -1,7 +1,9 @@
 class State {
-	file: null | string = null;
-
 	magnet: null | string = null;
+
+	season: null | number = null;
+
+	episode: null | number = null;
 }
 
 export default new State();

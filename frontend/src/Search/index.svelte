@@ -33,8 +33,8 @@
 						state.query = state.query.slice(0, -1);
 						update();
 					} else if (char === "\n") {
-						if (state.query)
-							location.href = `#/results/${state.query}`;
+						// if (state.query)
+						// 	location.href = `#/results/${state.query}`;
 					} else {
 						if (state.query.length) char = char.toLowerCase();
 						state.query += char;

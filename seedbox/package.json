@@ -1,19 +1,23 @@
 {
-  "name": "torrentd",
+  "name": "seedbox",
   "version": "0.0.0",
-  "description": "Torrent manager",
-  "main": "index.js",
+  "description": "Seedbox",
+  "main": "dist",
   "scripts": {
     "lint": "eslint *.ts",
     "dev": "tsc -w --sourceMap",
-    "build": "tsc --sourceMap && uglifyjs --compress --mangle --source-map content=index.js.map -o index.js index.js"
+    "build": "tsc && uglifyjs --compress --mangle -o dist/index.js dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "webtorrent": "^1.8.32"
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.2",
+    "socks-proxy-agent": "^7.0.0",
+    "webtorrent": "^1.9.7"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/node": "^18.11.7",
     "@types/node-ipc": "^9.2.0",
     "@types/webtorrent": "^0.109.3",

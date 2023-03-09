@@ -5,13 +5,11 @@ apt install -y \
 	fonts-cantarell \
 	fonts-noto \
 	git \
-	iptables \
 	iw \
 	libgtk-4-dev \
 	mpv \
 	netctl \
 	npm \
-	openvpn \
 	plymouth \
 	postgresql-14 \
 	snapd \
@@ -21,9 +19,6 @@ apt install -y \
 
 snap install ubuntu-frame
 
-npm i -g webtorrent-cli
-
-# dpkg -i windscribe.deb
 # dpkg -i frontend.deb
 # apt -f install
 
@@ -34,9 +29,8 @@ systemctl enable postgresql@14
 systemctl disable snapd
 systemctl enable getty@tty1
 systemctl enable tor
-# systemctl enable windscribe
 
-# edit gett@tty1 to autologin
+# edit getty@tty1 to autologin
 # edit .bashrc to autostart
 
 sed -i s/scram-sha-256/trust/g /etc/postgresql/*/*/pg_hba.conf

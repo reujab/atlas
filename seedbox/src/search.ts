@@ -1,9 +1,7 @@
 import cheerio from "cheerio";
 import http from "http";
+import parseName from "./parse";
 import { SocksProxyAgent } from "socks-proxy-agent";
-import { get } from "..";
-import { TitleType } from "../db";
-import { log, error } from "../log";
 
 export interface Source {
 	name: string;
@@ -19,45 +17,31 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export interface ParsedName {
-	seasons: number[];
-	episode: null | number;
-}
-
-export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?/i;
-
-export function parseName(name: string): ParsedName {
-	const match = name.match(episodeRegex);
-	if (!match) return { seasons: [], episode: null };
-
-	const seasons = match[1]
-		.replace(/[ .,&s-]+/gi, " ")
-		.trim()
-		.split(" ")
-		.map(Number)
-		.filter((s) => s < 256);
-	if (seasons.length === 2) {
-		for (let i = seasons[0] + 1; i < seasons[1]; i++) {
-			seasons.push(i);
-		}
-	}
-	const episode = Number(match[2]) || null;
-	return { seasons, episode };
-}
-
-export default async function search(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
+export default async function search(query: string, type: string): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
-	let sources = (await Promise.all([searchPB(query, type, signal), search1337x(query, type, signal)])).flat();
+	let sources = (await Promise.allSettled([searchPB(query, type), search1337x(query, type)])).filter((p) => {
+		if (p.status === "fulfilled") {
+			return true;
+		}
+
+		console.error(p.reason);
+
+		return false;
+	}).map((p: any) => p.value).flat();
 
 	function simplify(s: string): string {
 		return decodeURIComponent(s).replace(/\.|\(/g, " ").split(" ")[0].toLowerCase().replace(/[^a-z0-9]+/g, "");
 	}
 	sources = sources.filter((source) => {
+		if (source.seeders < 5) {
+			return false;
+		}
+
 		if (simplify(query) === simplify(source.name)) {
 			return true;
 		}
 
-		log(`filtering ${source.name} (${source.seeders})`);
+		console.log(`filtering ${source.name} (${source.seeders})`);
 		return false;
 	});
 
@@ -73,8 +57,8 @@ export default async function search(query: string, type?: TitleType, signal?: A
 			score *= 0.5;
 		}
 
-		if (name.includes("hdcam") || name.includes("camrip")) {
-			score *= 0.5;
+		if (name.includes("hdcam") || name.includes("camrip") || name.includes("hdts")) {
+			score *= 0.2;
 		}
 
 		if (name.includes("264") || name.includes("265")) {
@@ -84,10 +68,8 @@ export default async function search(query: string, type?: TitleType, signal?: A
 		source.score = score;
 
 		const parsed = parseName(name);
-		if (parsed) {
-			log("%O %O %O", source.name, source.seeders, parsed);
-		} else {
-			log("source doesn't match: %O", source.name);
+		if (!parsed) {
+			console.log("source doesn't match: %O", source.name);
 		}
 		Object.assign(source, parsed);
 	}
@@ -95,7 +77,7 @@ export default async function search(query: string, type?: TitleType, signal?: A
 	return sources;
 }
 
-function searchPB(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
+function searchPB(query: string, type?: string): Promise<Source[]> {
 	const cat = type === "movie" ? "201,207" : type === "tv" ? "205,208" : "200";
 	const path = `q.php?cat=${cat}&q=${query}`;
 
@@ -112,19 +94,14 @@ function searchPB(query: string, type?: TitleType, signal?: AbortSignal): Promis
 	}
 
 	return new Promise((resolve, reject) => {
-		get(`https://apibay.org/${path}`, { signal }).then((res) => {
+		get(`https://apibay.org/${path}`).then((res) => {
 			res.json().then((sources: any) => {
 				resolve(parseSources(sources));
 			}).catch((err: any) => {
 				reject(err);
 			});
 		}).catch((err: any) => {
-			if (signal?.aborted) {
-				reject(err);
-				return;
-			}
-
-			error("pb error", err);
+			console.error("pb error", err);
 			const agent = new SocksProxyAgent({
 				hostname: "localhost",
 				port: 9050,
@@ -133,52 +110,43 @@ function searchPB(query: string, type?: TitleType, signal?: AbortSignal): Promis
 				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
 				{ agent },
 				(res) => {
-					log("headers: %O", res.headers);
+					console.log("headers: %O", res.headers);
 
 					let data = "";
 					res.on("data", (chunk) => {
-						if (signal?.aborted) {
-							reject(new DOMException("aborted"));
-							res.destroy();
-							return;
-						}
 						data += chunk;
 					});
 					res.on("end", () => {
-						if (signal?.aborted) {
-							reject(new DOMException("aborted"));
-							return;
-						}
 						try {
 							resolve(parseSources(JSON.parse(data)));
 						} catch (err) {
-							log("%O", data);
-							error("error parsing json", err);
+							console.log("%O", data);
+							console.error("error parsing json", err);
 							reject(err);
 						}
 					});
 					res.on("error", (err) => {
-						error("pb onion error", err);
+						console.error("pb onion error", err);
 						reject(err);
 					});
 				}
 			);
 
 			req.on("error", (err) => {
-				error("socks error", err);
+				console.error("socks error", err);
 				reject(err);
 			});
 		});
 	});
 }
 
-async function search1337x(query: string, type?: TitleType, signal?: AbortSignal): Promise<Source[]> {
+async function search1337x(query: string, type?: string, signal?: AbortSignal): Promise<Source[]> {
 	const path = type === "movie" ? `category-search/${query}/Movies/1/` : type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
 	let res;
 	try {
 		res = await get(`https://1337x.to/${path}`, { signal });
 	} catch (err) {
-		error("1337x error", err);
+		console.error("1337x error", err);
 		return [];
 	}
 	const html = await res.text();
@@ -211,4 +179,36 @@ function parseSize(size: string): number {
 	const [num, den] = size.split(" ");
 	const multiplier = 1000 ** (dens.indexOf(den) + 1);
 	return Number(num.replace(/,/g, "")) * multiplier;
+}
+
+
+async function get(...args: Parameters<typeof fetch>): Promise<Response> {
+	const start = Date.now();
+	let lastErr;
+
+	for (let i = 0; i < 4; i++) {
+		if (Date.now() - start > 5000) break;
+
+		try {
+			console.log(`Getting ${args[0]}`);
+			// eslint-disable-next-line no-await-in-loop
+			const res = await fetch(...args);
+			console.log(`Reply at ${(Date.now() - start) / 1000}s`);
+
+			lastErr = new Error(`Status: ${res.status}`);
+
+			if (res.status >= 500) continue;
+			if (res.status !== 200) break;
+
+			return res;
+		} catch (err) {
+			lastErr = err;
+
+			console.error("Fetch error", err);
+
+			if ((err as Error).message?.startsWith("status:")) break;
+		}
+	}
+
+	throw lastErr;
 }
