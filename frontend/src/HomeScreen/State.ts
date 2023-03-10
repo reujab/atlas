@@ -1,8 +1,3 @@
-interface VPN {
-	connected: null | boolean;
-	location: null | string;
-}
-
 interface Weather {
 	city: string;
 	temp: string;
@@ -13,10 +8,7 @@ interface Weather {
 class State {
 	activeTile = 0;
 
-	vpn: VPN = {
-		connected: null,
-		location: null,
-	};
+	coords: null | number[] = null;
 
 	weather: null | Weather = null;
 }

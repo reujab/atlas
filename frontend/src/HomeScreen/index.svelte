@@ -11,7 +11,6 @@
 	import Clock from "./Clock.svelte";
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import HomeTile from "./HomeTile.svelte";
-	import VPNStatus from "./VPNStatus.svelte";
 	import Weather from "./Weather.svelte";
 	import childProcess from "child_process";
 	import seedrandom from "seedrandom";
@@ -99,8 +98,6 @@
 				<Clock />
 
 				<Weather />
-
-				<VPNStatus />
 			</div>
 		</div>
 	</div>

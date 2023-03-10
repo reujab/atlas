@@ -4,14 +4,19 @@
 	import { get } from "..";
 	import { log, error } from "../log";
 
-	fs.readFile("/tmp/geo.json", (err, geo) => {
-		if (err) {
-			error("Unable to get coordinates", err);
-			return;
+	async function getCoords(): Promise<number[]> {
+		if (state.coords) {
+			return state.coords;
 		}
 
-		const coords = JSON.parse(geo.toString());
+		const res = await get(
+			"https://location.services.mozilla.com/v1/geolocate?key=geoclue"
+		);
+		const json = JSON.parse(await res.text()).location;
+		return [json.lat, json.lng];
+	}
 
+	getCoords().then((coords) => {
 		updateWeather();
 		async function updateWeather(): Promise<void> {
 			try {
