@@ -1,10 +1,9 @@
 use crate::{get, TitleType};
-use futures::stream::StreamExt;
 use log::error;
 use serde::Deserialize;
 use sqlx::Row;
 use std::{env, time::Duration};
-use tokio::{fs::File, io::AsyncWriteExt, time::sleep};
+use tokio::time::sleep;
 
 #[derive(Deserialize, Debug)]
 struct Title {
@@ -143,24 +142,6 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
         return;
     }
 
-    let url = format!(
-        "https://www.themoviedb.org/t/p/w300_and_h450_bestv2{}",
-        title.poster_path.unwrap()
-    );
-    let path = format!(
-        "{}/{}/{id}",
-        env::var("POSTERS_PATH").unwrap(),
-        title_type.to_string()
-    );
-    let mut file = File::create(&path).await.unwrap();
-    let mut stream = get(&url).await.unwrap().bytes_stream();
-    while let Some(chunk) = stream.next().await {
-        file.write_all(&chunk.unwrap()).await.unwrap();
-    }
-    file.sync_all().await.unwrap();
-    drop(file);
-    info!("Downloaded poster to file://{path}");
-
     let trailer = title
         .videos
         .results
@@ -216,9 +197,9 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
             UPDATE titles
             SET ts = now(), genres = $1, language = $2, overview = $3, popularity = $4,
                 released = $5::date, runtime = $6, title = $7, trailer = $8, score = $9,
-                votes = $10, rating = $11::rating
-            WHERE id = $12
-            AND type = $13
+                votes = $10, rating = $11::rating, poster = $12
+            WHERE id = $13
+            AND type = $14
         "#,
     ))
     .bind(title.genres.iter().map(|g| g.id).collect::<Vec<i16>>())
@@ -232,6 +213,7 @@ async fn fetch(pool: &crate::Pool, id: i32, title_type: TitleType) {
     .bind(title.score * 1000.0)
     .bind(title.votes)
     .bind(rating)
+    .bind(title.poster_path)
     .bind(id)
     .bind(&title_type)
     .execute(&mut *conn)

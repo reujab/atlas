@@ -5,7 +5,7 @@
 </script>
 
 <div class="relative rounded-lg white-shadow overflow-hidden">
-	{@html title.poster?.outerHTML}
+	{@html title.posterImg?.outerHTML}
 	{#if title.progress}
 		<div class="absolute bottom-0 left-0 right-0 h-1">
 			<div

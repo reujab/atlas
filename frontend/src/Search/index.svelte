@@ -172,7 +172,7 @@
 					<div
 						class="flex justify-center rounded-[2rem] overflow-hidden shrink-0"
 					>
-						{@html title.poster.outerHTML}
+						{@html title.posterImg.outerHTML}
 					</div>
 					<span class="self-center grow whitespace-normal">
 						{title.title}

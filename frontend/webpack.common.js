@@ -55,7 +55,7 @@ module.exports = {
 	},
 	devServer: {
 		static: { directory: dist },
-		port: 8000,
+		port: 6000,
 		hot: false,
 		liveReload: false,
 		magicHtml: false,

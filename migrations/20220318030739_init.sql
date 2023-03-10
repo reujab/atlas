@@ -46,6 +46,7 @@ CREATE TABLE titles (
 	votes INT,
 	trailer VARCHAR(16),
 	overview TEXT,
+	poster TEXT,
 
 	PRIMARY KEY (id, type)
 );

@@ -6,7 +6,7 @@
 	import Row from "./Row";
 	import seasonsState from "../Seasons/State";
 	import store from "./State";
-	import { genres, TitleType } from "../db";
+	import { TitleType } from "../db";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -109,9 +109,7 @@
 		<div class="min-h-[9rem] flex flex-col mb-2">
 			{#if activeTitle}
 				<h3 class="text-xl mb-2">
-					{activeTitle.genres
-						.map((genre) => genres[genre])
-						.join(" • ")}
+					{activeTitle.genres.join(" • ")}
 				</h3>
 
 				<div

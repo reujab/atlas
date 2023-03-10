@@ -13,6 +13,7 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 	import { get } from "..";
+	import { error } from "../log";
 
 	const title = cache.tv[$params.id];
 	const magnets: {
@@ -132,13 +133,13 @@
 				await get(
 					`${
 						process.env.SEEDBOX_HOST
-					}:8000/search/tv?q=${encodeURIComponent(
+					}:8000/tv/magnet?q=${encodeURIComponent(
 						query
 					)}&s=${season}&e=${episode}`
 				)
 			).text();
 		} catch (err) {
-			console.error(err);
+			error("Error searching", err);
 			return null;
 		}
 	}

@@ -103,7 +103,7 @@
 		get(
 			`${
 				process.env.SEEDBOX_HOST
-			}:8000/search/movie?q=${encodeURIComponent(
+			}:8000/movie/magnet?q=${encodeURIComponent(
 				`${title.title} ${
 					title.released ? title.released.getFullYear() : ""
 				}`
@@ -162,9 +162,7 @@
 						<Rating rating={title.rating} />
 					{/if}
 					<span class:ml-2={title.rating}>
-						{title.genres
-							?.map((genre) => genres[genre])
-							.join(" • ")}
+						{title.genres?.join(" • ")}
 					</span>
 				</h3>
 

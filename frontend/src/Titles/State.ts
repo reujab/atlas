@@ -1,5 +1,5 @@
 import Row from "./Row";
-import { getTrending, getTopRated, getTitlesWithGenre, sortedGenres, TitleType, cacheTitles } from "../db";
+import { getTrending, getTopRated, getGenres, TitleType, cacheTitles } from "../db";
 import { writable } from "svelte/store";
 
 class State {
@@ -31,51 +31,35 @@ class State {
 			});
 		});
 
-		getTrending(type).then((trending) => {
-			this.rows.update((rows) => {
-				rows[1].titles = trending;
-				return rows;
-			});
-		});
-
-		getTopRated(type).then((topRated) => {
-			this.rows.update((rows) => {
-				rows[2].titles = topRated;
-				return rows;
-			});
-		});
-
-		const interval = setInterval(() => {
-			if (sortedGenres.length === 0) return;
-
-			clearInterval(interval);
-
-			let wg = 0;
-			for (const genre of sortedGenres) {
-				if (genre.name === "Family") continue;
-
-				const row = new Row(genre.name);
+		Promise.all([
+			(async () => {
+				const trending = await getTrending(type);
 				this.rows.update((rows) => {
-					rows.push(row);
+					rows[1].titles = trending;
 					return rows;
 				});
-
-				wg++;
-				// eslint-disable-next-line no-loop-func
-				getTitlesWithGenre(type, genre.id).then((titles) => {
-					if (titles.length >= 6) {
-						row.titles = titles;
-					} else {
-						this.rows.update((rows) => {
-							rows.splice(rows.indexOf(row), 1);
-							return rows;
-						});
-					}
-
-					if (--wg === 0) this.ready.set(true);
+			})(),
+			(async () => {
+				const topRated = await getTopRated(type);
+				this.rows.update((rows) => {
+					rows[2].titles = topRated;
+					return rows;
 				});
-			}
-		}, 100);
+			})(),
+			(async () => {
+				const genres = await getGenres(type);
+				for (const genre of genres) {
+					const row = new Row(genre.genre);
+					row.titles = genre.titles;
+					this.rows.update((rows) => {
+						rows.push(row);
+						return rows;
+					});
+				}
+			})(),
+		]).then(() => {
+			this.ready.set(true);
+		});
 	}
 }
 
