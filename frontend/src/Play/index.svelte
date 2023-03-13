@@ -17,7 +17,7 @@
 	const id = Number($params.id);
 	const title = cache[type][id];
 	const header = $params.type ? title.title : unescape($params.query);
-	const overlay = spawnOverlay(true, (progress) => {
+	const overlay = spawnOverlay((progress) => {
 		console.log("Progress", progress);
 		title.progress = progress;
 		// update downloaded titles
@@ -38,33 +38,33 @@
 		`${process.env.SEEDBOX_HOST}:8000/stream?magnet=${encodeURIComponent(
 			state.magnet
 		)}${state.season ? `&s=${state.season}&e=${state.episode}` : ""}`
-	).then(async (res) => {
-		if (res.status !== 200) {
-			error(`Stream failed with ${res.status}`);
+	)
+		.then(async (res) => {
+			const stream = await res.text();
+
+			mpv = childProcess.spawn(
+				"mpv",
+				[
+					"--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
+					"--input-ipc-server=/tmp/mpv",
+					"--save-position-on-quit",
+					"--network-timeout=300",
+					"--hwdec=vaapi",
+					process.env.SEEDBOX_HOST + stream,
+				],
+				{ stdio: "inherit" }
+			);
+
+			mpv.on("error", (err) => {
+				console.error(err);
+			});
+
+			mpv.on("exit", cleanup);
+		})
+		.catch((err) => {
+			error("Stream failed", err);
 			cleanup();
-			return;
-		}
-
-		const stream = await res.text();
-
-		mpv = childProcess.spawn(
-			"mpv",
-			[
-				"--audio-device=alsa/hdmi:CARD=PCH,DEV=0",
-				"--input-ipc-server=/tmp/mpv",
-				"--save-position-on-quit",
-				"--network-timeout=300",
-				process.env.SEEDBOX_HOST + stream,
-			],
-			{ stdio: "inherit" }
-		);
-
-		mpv.on("error", (err) => {
-			console.error(err);
 		});
-
-		mpv.on("exit", cleanup);
-	});
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {

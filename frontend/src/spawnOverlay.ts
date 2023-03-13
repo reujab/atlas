@@ -2,14 +2,14 @@ import childProcess from "child_process";
 import { error } from "./log";
 import fs from "fs";
 
-export default function spawnOverlay(torrent: boolean, cb: (progress: null | number) => void): childProcess.ChildProcess {
-	const overlay = childProcess.spawn("atlas-overlay", torrent ? ["--torrent"] : null, {
+export default function spawnOverlay(cb?: (progress: null | number) => void): childProcess.ChildProcess {
+	const overlay = childProcess.spawn("atlas-overlay", {
 		stdio: "inherit",
 	});
 
 	overlay.on("error", (err: Error) => {
 		error("Overlay", err);
-		cb(null);
+		cb?.(null);
 	});
 
 	overlay.once("exit", (code) => {
@@ -29,7 +29,7 @@ export default function spawnOverlay(torrent: boolean, cb: (progress: null | num
 			});
 
 			console.log(data.toString());
-			cb(Number(data));
+			cb?.(Number(data));
 		});
 	});
 

@@ -31,7 +31,7 @@ export const cache: { [type: string]: { [id: number]: Title } } = {
 };
 
 export function cacheTitles(titles: Title[]): Title[] {
-	return titles.map((title) => {
+	return titles.map((title, i) => {
 		if (cache[title.type][title.id])
 			return cache[title.type][title.id];
 		cache[title.type][title.id] = title;
@@ -41,7 +41,9 @@ export function cacheTitles(titles: Title[]): Title[] {
 		title.posterImg.addEventListener("error", (err) => {
 			error("Failed to load poster", err);
 		});
-		title.posterImg.src = `https://www.themoviedb.org/t/p/w300_and_h450_bestv2${title.poster}`;
+		setTimeout(() => {
+			title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
+		}, i * 1000);
 		return title;
 	});
 }
