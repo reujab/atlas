@@ -41,7 +41,9 @@
 		{
 			title: "Reboot",
 			onClick() {
-				childProcess.execSync("/sbin/reboot");
+				childProcess.execSync(
+					"dbus-send --system --dest=org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager.Reboot"
+				);
 			},
 			icon: require("../img/shutdown.png"),
 		},

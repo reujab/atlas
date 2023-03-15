@@ -318,7 +318,7 @@ fn main() {
 
     thread::sleep(Duration::from_secs(4));
     Command::new("killall")
-        .args(&["-STOP", "atlas-frontend"])
+        .args(&["-STOP", "frontend"])
         .output()
         .unwrap();
 
@@ -327,7 +327,7 @@ fn main() {
     app.run::<App>(stream);
 
     Command::new("killall")
-        .args(&["-CONT", "atlas-frontend"])
+        .args(&["-CONT", "frontend"])
         .output()
         .unwrap();
     Command::new("killall").arg("mpv").output().unwrap();

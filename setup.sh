@@ -1,53 +1,6 @@
-# requires debian bookworm
-
-apt install -y \
-	dhcpcd5 \
-	fonts-cantarell \
-	fonts-noto \
-	git \
-	iw \
-	libgtk-4-dev \
-	mpv \
-	netctl \
-	npm \
-	plymouth \
-	postgresql-14 \
-	snapd \
-	sudo \
-	tor \
-	zlib1g:armhf
-
-snap install ubuntu-frame
-
-# dpkg -i frontend.deb
-# apt -f install
-
-usermod -aG sudo atlas
-
-systemctl start postgresql@14
-systemctl enable postgresql@14
-systemctl disable snapd
-systemctl enable getty@tty1
-systemctl enable tor
-
-# edit getty@tty1 to autologin
-# edit .bashrc to autostart
-
-sed -i s/scram-sha-256/trust/g /etc/postgresql/*/*/pg_hba.conf
-su postgres -c "createuser atlas"
-su postgres -c "createdb atlas"
-
-# TODO run migrations
-
-# TODO copy .env
-
-su atlas -c '
-mkdir -p ~/posters/{movie,tv}
-cat >> ~/.bashrc << EOF
-if [[ $(tty) = /dev/tty1 ]]; then
-	~/start.sh &> /tmp/atlas.log
-fi
-EOF
-'
-
-# psql -f migrations/init...
+snap install --dangerous ./atlas*.snap
+snap connect atlas:hardware-observe
+snap connect atlas:process-control
+snap connect atlas:alsa
+snap connect atlas:joystick
+snap connect atlas:shutdown
