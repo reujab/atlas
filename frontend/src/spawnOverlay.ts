@@ -1,5 +1,5 @@
 import childProcess from "child_process";
-import { error } from "./log";
+import { error, log } from "./log";
 import fs from "fs";
 
 export default function spawnOverlay(cb?: (progress: null | number) => void): childProcess.ChildProcess {
@@ -12,7 +12,8 @@ export default function spawnOverlay(cb?: (progress: null | number) => void): ch
 		cb?.(null);
 	});
 
-	overlay.once("exit", (code) => {
+	overlay.once("exit", (code, sig) => {
+		log("overlay exited", code, sig);
 		if (code) {
 			error("Overlay exit code", `${code}`);
 			return;
@@ -28,7 +29,7 @@ export default function spawnOverlay(cb?: (progress: null | number) => void): ch
 				if (err) error("Error deleting /tmp/progress", err);
 			});
 
-			console.log(data.toString());
+			log("Progress %O", data.toString());
 			cb?.(Number(data));
 		});
 	});

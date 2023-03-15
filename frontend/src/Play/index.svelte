@@ -11,14 +11,13 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 	import childProcess from "child_process";
 	import { get } from "..";
-	import { error } from "../log";
+	import { error, log } from "../log";
 
 	const type: TitleType = $params.type;
 	const id = Number($params.id);
 	const title = cache[type][id];
 	const header = $params.type ? title.title : unescape($params.query);
 	const overlay = spawnOverlay((progress) => {
-		console.log("Progress", progress);
 		title.progress = progress;
 		// update downloaded titles
 		titlesState[type].rows.update((rows) => {
@@ -30,6 +29,7 @@
 			}
 			return rows;
 		});
+		history.back();
 	});
 
 	let mpv: childProcess.ChildProcess;
@@ -52,34 +52,38 @@
 					"--hwdec=vaapi",
 					process.env.SEEDBOX_HOST + stream,
 				],
+				// { stdio: "ignore", detached: true }
 				{ stdio: "inherit" }
 			);
 
 			mpv.on("error", (err) => {
 				console.error(err);
+				history.back();
 			});
 
-			mpv.on("exit", cleanup);
+			mpv.on("exit", (code, signal) => {
+				log("mpv exited %O %O", code, signal);
+
+				if (code === 1) {
+					error("mpv was unable to play file");
+				}
+			});
 		})
 		.catch((err) => {
 			error("Stream failed", err);
-			cleanup();
+			history.back();
 		});
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {
-			cleanup();
+			history.back();
 		}
-	}
-
-	function cleanup(): void {
-		overlay.kill();
-		mpv?.kill();
-		history.back();
 	}
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {
+		overlay.kill();
+		mpv?.kill();
 		unsubscribe(gamepadHandler);
 	});
 </script>
