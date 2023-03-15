@@ -5,7 +5,13 @@ use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, 
 use log::info;
 use relm4::prelude::*;
 use std::{
-    cmp::max, fs::File, io::prelude::*, os::unix::net::UnixStream, process::Command, thread,
+    cmp::max,
+    fs::File,
+    io::prelude::*,
+    os::unix::net::UnixStream,
+    process::Command,
+    sync::{Arc, Mutex},
+    thread,
     time::Duration,
 };
 
@@ -50,7 +56,7 @@ struct Format {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Init = UnixStream;
+    type Init = Arc<Mutex<UnixStream>>;
     type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -248,7 +254,7 @@ impl SimpleComponent for App {
         relm4::set_global_css(include_bytes!("styles.css"));
 
         let sender_clone = sender.clone();
-        let stream_clone = stream.try_clone().unwrap();
+        let stream_clone = stream.clone();
         thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream_clone));
         let sender_clone = sender.clone();
         thread::spawn(move || mpv_worker::start(sender_clone, stream));
@@ -271,6 +277,7 @@ impl SimpleComponent for App {
                 self.speed = speed;
             }
             Msg::Quit => {
+                info!("Quitting...");
                 let progress = self.mpv.position as f64 / self.duration as f64;
                 let mut file = File::create("/tmp/progress").unwrap();
                 file.write_all(progress.to_string().as_bytes()).unwrap();
@@ -324,7 +331,7 @@ fn main() {
 
     info!("Starting overlay");
     let app = RelmApp::new("atlas.overlay");
-    app.run::<App>(stream);
+    app.run::<App>(Arc::new(Mutex::new(stream)));
 
     Command::new("killall")
         .args(&["-CONT", "frontend"])

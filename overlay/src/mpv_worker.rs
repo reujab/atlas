@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     io::{prelude::*, BufReader},
     os::unix::net::UnixStream,
+    sync::{Arc, Mutex},
     thread::sleep,
     time::Duration,
 };
@@ -29,7 +30,8 @@ struct Event {
     event: String,
 }
 
-pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream) {
+pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixStream>>) {
+    let mut stream = mutex.lock().unwrap();
     let censor = Regex::new(r"(?i)fuck").unwrap();
     let title = get_property("media-title", &mut stream, &sender)
         .unwrap()
@@ -44,8 +46,10 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream)
         .as_f64()
         .unwrap() as u32;
     sender.input(Msg::SetDuration(duration));
+    drop(stream);
 
     loop {
+        let mut stream = mutex.lock().unwrap();
         let position = get_property("time-pos", &mut stream, &sender)
             .unwrap()
             .as_f64()
@@ -76,6 +80,7 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mut stream: UnixStream)
             .unwrap() as u32;
         sender.input(Msg::SetSpeed(speed));
 
+        drop(stream);
         sleep(Duration::from_millis(200));
     }
 }
