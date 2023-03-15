@@ -1,5 +1,4 @@
 <script lang="ts">
-	import fs from "fs";
 	import state from "./State";
 	import { get } from "..";
 	import { log, error } from "../log";
@@ -29,12 +28,15 @@
 				const forecast = (
 					await (await get(meta.properties.forecast)).json()
 				).properties.periods[0];
+				const description = forecast.shortForecast
+					.replace(/ then.*/, "")
+					.replace(/and/gi, "&");
 
 				state.weather = {
 					city: meta.properties.relativeLocation.properties.city,
 					temp: `${forecast.temperature} °${forecast.temperatureUnit}`,
 					icon: forecast.icon.replace(/,\d+/g, ""),
-					forecast: forecast.shortForecast.replace(/and/gi, "&"),
+					forecast: description,
 				};
 				log("weather: %O", state.weather);
 			} catch (err) {
