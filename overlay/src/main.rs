@@ -22,7 +22,7 @@ pub(crate) struct App {
     mpv: MPVInfo,
 
     title: String,
-    duration: u32,
+    duration: f64,
 
     buffered_width: i32,
     progress_width: i32,
@@ -31,7 +31,7 @@ pub(crate) struct App {
 #[derive(Debug, Default)]
 pub struct MPVInfo {
     paused: bool,
-    position: u32,
+    position: f64,
     buffering: bool,
     buffered: f64,
     speed: u32,
@@ -43,7 +43,7 @@ pub enum Msg {
     SetMPVInfo(MPVInfo),
 
     SetTitle(String),
-    SetDuration(u32),
+    SetDuration(f64),
 
     Quit,
 }
@@ -243,7 +243,7 @@ impl SimpleComponent for App {
             mpv: MPVInfo::default(),
 
             title: "Loading...".to_owned(),
-            duration: 0,
+            duration: 0.0,
 
             buffered_width: 0,
             progress_width: 0,
@@ -283,15 +283,16 @@ impl SimpleComponent for App {
         }
 
         self.buffered_width = PROGRESS_BAR_HEIGHT
-            + (self.mpv.buffered / self.duration as f64
+            + (self.mpv.buffered / self.duration
                 * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
         self.progress_width = PROGRESS_BAR_HEIGHT
-            + (self.mpv.position as f64 / self.duration as f64
+            + (self.mpv.position / self.duration
                 * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
     }
 }
 
-fn format(secs: u32) -> Format {
+fn format(secs: f64) -> Format {
+    let secs = secs as u32;
     let hours = secs / 3600;
     let minutes = secs % 3600 / 60;
     let seconds = secs % 60;

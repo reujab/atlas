@@ -1,5 +1,5 @@
 use super::{MPVInfo, Msg};
-use log::{debug, info};
+use log::{debug, error, info};
 use regex::Regex;
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -37,7 +37,7 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
 
     let mut stream = mutex.lock().unwrap();
     let censor = Regex::new(r"(?i)fuck").unwrap();
-    let title = get_property("media-title", &mut stream, &sender)
+    let title = get_property("media-title", &mut stream)
         .unwrap()
         .as_str()
         .unwrap()
@@ -45,10 +45,10 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
     let title = censor.replace_all(&title, "****").to_string();
     sender.input(Msg::SetTitle(title));
 
-    let duration = get_property("duration", &mut stream, &sender)
+    let duration = get_property("duration", &mut stream)
         .unwrap()
         .as_f64()
-        .unwrap() as u32;
+        .unwrap();
     sender.input(Msg::SetDuration(duration));
     drop(stream);
 
@@ -56,39 +56,16 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
         debug!("locking");
         let mut stream = mutex.lock().unwrap();
         debug!("locked");
-        let paused = get_property("pause", &mut stream, &sender)
-            .unwrap()
-            .as_bool()
-            .unwrap();
-        let position = get_property("time-pos", &mut stream, &sender)
-            .unwrap()
-            .as_f64()
-            .unwrap() as u32;
-        let buffering = get_property("paused-for-cache", &mut stream, &sender)
-            .unwrap()
-            .as_bool()
-            .unwrap();
-        let dropped = get_property("frame-drop-count", &mut stream, &sender)
-            .unwrap()
-            .as_u64()
-            .unwrap();
-        let speed = get_property("cache-speed", &mut stream, &sender)
-            .unwrap()
-            .as_u64()
-            .unwrap() as u32;
-        let buffered = match get_property("demuxer-cache-time", &mut stream, &sender) {
-            Ok(buffered) => buffered.as_f64().unwrap(),
-            Err(_) => position as f64,
+        let mpv_info = match get_mpv_info(&mut stream) {
+            Ok(mpv_info) => mpv_info,
+            Err(err) => {
+                error!("{err}");
+                sender.input(Msg::Quit);
+                break;
+            }
         };
 
-        sender.input(Msg::SetMPVInfo(MPVInfo {
-            position,
-            paused,
-            buffering,
-            buffered,
-            dropped,
-            speed,
-        }));
+        sender.input(Msg::SetMPVInfo(mpv_info));
 
         debug!("unlocking");
         drop(stream);
@@ -99,21 +76,18 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
 pub(crate) fn send_command(
     command: Command,
     stream: &mut UnixStream,
-    sender: &ComponentSender<super::App>,
 ) -> Result<serde_json::Value, String> {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
     let command_str = serde_json::to_string(&command).unwrap() + "\n";
     debug!("> {}", command_str.trim());
     if let Err(err) = stream.write_all(&command_str.into_bytes()) {
-        sender.input(Msg::Quit);
-        panic!("{err}");
+        return Err(err.to_string());
     }
 
     loop {
         let mut res = String::new();
         if reader.read_line(&mut res).unwrap() == 0 {
-            sender.input(Msg::Quit);
-            panic!("socket closed, quitting");
+            return Err("socket closed".into());
         }
 
         debug!("< {}", res.trim());
@@ -138,7 +112,6 @@ pub(crate) fn send_command(
 fn get_property(
     property: &'static str,
     stream: &mut UnixStream,
-    sender: &ComponentSender<super::App>,
 ) -> Result<serde_json::Value, String> {
     debug!("getting property: {}", property);
     return send_command(
@@ -147,7 +120,6 @@ fn get_property(
             command: vec!["get_property", property],
         },
         stream,
-        sender,
     );
 }
 
@@ -172,4 +144,25 @@ pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {
             }
         }
     }
+}
+
+fn get_mpv_info(stream: &mut UnixStream) -> Result<MPVInfo, String> {
+    let paused = get_property("pause", stream)?.as_bool().unwrap();
+    let position = get_property("time-pos", stream)?.as_f64().unwrap();
+    let buffering = get_property("paused-for-cache", stream)?.as_bool().unwrap();
+    let buffered = match get_property("demuxer-cache-time", stream) {
+        Ok(buffered) => buffered.as_f64().unwrap(),
+        Err(_) => position,
+    };
+    let dropped = get_property("frame-drop-count", stream)?.as_u64().unwrap();
+    let speed = get_property("cache-speed", stream)?.as_u64().unwrap() as u32;
+
+    Ok(MPVInfo {
+        position,
+        paused,
+        buffering,
+        buffered,
+        dropped,
+        speed,
+    })
 }

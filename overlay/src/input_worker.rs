@@ -28,7 +28,6 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                                 command: vec!["cycle", "pause"],
                             },
                             &mut stream,
-                            &sender,
                         )
                         .unwrap();
                     }
@@ -52,7 +51,6 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                         command: vec!["seek", "-10"],
                     },
                     &mut stream,
-                    &sender,
                 )
                 .unwrap();
                 debug!("unlocking");
@@ -66,7 +64,6 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                         command: vec!["seek", "10"],
                     },
                     &mut stream,
-                    &sender,
                 )
                 .unwrap();
                 debug!("unlocking");
