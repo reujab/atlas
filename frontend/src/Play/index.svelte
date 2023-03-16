@@ -3,7 +3,6 @@
 	import Header from "../Header/index.svelte";
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
-	import titlesState from "../Titles/State";
 	import { Circle2 } from "svelte-loading-spinners";
 	import { cache, TitleType } from "../db";
 	import { onDestroy } from "svelte";
@@ -19,16 +18,6 @@
 	const header = $params.type ? title.title : unescape($params.query);
 	const overlay = spawnOverlay((progress) => {
 		title.progress = progress;
-		// update downloaded titles
-		titlesState[type].rows.update((rows) => {
-			const index = rows[0].titles.indexOf(title);
-			if (index === -1) {
-				rows[0].titles.unshift(title);
-			} else if (index !== 0) {
-				rows[0].titles.unshift(rows[0].titles.splice(index, 1)[0]);
-			}
-			return rows;
-		});
 		history.back();
 	});
 

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Carousel from "svelte-carousel";
 	import ErrorBanner from "../ErrorBanner/index.svelte";
-	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
 	import GamepadButton from "../GamepadButton/index.svelte";
 	import Header from "../Header/index.svelte";
@@ -238,10 +237,6 @@
 											Unavailable
 										{:else}
 											<div class="h-1/2 flex gap-8">
-												<div class="relative h-full">
-													<GamepadButton button="X" />
-													<FaDownload />
-												</div>
 												<div class="relative h-full">
 													<GamepadButton button="A" />
 													<FaPlay />

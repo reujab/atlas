@@ -1,16 +1,18 @@
 <script lang="ts">
 	import Button from "./Button.svelte";
 	import ErrorBanner from "../ErrorBanner/index.svelte";
-	import FaDownload from "svelte-icons/fa/FaDownload.svelte";
+	import FaCheck from "svelte-icons/fa/FaCheck.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
+	import FaPlus from "svelte-icons/fa/FaPlus.svelte";
 	import FaYoutube from "svelte-icons/fa/FaYoutube.svelte";
 	import Header from "../Header/index.svelte";
 	import Poster from "../Poster";
 	import Rating from "./Rating.svelte";
 	import playState from "../Play/State";
 	import seasonsState from "../Seasons/State";
+	import titlesState from "../Titles/State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, getSeasons, Season } from "../db";
+	import { cache, getSeasons, Season, TitleType } from "../db";
 	import { error, log } from "../log";
 	import { get } from "..";
 	import { onDestroy } from "svelte";
@@ -18,19 +20,21 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	interface IButton {
-		hidden?: boolean;
 		icon: any;
 		title: string;
 		onClick: () => void;
 	}
 
-	const title = cache[$params.type][$params.id];
+	const type = $params.type as TitleType;
+	const title = cache[type][$params.id];
 	const buttons: IButton[] = [];
+	const rows = titlesState[type].rows;
 	let activeButton = 0;
+	let inList = $rows[0].titles.includes(title);
 
 	log("title: %O", title);
 
-	if ($params.type === "movie") {
+	if (type === "movie") {
 		buttons.push({
 			icon: Circle2,
 			title: "Play",
@@ -38,14 +42,6 @@
 				if (playState.magnet) {
 					location.href = `#/movie/${title.id}/play`;
 				}
-			},
-		});
-
-		buttons.push({
-			icon: Circle2,
-			title: "Download",
-			onClick() {
-				// TODO
 			},
 		});
 	} else {
@@ -57,6 +53,27 @@
 			},
 		});
 	}
+
+	buttons.push({
+		icon: inList ? FaCheck : FaPlus,
+		title: "Add to list",
+		onClick() {
+			// eslint-disable-next-line no-shadow
+			titlesState[type].rows.update((rows) => {
+				const myList = rows[0];
+				const index = myList.titles.indexOf(title);
+				if (index === -1) {
+					myList.titles.unshift(title);
+					inList = true;
+				} else {
+					myList.titles.splice(index, 1);
+					inList = false;
+				}
+				buttons[1].icon = inList ? FaCheck : FaPlus;
+				return rows;
+			});
+		},
+	});
 
 	if (title.trailer) {
 		buttons.push({
@@ -115,13 +132,11 @@
 				playState.season = null;
 				playState.episode = null;
 				buttons[0].icon = FaPlay;
-				buttons[1].icon = FaDownload;
 			})
 			.catch((err) => {
 				console.error(err);
 				buttons[0].title = "Unavailable";
 				buttons[0].icon = null;
-				buttons[1].hidden = true;
 			});
 	}
 
@@ -183,15 +198,13 @@
 
 	<div class="flex justify-around mb-16">
 		{#each buttons as button, i}
-			{#if !button.hidden}
-				<div>
-					<Button
-						icon={button.icon}
-						text={button.title}
-						active={i === activeButton}
-					/>
-				</div>
-			{/if}
+			<div>
+				<Button
+					icon={button.icon}
+					text={button.title}
+					active={i === activeButton}
+				/>
+			</div>
 		{/each}
 	</div>
 </div>

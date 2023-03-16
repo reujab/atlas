@@ -6,7 +6,7 @@ class State {
 	ready = writable(false);
 
 	rows = writable([
-		new Row("Downloaded"),
+		new Row("My list"),
 		new Row("Trending"),
 		new Row("Top rated"),
 	]);
@@ -15,7 +15,7 @@ class State {
 
 	constructor(type: TitleType) {
 		this.rows.update((rows) => {
-			const titles = JSON.parse(localStorage.downloaded)[type];
+			const titles = JSON.parse(localStorage.myList)[type];
 			for (const title of titles) {
 				title.released = new Date(title.released);
 			}
@@ -24,9 +24,9 @@ class State {
 		});
 
 		this.rows.subscribe((rows) => {
-			const downloaded = JSON.parse(localStorage.downloaded);
-			localStorage.downloaded = JSON.stringify({
-				...downloaded,
+			const myList = JSON.parse(localStorage.myList);
+			localStorage.myList = JSON.stringify({
+				...myList,
 				[type]: rows[0].titles,
 			});
 		});
@@ -63,8 +63,8 @@ class State {
 	}
 }
 
-if (!localStorage.downloaded) {
-	localStorage.downloaded = JSON.stringify({
+if (!localStorage.myList) {
+	localStorage.myList = JSON.stringify({
 		movie: [],
 		tv: [],
 	});
