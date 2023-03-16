@@ -1,4 +1,5 @@
 use super::{MPVInfo, Msg};
+use log::{debug, info};
 use regex::Regex;
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -21,6 +22,7 @@ pub struct Command {
 struct Data {
     #[serde(rename = "request_id")]
     id: u32,
+    #[serde(default)]
     data: serde_json::Value,
     error: String,
 }
@@ -31,6 +33,8 @@ struct Event {
 }
 
 pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixStream>>) {
+    info!("Starting mpv info worker");
+
     let mut stream = mutex.lock().unwrap();
     let censor = Regex::new(r"(?i)fuck").unwrap();
     let title = get_property("media-title", &mut stream, &sender)
@@ -49,7 +53,13 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
     drop(stream);
 
     loop {
+        debug!("locking");
         let mut stream = mutex.lock().unwrap();
+        debug!("locked");
+        let paused = get_property("pause", &mut stream, &sender)
+            .unwrap()
+            .as_bool()
+            .unwrap();
         let position = get_property("time-pos", &mut stream, &sender)
             .unwrap()
             .as_f64()
@@ -58,28 +68,29 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
             .unwrap()
             .as_bool()
             .unwrap();
-        let paused = get_property("pause", &mut stream, &sender)
-            .unwrap()
-            .as_bool()
-            .unwrap();
         let dropped = get_property("frame-drop-count", &mut stream, &sender)
             .unwrap()
             .as_u64()
             .unwrap();
+        let speed = get_property("cache-speed", &mut stream, &sender)
+            .unwrap()
+            .as_u64()
+            .unwrap() as u32;
+        let buffered = match get_property("demuxer-cache-time", &mut stream, &sender) {
+            Ok(buffered) => buffered.as_f64().unwrap(),
+            Err(_) => position as f64,
+        };
 
         sender.input(Msg::SetMPVInfo(MPVInfo {
             position,
             paused,
             buffering,
+            buffered,
             dropped,
+            speed,
         }));
 
-        let speed = get_property("cache-speed", &mut stream, &sender)
-            .unwrap()
-            .as_u64()
-            .unwrap() as u32;
-        sender.input(Msg::SetSpeed(speed));
-
+        debug!("unlocking");
         drop(stream);
         sleep(Duration::from_millis(200));
     }
@@ -92,6 +103,7 @@ pub(crate) fn send_command(
 ) -> Result<serde_json::Value, String> {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
     let command_str = serde_json::to_string(&command).unwrap() + "\n";
+    debug!("> {}", command_str.trim());
     if let Err(err) = stream.write_all(&command_str.into_bytes()) {
         sender.input(Msg::Quit);
         panic!("{err}");
@@ -104,17 +116,21 @@ pub(crate) fn send_command(
             panic!("socket closed, quitting");
         }
 
+        debug!("< {}", res.trim());
         match serde_json::from_str::<Data>(&res) {
             Ok(data) => {
                 if data.id == command.id {
                     if data.error != "success" {
-                        sender.input(Msg::Quit);
                         return Err(data.error);
                     }
                     return Ok(data.data);
+                } else {
+                    debug!("wrong id");
                 }
             }
-            Err(_) => continue,
+            Err(err) => {
+                debug!("parse error: {}", err);
+            }
         }
     }
 }
@@ -124,6 +140,7 @@ fn get_property(
     stream: &mut UnixStream,
     sender: &ComponentSender<super::App>,
 ) -> Result<serde_json::Value, String> {
+    debug!("getting property: {}", property);
     return send_command(
         Command {
             id: 1,
@@ -135,6 +152,7 @@ fn get_property(
 }
 
 pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {
+    debug!("waiting for {}", event);
     let mut reader = BufReader::new(stream);
 
     loop {
@@ -142,13 +160,16 @@ pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {
         if reader.read_line(&mut res).unwrap() == 0 {
             panic!("socket closed");
         }
+        debug!("{}", res);
         match serde_json::from_str::<Event>(&res) {
             Ok(e) => {
                 if e.event == event {
                     break;
                 }
             }
-            Err(_) => continue,
+            Err(err) => {
+                debug!("parse error: {}", err);
+            }
         }
     }
 }

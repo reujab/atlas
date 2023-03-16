@@ -1,5 +1,6 @@
 use crate::mpv_worker::{send_command, Command};
 use gilrs::{ev::Button, Event, Gilrs};
+use log::{debug, info};
 use relm4::prelude::*;
 use std::{
     os::unix::net::UnixStream,
@@ -9,12 +10,16 @@ use std::{
 };
 
 pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixStream>>) {
+    info!("Starting input worker");
     let mut gilrs = Gilrs::new().unwrap();
 
     loop {
         while let Some(Event { event, .. }) = gilrs.next_event() {
             if let gilrs::ev::EventType::ButtonPressed(button, _) = event {
+                debug!("{:?}", button);
+                debug!("locking");
                 let mut stream = mutex.lock().unwrap();
+                debug!("locked");
                 match button {
                     Button::South => {
                         send_command(
@@ -32,12 +37,15 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                     }
                     _ => {}
                 }
+                debug!("unlocking");
             }
         }
 
         for (_, gamepad) in gilrs.gamepads() {
             if gamepad.is_pressed(Button::DPadLeft) {
+                debug!("locking");
                 let mut stream = mutex.lock().unwrap();
+                debug!("locked");
                 send_command(
                     Command {
                         id: 0,
@@ -47,8 +55,11 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                     &sender,
                 )
                 .unwrap();
+                debug!("unlocking");
             } else if gamepad.is_pressed(Button::DPadRight) {
+                debug!("locking");
                 let mut stream = mutex.lock().unwrap();
+                debug!("locked");
                 send_command(
                     Command {
                         id: 0,
@@ -58,6 +69,7 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                     &sender,
                 )
                 .unwrap();
+                debug!("unlocking");
             }
         }
 

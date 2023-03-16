@@ -23,7 +23,6 @@ pub(crate) struct App {
 
     title: String,
     duration: u32,
-    speed: u32,
 
     buffered_width: i32,
     progress_width: i32,
@@ -31,9 +30,11 @@ pub(crate) struct App {
 
 #[derive(Debug, Default)]
 pub struct MPVInfo {
-    position: u32,
     paused: bool,
+    position: u32,
     buffering: bool,
+    buffered: f64,
+    speed: u32,
     dropped: u64,
 }
 
@@ -43,7 +44,6 @@ pub enum Msg {
 
     SetTitle(String),
     SetDuration(u32),
-    SetSpeed(u32),
 
     Quit,
 }
@@ -109,7 +109,7 @@ impl SimpleComponent for App {
 
                                 Label {
                                     #[watch]
-                                    set_label: &(human_bytes::human_bytes(model.speed) + "/s"),
+                                    set_label: &(human_bytes::human_bytes(model.mpv.speed) + "/s"),
                                 },
 
                                 Label {
@@ -244,7 +244,6 @@ impl SimpleComponent for App {
 
             title: "Loading...".to_owned(),
             duration: 0,
-            speed: 0,
 
             buffered_width: 0,
             progress_width: 0,
@@ -273,11 +272,7 @@ impl SimpleComponent for App {
             Msg::SetDuration(duration) => {
                 self.duration = duration;
             }
-            Msg::SetSpeed(speed) => {
-                self.speed = speed;
-            }
             Msg::Quit => {
-                info!("Quitting...");
                 let progress = self.mpv.position as f64 / self.duration as f64;
                 let mut file = File::create("/tmp/progress").unwrap();
                 file.write_all(progress.to_string().as_bytes()).unwrap();
@@ -287,9 +282,9 @@ impl SimpleComponent for App {
             }
         }
 
-        // self.buffered_width = PROGRESS_BAR_HEIGHT
-        //     + (self.torrentd.buffered.unwrap_or(0.0)
-        //         * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
+        self.buffered_width = PROGRESS_BAR_HEIGHT
+            + (self.mpv.buffered / self.duration as f64
+                * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
         self.progress_width = PROGRESS_BAR_HEIGHT
             + (self.mpv.position as f64 / self.duration as f64
                 * (PROGRESS_BAR_WIDTH - PROGRESS_BAR_HEIGHT) as f64) as i32;
@@ -323,6 +318,7 @@ fn main() {
     info!("Waiting for file to load");
     mpv_worker::wait_for_event(&stream, "file-loaded");
 
+    info!("Sleeping");
     thread::sleep(Duration::from_secs(4));
     Command::new("killall")
         .args(&["-STOP", "frontend"])
@@ -333,6 +329,7 @@ fn main() {
     let app = RelmApp::new("atlas.overlay");
     app.run::<App>(Arc::new(Mutex::new(stream)));
 
+    info!("Quitting");
     Command::new("killall")
         .args(&["-CONT", "frontend"])
         .output()
