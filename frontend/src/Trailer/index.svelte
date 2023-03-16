@@ -30,8 +30,8 @@
 	}
 
 	mpv.on("exit", (code) => {
-		if (code) {
-			error("mpv exit code", code);
+		if (code === 1) {
+			error("mpv exit code 1");
 		}
 
 		if (location.href.includes("/trailer")) history.back();
