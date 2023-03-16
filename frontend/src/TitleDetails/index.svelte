@@ -7,11 +7,10 @@
 	import Header from "../Header/index.svelte";
 	import Poster from "../Poster";
 	import Rating from "./Rating.svelte";
-	import getSeasons from "../Seasons/getSeasons";
 	import playState from "../Play/State";
 	import seasonsState from "../Seasons/State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, genres } from "../db";
+	import { cache, getSeasons, Season } from "../db";
 	import { error, log } from "../log";
 	import { get } from "..";
 	import { onDestroy } from "svelte";
@@ -127,10 +126,19 @@
 	}
 
 	// preload seasons
+	const imgCache = [];
 	if (title.type === "tv" && !seasonsState.seasons.length) {
 		getSeasons(title)
-			.then((seasons) => {
+			.then((seasons: Season[]) => {
 				seasonsState.seasons = seasons;
+
+				// preload first season stills
+				for (const episode of seasons[0]?.episodes || []) {
+					if (!episode.still) continue;
+					const img = new Image();
+					img.src = `https://image.tmdb.org/t/p/w227_and_h127_bestv2${episode.still}`;
+					imgCache.push(img);
+				}
 			})
 			.catch((err) => {
 				error("getSeasons error:", err);
@@ -176,7 +184,7 @@
 	<div class="flex justify-around mb-16">
 		{#each buttons as button, i}
 			{#if !button.hidden}
-				<div class="pointer-cursor" on:click={button.onClick}>
+				<div>
 					<Button
 						icon={button.icon}
 						text={button.title}

@@ -23,6 +23,24 @@ export interface Genre {
 	titles: Title[];
 }
 
+export interface Season {
+	number: number;
+	episodes: Episode[];
+	activeEpisode: number;
+	ele: null | HTMLDivElement;
+	episodesEle: null | HTMLDivElement;
+}
+
+export interface Episode {
+	number: number;
+	date: Date;
+	name: string;
+	overview: string;
+	runtime: number;
+	still: string;
+	ele: null | HTMLDivElement;
+}
+
 const db = `${process.env.SEEDBOX_HOST}:8000`;
 
 export const cache: { [type: string]: { [id: number]: Title } } = {
@@ -67,6 +85,10 @@ export async function getGenres(type: TitleType): Promise<Genre[]> {
 		genre.titles = cacheTitles(genre.titles);
 	}
 	return genres;
+}
+
+export async function getSeasons(title: Title): Promise<Season[]> {
+	return (await get(`${db}/seasons/${title.id}`)).json();
 }
 
 export async function getAutocomplete(query: string, blacklist: number[] = []): Promise<null | Title[]> {

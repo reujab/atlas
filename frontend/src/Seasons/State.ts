@@ -1,4 +1,4 @@
-import { Season } from "./getSeasons";
+import { Season } from "../db";
 
 class State {
 	seasonIndex = 0;
