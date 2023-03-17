@@ -29,6 +29,7 @@
 	const title = cache[type][$params.id];
 	const buttons: IButton[] = [];
 	const rows = titlesState[type].rows;
+	const seasons = seasonsState.seasons;
 	let activeButton = 0;
 	let inList = $rows[0].titles.includes(title);
 
@@ -142,13 +143,13 @@
 
 	// preload seasons
 	const imgCache = [];
-	if (title.type === "tv" && !seasonsState.seasons.length) {
+	if (title.type === "tv" && !$seasons.length) {
 		getSeasons(title)
-			.then((seasons: Season[]) => {
-				seasonsState.seasons = seasons;
+			.then((s: Season[]) => {
+				$seasons = s;
 
 				// preload first season stills
-				for (const episode of seasons[0]?.episodes || []) {
+				for (const episode of $seasons[0]?.episodes || []) {
 					if (!episode.still) continue;
 					const img = new Image();
 					img.src = `https://image.tmdb.org/t/p/w227_and_h127_bestv2${episode.still}`;

@@ -18,8 +18,8 @@ export default function stream(req: express.Request, res: express.Response): voi
 	}
 
 	const magnet = req.query.magnet as string;
-	const { season } = req.query;
-	const { episode } = req.query;
+	const season = req.query.s;
+	const episode = req.query.e;
 
 	if (!magnet) {
 		res.status(400).end();

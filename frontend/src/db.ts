@@ -39,6 +39,8 @@ export interface Episode {
 	runtime: number;
 	still: string;
 	ele: null | HTMLDivElement;
+
+	magnet: undefined | null | string;
 }
 
 const db = `${process.env.SEEDBOX_HOST}:8000`;

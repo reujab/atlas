@@ -7,37 +7,35 @@
 	import playState from "../Play/State";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache } from "../db";
+	import { cache, Season } from "../db";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 	import { get } from "..";
-	import { error } from "../log";
+	import { error, log } from "../log";
+
+	interface Magnet {
+		magnet: string;
+		seasons: number[];
+	}
 
 	const title = cache.tv[$params.id];
-	const magnets: {
-		[season: number]: {
-			[episode: number]: null | string;
-		};
-	} = {};
 	let seasons = state.seasons;
 	let carousel: any;
 	let seasonsEle: HTMLDivElement;
-	let controller: AbortController;
 	let loading = false;
-	$: activeSeason = seasons[state.seasonIndex];
+	$: activeSeason = $seasons[state.seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
-	if (seasons.length) {
+	if ($seasons.length) {
 		onMount(update);
 	} else {
-		const interval = setInterval(() => {
-			if (state.seasons.length) {
-				seasons = state.seasons;
-				clearInterval(interval);
-				setTimeout(update);
-			}
-		}, 50);
+		const unsub = seasons.subscribe((s) => {
+			if (!s.length) return;
+
+			unsub();
+			setTimeout(update);
+		});
 	}
 
 	function gamepadHandler(button: string): void {
@@ -51,17 +49,15 @@
 			return;
 		}
 
-		if (!seasons.length) return;
+		if (!$seasons.length) return;
 
 		switch (button) {
 			case "A":
-				const magnet =
-					magnets[activeSeason.number]?.[activeEpisode.number];
-				if (!magnet) {
+				if (!activeEpisode.magnet) {
 					return;
 				}
 
-				playState.magnet = magnet;
+				playState.magnet = activeEpisode.magnet;
 				playState.season = activeSeason.number;
 				playState.episode = activeEpisode.number;
 				location.href = `#/tv/${title.id}/play`;
@@ -70,11 +66,11 @@
 				if (state.seasonIndex > 0) {
 					carousel.goTo(state.seasonIndex - 1);
 				} else {
-					carousel.goTo(seasons.length - 1);
+					carousel.goTo($seasons.length - 1);
 				}
 				break;
 			case "right":
-				if (state.seasonIndex < seasons.length - 1) {
+				if (state.seasonIndex < $seasons.length - 1) {
 					carousel.goTo(state.seasonIndex + 1);
 				} else {
 					carousel.goTo(0);
@@ -107,26 +103,31 @@
 
 		const season = activeSeason;
 		const episode = activeEpisode;
-		controller?.abort();
+		const source = await search(title.title, season.number, episode.number);
 
-		if (!magnets[season.number]) {
-			magnets[season.number] = {};
-		}
+		seasons.update((): Season[] => {
+			if (source?.seasons) {
+				for (const seasonNum of source.seasons) {
+					// eslint-disable-next-line no-shadow
+					for (const episode of $seasons.find(
+						(s) => s.number === seasonNum
+					).episodes) {
+						episode.magnet = source.magnet;
+					}
+				}
+			} else {
+				activeEpisode.magnet = source ? source.magnet : null;
+			}
 
-		if (!magnets[season.number][episode.number]) {
-			magnets[season.number][episode.number] = await search(
-				title.title,
-				season.number,
-				episode.number
-			);
-		}
+			return $seasons;
+		});
 	}
 
 	async function search(
 		query: string,
 		season: number,
 		episode: number
-	): Promise<null | string> {
+	): Promise<null | Magnet> {
 		try {
 			return (
 				await get(
@@ -136,7 +137,7 @@
 						query
 					)}&s=${season}&e=${episode}`
 				)
-			).text();
+			).json();
 		} catch (err) {
 			error("Error searching", err);
 			return null;
@@ -144,6 +145,7 @@
 	}
 
 	function retry(e: any): void {
+		log("retrying");
 		e.srcElement.src = e.srcElement.src;
 	}
 
@@ -160,7 +162,7 @@
 		<Header title={title.title} back />
 	</div>
 
-	{#if seasons.length && !loading}
+	{#if $seasons.length && !loading}
 		<div class="px-48 min-h-[108px] flex flex-col my-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
 				{activeEpisode.overview}
@@ -172,7 +174,7 @@
 				class="flex gap-8 overflow-scroll scroll-smooth pt-4 pb-5 px-3 shrink-0 relative"
 				bind:this={seasonsEle}
 			>
-				{#each seasons as season, i}
+				{#each $seasons as season, i}
 					<div
 						class="season text-3xl text-black bg-[#eee] rounded-full p-4 shrink-0 relative drop-shadow"
 						class:active={state.seasonIndex === i}
@@ -194,7 +196,7 @@
 				state.seasonIndex = e.detail;
 			}}
 		>
-			{#each seasons as season, i}
+			{#each $seasons as season, i}
 				<div
 					class="flex px-48 flex-col gap-12 overflow-scroll scroll-smooth pt-5 relative pb-[13rem] h-[66vh]"
 					bind:this={season.episodesEle}
@@ -232,8 +234,8 @@
 								class="mr-8 h-full flex items-center justify-center min-w-[146px]"
 							>
 								{#if i === state.seasonIndex && j === activeSeason.activeEpisode}
-									{#if magnets[season.number]?.[episode.number] !== undefined}
-										{#if magnets[season.number][episode.number] === null}
+									{#if episode.magnet !== undefined}
+										{#if episode.magnet === null}
 											Unavailable
 										{:else}
 											<div class="h-1/2 flex gap-8">

@@ -17,6 +17,7 @@
 		["A", "S", "D", "F", "G", "H", "J", "K", "L", "\n"],
 		["Z", "X", "C", "V", "B", "N", "M", " "],
 	];
+	const seasons = seasonsState.seasons;
 	let activeRow = 0;
 	let activeCol = 4;
 	let autocomplete: Title[] = [];
@@ -25,7 +26,7 @@
 		switch (button) {
 			case "A":
 				seasonsState.seasonIndex = 0;
-				seasonsState.seasons = [];
+				$seasons = [];
 
 				if (activeRow >= 0) {
 					let char = keyboard[activeRow][activeCol];

@@ -129,10 +129,17 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 		return;
 	}
 
-	const magnet = await sources[0].getMagnet();
+	const source = sources[0];
+	const magnet = await source.getMagnet();
+	const seasons = source.episode === null ? source.seasons : null;
 
 	console.log(magnet);
-	res.end(magnet);
+	// cache for a week
+	res.set("Cache-Control", "public, max-age=604800");
+	res.json({
+		magnet,
+		seasons,
+	});
 });
 
 app.get("/stream", stream);

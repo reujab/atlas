@@ -15,6 +15,7 @@
 	const state = store[type];
 	const { ready } = state;
 	const rowsStore = state.rows;
+	const seasons = seasonsState.seasons;
 	let rows: Row[] = [];
 	let rowsEle: HTMLDivElement;
 	$: activeTitle =
@@ -41,7 +42,7 @@
 		switch (button) {
 			case "A":
 				seasonsState.seasonIndex = 0;
-				seasonsState.seasons = [];
+				$seasons = [];
 				location.hash = `#/${title.type}/${title.id}`;
 				break;
 			case "Y":
