@@ -127,9 +127,9 @@
 			)}`
 		)
 			.then(async (res) => {
-				const magnet = await res.text();
-				console.log(magnet);
-				playState.magnet = magnet;
+				const source = await res.json();
+				console.log(source.magnet);
+				playState.magnet = source.magnet;
 				playState.season = null;
 				playState.episode = null;
 				buttons[0].icon = FaPlay;

@@ -11,6 +11,10 @@ const maxStreams = 10;
 const streams: Map<string, null | string> = new Map();
 let streamID = -1;
 
+webtorrent.on("error", (err) => {
+	console.error(err);
+});
+
 export default function stream(req: express.Request, res: express.Response): void {
 	if (streams.size >= maxStreams) {
 		res.status(500).end("Too many active streams");
@@ -26,6 +30,7 @@ export default function stream(req: express.Request, res: express.Response): voi
 		return;
 	}
 
+	console.log(magnet);
 	if (streams.get(magnet) !== undefined) {
 		if (streams.get(magnet) === null) {
 			const then = Date.now();
@@ -49,9 +54,8 @@ export default function stream(req: express.Request, res: express.Response): voi
 
 	streams.set(magnet, null);
 
-	console.log(season, episode);
 	console.log("Connecting");
-
+	res.setTimeout(3 * 60 * 1000);
 	webtorrent.add(magnet, { destroyStoreOnDestroy: true }, (torrent) => {
 		console.log("Connected");
 
@@ -114,6 +118,10 @@ export default function stream(req: express.Request, res: express.Response): voi
 					updateTimeout();
 				}
 			});
+		});
+		torrentServer.on("error", (err) => {
+			console.error(err);
+			cleanup();
 		});
 		const port = 8001 + ++streamID % 999;
 		torrentServer.listen(port, "0.0.0.0", undefined, () => {

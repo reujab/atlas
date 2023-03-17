@@ -2,6 +2,7 @@ import cheerio from "cheerio";
 import http from "http";
 import parseName from "./parse";
 import { SocksProxyAgent } from "socks-proxy-agent";
+import { get } from ".";
 
 export interface Source {
 	name: string;
@@ -179,36 +180,4 @@ function parseSize(size: string): number {
 	const [num, den] = size.split(" ");
 	const multiplier = 1000 ** (dens.indexOf(den) + 1);
 	return Number(num.replace(/,/g, "")) * multiplier;
-}
-
-
-async function get(...args: Parameters<typeof fetch>): Promise<Response> {
-	const start = Date.now();
-	let lastErr;
-
-	for (let i = 0; i < 4; i++) {
-		if (Date.now() - start > 5000) break;
-
-		try {
-			console.log(`Getting ${args[0]}`);
-			// eslint-disable-next-line no-await-in-loop
-			const res = await fetch(...args);
-			console.log(`Reply at ${(Date.now() - start) / 1000}s`);
-
-			lastErr = new Error(`Status: ${res.status}`);
-
-			if (res.status >= 500) continue;
-			if (res.status !== 200) break;
-
-			return res;
-		} catch (err) {
-			lastErr = err;
-
-			console.error("Fetch error", err);
-
-			if ((err as Error).message?.startsWith("status:")) break;
-		}
-	}
-
-	throw lastErr;
 }

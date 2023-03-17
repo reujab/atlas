@@ -49,7 +49,7 @@ app.get("/seasons/:id(\\d+)", async (req, res) => {
 			.map((_, j) => `season/${i * 20 + j + 1}`)
 			.join(",");
 		// eslint-disable-next-line no-await-in-loop
-		const json = await (await fetch(
+		const json = await (await get(
 			`https://api.themoviedb.org/3/tv/${req.params.id}?api_key=${process.env.TMDB_KEY}&append_to_response=${append}`
 		)).json();
 		keys = Object.keys(json).filter((key) => key.startsWith("season/"))
@@ -147,3 +147,34 @@ app.get("/stream", stream);
 app.listen(8000, () => {
 	console.log("Listening to :8000");
 });
+
+export async function get(...args: Parameters<typeof fetch>): Promise<Response> {
+	const start = Date.now();
+	let lastErr;
+
+	for (let i = 0; i < 4; i++) {
+		if (Date.now() - start > 5000) break;
+
+		console.log(`Getting ${args[0]}`);
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			const res = await fetch(...args);
+			console.log(`Reply at ${(Date.now() - start) / 1000}s`);
+
+			lastErr = new Error(`Status: ${res.status}`);
+
+			if (res.status >= 500) continue;
+			if (res.status !== 200) break;
+
+			return res;
+		} catch (err) {
+			lastErr = err;
+
+			console.error("Fetch error", err);
+
+			if ((err as Error).message?.startsWith("status:")) break;
+		}
+	}
+
+	throw lastErr;
+}
