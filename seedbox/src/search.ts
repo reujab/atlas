@@ -1,7 +1,7 @@
 import express from "express";
 import sql from "./sql";
 
-export default async function search(req: express.Request, res: express.Response): void {
+export default async function search(req: express.Request, res: express.Response): Promise<void> {
 	const query = req.query.q as string;
 
 	if (!query || !/[a-z0-9 ]/.test(query)) {

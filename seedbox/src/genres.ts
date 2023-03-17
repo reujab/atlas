@@ -63,6 +63,6 @@ export default async function getGenres(req: express.Request, res: express.Respo
 
 export function expandGenres(titles: any[]): void {
 	for (const title of titles) {
-		title.genres = title.genres.map((g) => genreMap[g]);
+		title.genres = title.genres.map((g: any) => genreMap[g]);
 	}
 }
