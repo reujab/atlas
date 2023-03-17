@@ -22,6 +22,7 @@
 	});
 
 	let mpv: childProcess.ChildProcess;
+	let cancelled = false;
 
 	get(
 		`${process.env.SEEDBOX_HOST}:8000/stream?magnet=${encodeURIComponent(
@@ -29,6 +30,10 @@
 		)}${state.season ? `&s=${state.season}&e=${state.episode}` : ""}`
 	)
 		.then(async (res) => {
+			if (cancelled) {
+				return;
+			}
+
 			const stream = await res.text();
 
 			mpv = childProcess.spawn(
@@ -41,7 +46,6 @@
 					"--hwdec=vaapi",
 					process.env.SEEDBOX_HOST + stream,
 				],
-				// { stdio: "ignore", detached: true }
 				{ stdio: "inherit" }
 			);
 
@@ -71,6 +75,7 @@
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {
+		cancelled = true;
 		overlay.kill();
 		mpv?.kill();
 		unsubscribe(gamepadHandler);

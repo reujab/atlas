@@ -23,7 +23,6 @@
 	let seasons = state.seasons;
 	let carousel: any;
 	let seasonsEle: HTMLDivElement;
-	let loading = false;
 	$: activeSeason = $seasons[state.seasonIndex];
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
@@ -40,12 +39,7 @@
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {
-			if (loading) {
-				loading = false;
-				setTimeout(update);
-			} else {
-				history.back();
-			}
+			history.back();
 			return;
 		}
 
@@ -162,7 +156,7 @@
 		<Header title={title.title} back />
 	</div>
 
-	{#if $seasons.length && !loading}
+	{#if $seasons.length}
 		<div class="px-48 min-h-[108px] flex flex-col my-2">
 			<div class="text-3xl text-ellipsis overflow-hidden grow clamp-3">
 				{activeEpisode.overview}
