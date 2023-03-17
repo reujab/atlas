@@ -61,9 +61,7 @@ export function cacheTitles(titles: Title[]): Title[] {
 		title.posterImg.addEventListener("error", (err) => {
 			error("Failed to load poster", err);
 		});
-		setTimeout(() => {
-			title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
-		}, i * 100);
+		title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
 		return title;
 	});
 }
@@ -94,7 +92,7 @@ export async function getSeasons(title: Title): Promise<Season[]> {
 }
 
 export async function getAutocomplete(query: string, blacklist: number[] = []): Promise<null | Title[]> {
-	const res = await get(`${db}/search?q=${encodeURIComponent(query)}`);
+	const res = await get(`${db}/search?q=${encodeURIComponent(query)}&blacklist=${blacklist.join(",")}`);
 	const titles = await res.json();
 	return cacheTitles(titles);
 }
