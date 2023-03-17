@@ -141,19 +141,16 @@ function searchPB(query: string, type?: string): Promise<Source[]> {
 	});
 }
 
-async function search1337x(query: string, type?: string, signal?: AbortSignal): Promise<Source[]> {
+async function search1337x(query: string, type?: string): Promise<Source[]> {
 	const path = type === "movie" ? `category-search/${query}/Movies/1/` : type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
 	let res;
 	try {
-		res = await get(`https://1337x.to/${path}`, { signal });
+		res = await get(`https://1337x.to/${path}`);
 	} catch (err) {
 		console.error("1337x error", err);
 		return [];
 	}
 	const html = await res.text();
-	if (signal?.aborted) {
-		throw new DOMException("aborted");
-	}
 	const $ = cheerio.load(html);
 	return Array.from($("tbody > tr")).map((ele) => ({
 		getMagnet: (async (p?: string) => {
