@@ -63,7 +63,7 @@ export function cacheTitles(titles: Title[]): Title[] {
 		});
 		setTimeout(() => {
 			title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
-		}, i * 1000);
+		}, i * 100);
 		return title;
 	});
 }
