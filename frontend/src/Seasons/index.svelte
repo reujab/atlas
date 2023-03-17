@@ -12,7 +12,7 @@
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
 	import { get } from "..";
-	import { error, log } from "../log";
+	import { log } from "../log";
 
 	interface Magnet {
 		magnet: string;
@@ -139,7 +139,7 @@
 				)
 			).json();
 		} catch (err) {
-			error("Error searching", err);
+			log("Error searching", err);
 			return null;
 		}
 	}
