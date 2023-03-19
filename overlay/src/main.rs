@@ -134,6 +134,10 @@ impl SimpleComponent for App {
                         add_css_class: "bottom",
                         set_orientation: Orientation::Horizontal,
 
+                        Box {
+                            set_hexpand: true,
+                        },
+
                         Label {
                             add_css_class: "mono",
                             #[watch]
@@ -228,6 +232,10 @@ impl SimpleComponent for App {
                             set_halign: Align::End,
                             #[watch]
                             set_label: &format(model.duration).seconds,
+                        },
+
+                        Box {
+                            set_hexpand: true,
                         },
                     },
                 },
