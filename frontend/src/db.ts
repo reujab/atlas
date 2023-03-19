@@ -50,7 +50,7 @@ export const cache: { [type: string]: { [id: number]: Title } } = {
 	tv: {},
 };
 
-export function cacheTitles(titles: Title[]): Title[] {
+export function cacheTitles(titles: Title[], delay?: boolean): Title[] {
 	return titles.map((title, i) => {
 		if (cache[title.type][title.id])
 			return cache[title.type][title.id];
@@ -61,7 +61,15 @@ export function cacheTitles(titles: Title[]): Title[] {
 		title.posterImg.addEventListener("error", (err) => {
 			error("Failed to load poster", err);
 		});
-		title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
+
+		function setSrc(): void {
+			title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
+		}
+		if (delay === undefined || delay === true) {
+			setTimeout(setSrc, i * 100);
+		} else {
+			setSrc();
+		}
 		return title;
 	});
 }
@@ -94,5 +102,5 @@ export async function getSeasons(title: Title): Promise<Season[]> {
 export async function getAutocomplete(query: string, blacklist: number[] = []): Promise<null | Title[]> {
 	const res = await get(`${db}/search?q=${encodeURIComponent(query)}&blacklist=${blacklist.join(",")}`);
 	const titles = await res.json();
-	return cacheTitles(titles);
+	return cacheTitles(titles, false);
 }
