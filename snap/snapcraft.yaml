@@ -210,14 +210,16 @@ parts:
       rm -rf bug drirc.d glvnd libdrm lintian man
       rm -rf applications apport bash-completion dbus-1 doc-base doc gtk-doc\
              help pkgconfig libthai metainfo themes thumbnailers xml
-      rm -rf $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libLLVM*
+      cd $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
+      rm -rf libLLVM* libGLX_mesa* libpulse-simple* libjacket* libtheora* libvulkan* libwayland-server* libdconf*
 
 layout:
   /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs
     bind: $SNAP/graphics/libdrm
   /usr/share/drirc.d:  # Used by mesa-core20 for app specific workarounds
     bind: $SNAP/graphics/drirc.d
-  # /usr/share/fonts doesn't work for some reason
+  /usr/share/fonts:
+    bind: $SNAP/usr/share/fonts
   /usr/local/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/icons:
