@@ -3,6 +3,7 @@ mod mpv_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
 use log::info;
+use mpv_worker::{send_command, Command as MPVCommand};
 use relm4::prelude::*;
 use std::{
     cmp::max,
@@ -307,7 +308,7 @@ fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     info!("Connecting to mpv");
-    let stream = loop {
+    let mut stream = loop {
         match UnixStream::connect("/tmp/mpv") {
             Ok(stream) => break stream,
             Err(_) => {
@@ -328,12 +329,19 @@ fn main() {
 
     info!("Starting overlay");
     let app = RelmApp::new("atlas.overlay");
-    app.run::<App>(Arc::new(Mutex::new(stream)));
+    app.run::<App>(Arc::new(Mutex::new(stream.try_clone().unwrap())));
 
     info!("Quitting");
     Command::new("killall")
         .args(&["-CONT", "frontend"])
         .output()
         .unwrap();
-    Command::new("killall").arg("mpv").output().unwrap();
+
+    let _ = send_command(
+        MPVCommand {
+            id: 0,
+            command: vec!["quit-watch-later"],
+        },
+        &mut stream,
+    );
 }
