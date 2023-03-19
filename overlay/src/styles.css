@@ -43,6 +43,7 @@ image {
 
 .mono {
 	font-family: Noto Sans Mono;
+	font-weight: 300;
 }
 
 .progress-bar {

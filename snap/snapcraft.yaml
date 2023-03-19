@@ -27,10 +27,6 @@ apps:
       - audio-playback
       - alsa
       - shutdown
-    environment:
-      XDG_DATA_HOME: $SNAP_USER_DATA
-      XDG_DATA_DIRS: $SNAP/usr/share
-      GDK_GL: gles
 
   overlay:
     command: bin/atlas-overlay
@@ -40,9 +36,6 @@ apps:
       - wayland
       - process-control
 
-# This is one of four snippets that relate to providing the userspace graphics needed by your application.
-# You can treat this as "magic" so long as you don't need to make changes.
-# On the Mir discourse forum there's a lot more detail on [the graphics-core20 Snap interface](https://discourse.ubuntu.com/t/the-graphics-core20-snap-interface/23000) and it's use.
 plugs:
   graphics-core20:
     interface: content
@@ -54,30 +47,31 @@ plugs:
     default-provider: gnome-42-2204
 
 environment:
-  # This is one of four snippets that relate to providing the userspace graphics needed by your application.
+  # graphics
   LD_LIBRARY_PATH: $SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/graphics/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/samba:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack
   LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
   LIBVA_DRIVERS_PATH: $SNAP/graphics/dri
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
-  # Other, generally useful environment settings...
-  # XDG config
+  # XDG
   XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
   XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
   XDG_CONFIG_DIRS: $SNAP/etc/xdg
-  # XKB config
-  XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
+  XDG_DATA_HOME: $SNAP_USER_DATA
+  XDG_DATA_DIRS: $SNAP/usr/share
+  # GTK
+  GDK_GL: gles
   GTK_USE_PORTAL: 0
+  GTK_A11Y: none
+  # other
+  XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
   SEEDBOX_HOST: http://192.168.1.129
   PKG_CONFIG_PATH: $SNAP/gnome-platform/usr/lib/pkgconfig
   PYTHONPATH: $PYTHONPATH:$SNAP/usr/lib/python3/dist-packages
-  GTK_A11Y: none
 
 parts:
   frontend:
     plugin: nil
     source: frontend
-    build-environment:
-      - PATH: "$PATH:$SNAPCRAFT_PART_BUILD/node_modules/.bin"
     override-build: |
       set +u # core20 base does not allow unbound variables !
       # workaround for build.snapcraft.io builds
@@ -102,8 +96,6 @@ parts:
       - libgtk-3-0
       - libasound2
       - libffi7
-      - fonts-cantarell
-      - fonts-noto
       - mpv
       - yt-dlp
 
@@ -124,14 +116,17 @@ parts:
       - usr/share/mime
       - usr/bin/killall
 
-  post-build:
+  fonts:
     plugin: nil
-    after:
-      - frontend
-      - overlay
-    override-prime: |
-      ln -sf usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2{.1400.0,}
-      fc-cache -r -v
+    stage-packages:
+      - fonts-cantarell
+      - fonts-noto
+      - fonts-noto-extra
+      - fonts-noto-cjk
+    stage:
+      - usr/share/fonts/opentype/cantarell
+      - usr/share/fonts/truetype/noto/NotoSansMono-*.ttf
+      - usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
 
   wrapper:
     plugin: dump
@@ -171,9 +166,6 @@ parts:
       mkdir -p ${SNAPCRAFT_PART_INSTALL}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/
       /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libgtk-3-0/gtk-query-immodules-3.0 > ${SNAPCRAFT_PART_INSTALL}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
 
-  # Because Bomber won't run without a session dbus, and this isn't available to daemons on core
-  # (there is no "session") we need to include a dbus session in the snap.
-  # The `source: dbus` contains a script and configuration file for running `dbus-run-session`.
   dbus:
     plugin: dump
     source: dbus
@@ -199,6 +191,7 @@ parts:
   # This is one of four snippets that relate to providing the userspace graphics needed by your application.
   # This ensures that your snap doesn't contain its own copy of the userspace drivers
   cleanup:
+    plugin: nil
     after:
       - frontend
       - overlay
@@ -207,7 +200,6 @@ parts:
       - dbus
       - gsettings+pixbuf
       - immodules
-    plugin: nil
     build-snaps: [ mesa-core20 ]
     override-prime: |
       set -eux
@@ -218,17 +210,15 @@ parts:
       rm -rf bug drirc.d glvnd libdrm lintian man
       rm -rf applications apport bash-completion dbus-1 doc-base doc gtk-doc\
              help pkgconfig libthai metainfo themes thumbnailers xml
+      rm -rf $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libLLVM*
 
-# The `layout` ensures that files can be found by applications where they are expected by the toolkit or application.
 layout:
-  # This is one of four snippets that relate to providing the userspace graphics needed by your application.
-  # These paths (/usr/share/libdrm and /usr/share/drirc.d) are hardcoded in mesa.
   /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs
     bind: $SNAP/graphics/libdrm
   /usr/share/drirc.d:  # Used by mesa-core20 for app specific workarounds
     bind: $SNAP/graphics/drirc.d
-  # Other, generally useful paths
-  /usr/share/fonts:
+  # /usr/share/fonts doesn't work for some reason
+  /usr/local/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/icons:
     bind: $SNAP/usr/share/icons
@@ -236,7 +226,6 @@ layout:
     bind: $SNAP/usr/share/sounds
   /etc/fonts:
     bind: $SNAP/etc/fonts
-  # GTK
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
   /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gtk-3.0:
@@ -247,6 +236,8 @@ layout:
     bind: $SNAP/etc/gtk-3.0
   /usr/share/alsa:
     bind: $SNAP/usr/share/alsa
+  $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2:
+    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2.1400.0
 
 architectures:
   - build-on: amd64
