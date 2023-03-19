@@ -7,7 +7,7 @@
 	import playState from "../Play/State";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, Season } from "../db";
+	import { cache, Season, progress } from "../db";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -204,14 +204,26 @@
 						>
 							{#if episode.still && Math.abs(state.seasonIndex - i) < 2}
 								<div
-									class="max-h-[127px] min-w-[277px] max-w-[277px] overflow-hidden flex items-center justify-start drop-shadow"
+									class="max-h-[127px] overflow-hidden flex items-center justify-start drop-shadow relative mr-6"
 								>
 									<img
 										alt=""
 										src="https://image.tmdb.org/t/p/w227_and_h127_bestv2{episode.still}"
-										class="inline-block min-w-[227px]"
+										class="inline-block"
 										on:error={retry}
 									/>
+									<div
+										class="absolute bottom-0 left-0 right-0 h-1"
+									>
+										<div
+											style="width: {($progress[
+												title.type
+											][
+												`${title.id}-${season.number}-${episode.number}`
+											] || 0) * 100}%"
+											class="bg-red-500 h-full"
+										/>
+									</div>
 								</div>
 							{/if}
 

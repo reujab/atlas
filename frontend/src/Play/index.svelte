@@ -1,23 +1,27 @@
 <script lang="ts">
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
+	import childProcess from "child_process";
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, TitleType } from "../db";
+	import { cache, TitleType, progress } from "../db";
+	import { error, log } from "../log";
+	import { get } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import childProcess from "child_process";
-	import { get } from "..";
-	import { error, log } from "../log";
 
 	const type: TitleType = $params.type;
 	const id = Number($params.id);
 	const title = cache[type][id];
 	const header = $params.type ? title.title : unescape($params.query);
-	const overlay = spawnOverlay((progress) => {
-		title.progress = progress;
+	const overlay = spawnOverlay((p) => {
+		const progressID =
+			type === "movie"
+				? String(id)
+				: `${id}-${state.season}-${state.episode}`;
+		$progress[type][progressID] = p;
 		history.back();
 	});
 

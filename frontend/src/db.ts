@@ -1,5 +1,6 @@
-import { get } from ".";
 import { error } from "./log";
+import { get } from ".";
+import { writable, Writable } from "svelte/store";
 
 export type TitleType = "movie" | "tv";
 
@@ -14,8 +15,6 @@ export interface Title {
 	rating: null | string;
 	poster: string;
 	posterImg: HTMLImageElement;
-
-	progress?: number;
 }
 
 export interface Genre {
@@ -49,6 +48,11 @@ export const cache: { [type: string]: { [id: number]: Title } } = {
 	movie: {},
 	tv: {},
 };
+
+export const progress: Writable<{ [type: string]: { [id: string]: number } }> = writable(localStorage.progress ? JSON.parse(localStorage.progress) : {
+	movie: {},
+	tv: {},
+});
 
 export function cacheTitles(titles: Title[], delay?: boolean): Title[] {
 	return titles.map((title, i) => {
@@ -104,3 +108,7 @@ export async function getAutocomplete(query: string, blacklist: number[] = []): 
 	const titles = await res.json();
 	return cacheTitles(titles, false);
 }
+
+progress.subscribe((p) => {
+	localStorage.progress = JSON.stringify(p);
+});
