@@ -27,13 +27,13 @@
 	$: activeEpisode = activeSeason?.episodes[activeSeason.activeEpisode];
 
 	if ($seasons.length) {
-		onMount(update);
+		onMount(init);
 	} else {
 		const unsub = seasons.subscribe((s) => {
 			if (!s.length) return;
 
 			unsub();
-			setTimeout(update);
+			setTimeout(init);
 		});
 	}
 
@@ -85,6 +85,23 @@
 				break;
 		}
 
+		setTimeout(update);
+	}
+
+	function init(): void {
+		if ($progress[title.type][title.id]) {
+			const pair = String($progress[title.type][title.id])
+				.split("-")
+				.map(Number);
+
+			state.seasonIndex = $seasons.findIndex((s) => s.number === pair[0]);
+			$seasons[state.seasonIndex].activeEpisode = $seasons[
+				state.seasonIndex
+			].episodes.findIndex((e) => e.number === pair[1]);
+			setTimeout(() => {
+				carousel.goTo(state.seasonIndex);
+			});
+		}
 		setTimeout(update);
 	}
 
@@ -216,11 +233,11 @@
 										class="absolute bottom-0 left-0 right-0 h-1"
 									>
 										<div
-											style="width: {($progress[
-												title.type
-											][
-												`${title.id}-${season.number}-${episode.number}`
-											] || 0) * 100}%"
+											style="width: {Number(
+												$progress[title.type][
+													`${title.id}-${season.number}-${episode.number}`
+												] || 0
+											) * 100}%"
 											class="bg-red-500 h-full"
 										/>
 									</div>

@@ -22,6 +22,9 @@
 				? String(id)
 				: `${id}-${state.season}-${state.episode}`;
 		$progress[type][progressID] = p;
+		if (type === "tv") {
+			$progress[type][String(id)] = `${state.season}-${state.episode}`;
+		}
 		history.back();
 	});
 
