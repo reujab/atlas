@@ -1,25 +1,22 @@
-import Row from "./Row";
-import { getTrending, getTopRated, getGenres, TitleType, cacheTitles } from "../db";
+import { getRows, TitleType, cacheTitles, Row } from "../db";
 import { writable } from "svelte/store";
+import { error } from "../log";
 
 class State {
-	ready = writable(false);
+	rows = writable([{
+		name: "My list",
+		titles: [],
+		activeCol: 0,
+		element: null,
+	}] as Row[]);
 
-	rows = writable([
-		new Row("My list"),
-		new Row("Trending"),
-		new Row("Top rated"),
-	]);
-
-	activeRow = 0;
+	activeRow = writable(1);
 
 	constructor(type: TitleType) {
 		this.rows.update((rows) => {
 			const titles = JSON.parse(localStorage.myList)[type];
-			for (const title of titles) {
-				title.released = new Date(title.released);
-			}
 			rows[0].titles = cacheTitles(titles);
+			if (rows[0].titles.length) this.activeRow.set(0);
 			return rows;
 		});
 
@@ -31,34 +28,13 @@ class State {
 			});
 		});
 
-		Promise.all([
-			(async () => {
-				const trending = await getTrending(type);
-				this.rows.update((rows) => {
-					rows[1].titles = trending;
-					return rows;
-				});
-			})(),
-			(async () => {
-				const topRated = await getTopRated(type);
-				this.rows.update((rows) => {
-					rows[2].titles = topRated;
-					return rows;
-				});
-			})(),
-			(async () => {
-				const genres = await getGenres(type);
-				for (const genre of genres) {
-					const row = new Row(genre.genre);
-					row.titles = genre.titles;
-					this.rows.update((rows) => {
-						rows.push(row);
-						return rows;
-					});
-				}
-			})(),
-		]).then(() => {
-			this.ready.set(true);
+		getRows(type).then((rows) => {
+			this.rows.update((myList) => [
+				...myList,
+				...rows,
+			]);
+		}).catch((err) => {
+			error("Error getting rows", err);
 		});
 	}
 }

@@ -22,6 +22,14 @@ export interface Genre {
 	titles: Title[];
 }
 
+export interface Row {
+	name: string;
+	titles: Title[];
+
+	activeCol: number;
+	element: null | HTMLDivElement;
+}
+
 export interface Season {
 	number: number;
 	episodes: Episode[];
@@ -78,25 +86,15 @@ export function cacheTitles(titles: Title[], delay?: boolean): Title[] {
 	});
 }
 
-export async function getTrending(type: TitleType): Promise<Title[]> {
-	const res = await get(`${db}/${type}/trending`);
-	const trending = await res.json();
-	return cacheTitles(trending);
-}
-
-export async function getTopRated(type: TitleType): Promise<Title[]> {
-	const res = await get(`${db}/${type}/top`);
-	const topRated = await res.json();
-	return cacheTitles(topRated);
-}
-
-export async function getGenres(type: TitleType): Promise<Genre[]> {
-	const res = await get(`${db}/${type}/genres`);
-	const genres = await res.json();
-	for (const genre of genres) {
-		genre.titles = cacheTitles(genre.titles);
+export async function getRows(type: TitleType): Promise<Row[]> {
+	const res = await get(`${db}/${type}/rows`);
+	const rows = await res.json();
+	for (const row of rows) {
+		row.titles = cacheTitles(row.titles);
+		row.activeCol = 0;
+		row.element = null;
 	}
-	return genres;
+	return rows;
 }
 
 export async function getSeasons(title: Title): Promise<Season[]> {

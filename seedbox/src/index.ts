@@ -1,82 +1,21 @@
 import express from "express";
-import genres, { expandGenres } from "./genres";
 import morgan from "morgan";
 import search from "./search";
 import searchMagnets from "./magnet";
-import sql from "./sql";
 import stream from "./stream";
+import getSeasons from "./seasons";
+import getRows from "./rows";
 
 const app = express();
 
 app.use(morgan("dev"));
 
-app.get("/:type(movie|tv)/trending", async (req, res) => {
-	const trending = await sql`
-		SELECT id, type, title, genres, overview, released, trailer, rating, poster
-		FROM titles
-		WHERE type = ${req.params.type}
-		AND language = 'en'
-		AND rating >= 'PG-13'
-		ORDER BY popularity DESC NULLS LAST
-		LIMIT 100
-	`;
-	expandGenres(trending);
-	res.json(trending);
+app.get("/:type(movie|tv)/rows", async (req, res) => {
+	res.json(await getRows(req.params.type as "movie" | "tv"));
 });
-
-app.get("/:type(movie|tv)/top", async (req, res) => {
-	const topRated = await sql`
-		SELECT id, type, title, genres, overview, released, trailer, rating, poster
-		FROM titles
-		WHERE type = ${req.params.type}
-		AND votes >= 1000
-		AND language = 'en'
-		ORDER BY score DESC NULLS LAST, popularity DESC NULLS LAST
-		LIMIT 100
-	`;
-	expandGenres(topRated);
-	res.json(topRated);
-});
-
-app.get("/:type(movie|tv)/genres", genres);
 
 app.get("/seasons/:id(\\d+)", async (req, res) => {
-	const seasons = [];
-
-	for (let i = 0, keys = 20; keys === 20; i++) {
-		const append = Array(20)
-			.fill(null)
-			.map((_, j) => `season/${i * 20 + j + 1}`)
-			.join(",");
-		// eslint-disable-next-line no-await-in-loop
-		const json = await (await get(
-			`https://api.themoviedb.org/3/tv/${req.params.id}?api_key=${process.env.TMDB_KEY}&append_to_response=${append}`
-		)).json();
-		keys = Object.keys(json).filter((key) => key.startsWith("season/"))
-			.length;
-
-		for (let j = 0; j < 20; j++) {
-			const season = json[`season/${i * 20 + j + 1}`];
-			if (season?.episodes.length) {
-				seasons.push({
-					number: season.season_number,
-					episodes: season.episodes.map((episode: any) => ({
-						number: episode.episode_number,
-						date: episode.air_date,
-						name: episode.name,
-						overview: episode.overview,
-						runtime: episode.runtime,
-						still: episode.still_path,
-					})),
-					activeEpisode: 0,
-					ele: null,
-					episodesEle: null,
-				});
-			}
-		}
-	}
-
-	res.json(seasons);
+	res.json(await getSeasons(req.params.id));
 });
 
 app.get("/search", search);
@@ -133,7 +72,6 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 	const magnet = await source.getMagnet();
 	const seasons = source.episode === null ? source.seasons : null;
 
-	console.log(magnet);
 	// cache for a week
 	res.set("Cache-Control", "public, max-age=604800");
 	res.json({

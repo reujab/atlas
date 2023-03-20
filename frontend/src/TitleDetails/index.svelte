@@ -28,7 +28,7 @@
 	const type = $params.type as TitleType;
 	const title = cache[type][$params.id];
 	const buttons: IButton[] = [];
-	const rows = titlesState[type].rows;
+	const { rows, activeRow } = titlesState[type];
 	const seasons = seasonsState.seasons;
 	let activeButton = 0;
 	let inList = $rows[0].titles.includes(title);
@@ -65,11 +65,12 @@
 				const index = myList.titles.indexOf(title);
 				if (index === -1) {
 					myList.titles.unshift(title);
-					inList = true;
 				} else {
 					myList.titles.splice(index, 1);
-					inList = false;
+					if (!myList.titles.length && $activeRow === 0)
+						$activeRow = 1;
 				}
+				inList = !inList;
 				buttons[1].icon = inList ? FaCheck : FaPlus;
 				return rows;
 			});

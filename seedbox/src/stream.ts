@@ -55,9 +55,10 @@ export default function stream(req: express.Request, res: express.Response): voi
 	streams.set(magnet, null);
 
 	console.log("Connecting");
-	res.setTimeout(3 * 60 * 1000);
+	const then = Date.now();
+	req.setTimeout(3 * 60 * 1000);
 	webtorrent.add(magnet, { destroyStoreOnDestroy: true }, (torrent) => {
-		console.log("Connected");
+		console.log("Connected in", ((Date.now() - then) / 1000).toFixed(2), "s");
 
 		let torrentServer: http.Server, interval: NodeJS.Timer;
 

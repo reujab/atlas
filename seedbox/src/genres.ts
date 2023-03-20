@@ -1,4 +1,4 @@
-import express from "express";
+import { Row } from "./rows";
 import sql from "./sql";
 
 const genreMap: { [id: number]: string } = {};
@@ -18,24 +18,24 @@ interface Genre {
 	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 })();
 
-export default async function getGenres(req: express.Request, res: express.Response): Promise<void> {
-	const genres: any[] = [];
+export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
+	const rows: Row[] = [];
 
 	await Promise.all(sortedGenres.map(async (genre) => {
 		if (genre.name === "Family") return;
 
 		const row = {
-			genre: genre.name,
+			name: genre.name,
 			titles: [],
 		};
 
-		genres.push(row);
+		rows.push(row);
 
 		if (genre.name === "Kids") {
 			row.titles = await sql`
 				SELECT id, type, title, genres, overview, released, trailer, rating, poster
 				FROM titles
-				WHERE type = ${req.params.type}
+				WHERE type = ${type}
 				AND language = 'en'
 				AND rating < 'PG-13'
 				ORDER BY popularity DESC NULLS LAST
@@ -46,7 +46,7 @@ export default async function getGenres(req: express.Request, res: express.Respo
 				SELECT id, type, title, genres, overview, released, trailer, rating, poster
 				FROM (
 					SELECT * FROM titles
-					WHERE type = ${req.params.type}
+					WHERE type = ${type}
 					AND ${genre.id} = ANY(genres)
 					ORDER BY popularity DESC NULLS LAST
 					LIMIT 300
@@ -58,7 +58,8 @@ export default async function getGenres(req: express.Request, res: express.Respo
 		}
 		expandGenres(row.titles);
 	}));
-	res.json(genres.filter((g) => g.titles.length));
+
+	return rows.filter((g) => g.titles.length);
 }
 
 export function expandGenres(titles: any[]): void {

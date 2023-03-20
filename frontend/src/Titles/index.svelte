@@ -3,7 +3,6 @@
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import Header from "../Header/index.svelte";
 	import Poster from "../Poster";
-	import Row from "./Row";
 	import seasonsState from "../Seasons/State";
 	import store from "./State";
 	import { TitleType } from "../db";
@@ -12,22 +11,10 @@
 	import { subscribe, unsubscribe } from "../gamepad";
 
 	const type = $params.type as TitleType;
-	const state = store[type];
-	const { ready } = state;
-	const rowsStore = state.rows;
+	const { rows, activeRow } = store[type];
 	const seasons = seasonsState.seasons;
-	let rows: Row[] = [];
 	let rowsEle: HTMLDivElement;
-	$: activeTitle =
-		rows[state.activeRow]?.titles[rows[state.activeRow].activeCol];
-
-	const unsubscribeReady = ready.subscribe((isReady) => {
-		if (isReady) onReady();
-	});
-
-	function onReady(): void {
-		rows = $rowsStore.filter((row) => Boolean(row.titles.length));
-	}
+	$: activeTitle = $rows[$activeRow]?.titles[$rows[$activeRow].activeCol];
 
 	function gamepadHandler(button: string): void {
 		if (button === "B") {
@@ -35,9 +22,9 @@
 			return;
 		}
 
-		if (!$ready) return;
+		if ($rows.length === 1) return;
 
-		const row = rows[state.activeRow];
+		const row = $rows[$activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
 			case "A":
@@ -49,22 +36,21 @@
 				location.hash = "#/search";
 				break;
 			case "up":
-				state.activeRow =
-					(rows.length + state.activeRow - 1) % rows.length;
+				if ($activeRow === 1 && !$rows[0].titles.length) break;
+				$activeRow = ($rows.length + $activeRow - 1) % $rows.length;
 				break;
 			case "down":
-				state.activeRow =
-					(rows.length + state.activeRow + 1) % rows.length;
+				$activeRow = ($rows.length + $activeRow + 1) % $rows.length;
 				break;
 			case "left":
 				row.activeCol =
 					(row.titles.length + row.activeCol - 1) % row.titles.length;
-				rows = rows;
+				$rows = $rows;
 				break;
 			case "right":
 				row.activeCol =
 					(row.titles.length + row.activeCol + 1) % row.titles.length;
-				rows = rows;
+				$rows = $rows;
 				break;
 		}
 
@@ -72,9 +58,9 @@
 	}
 
 	function scroll(instant?: boolean): void {
-		rowsEle?.scrollTo(0, rows[state.activeRow].element.offsetTop);
+		rowsEle?.scrollTo(0, $rows[$activeRow].element?.offsetTop);
 
-		for (const row of rows) {
+		for (const row of $rows) {
 			row.element?.querySelector(".posters").scrollTo({
 				left:
 					(row.element?.querySelectorAll(".poster")[
@@ -87,13 +73,20 @@
 		}
 	}
 
+	if ($rows.length === 1) {
+		const rowsUnsub = rows.subscribe((r) => {
+			if (r.length === 1) return;
+			scroll();
+			rowsUnsub();
+		});
+	}
+
 	subscribe(gamepadHandler);
 	onMount(() => {
 		scroll(true);
 	});
 	onDestroy(() => {
 		unsubscribe(gamepadHandler);
-		unsubscribeReady();
 	});
 </script>
 
@@ -106,7 +99,7 @@
 		search="/search"
 	/>
 
-	{#if $ready}
+	{#if $rows.length > 1}
 		<div class="min-h-[9rem] flex flex-col mb-2">
 			{#if activeTitle}
 				<h3 class="text-xl mb-2">
@@ -125,27 +118,29 @@
 			class="overflow-scroll scroll-smooth pb-[100%] flex flex-col mt-4 relative"
 			bind:this={rowsEle}
 		>
-			{#each rows as row, rowIndex}
-				<div class="row" bind:this={row.element}>
-					<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
-					<div
-						class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 px-4 py-6 relative min-h-[400px] items-center"
-					>
-						{#each row.titles as title, colIndex}
-							<a
-								href="#/{title.type}/{title.id}"
-								class="poster shrink-0 w-[15rem]"
-								class:active={rowIndex === state.activeRow &&
-									colIndex ===
-										rows[state.activeRow].activeCol}
-							>
-								{#if rowIndex === state.activeRow || Math.abs(colIndex - rows[rowIndex].activeCol) < 10}
-									<Poster {title} />
-								{/if}
-							</a>
-						{/each}
+			{#each $rows as row, rowIndex}
+				{#if row.titles.length}
+					<div class="row" bind:this={row.element}>
+						<h2 class="text-7xl mb-4 font-light">{row.name}</h2>
+						<div
+							class="posters flex mb-4 overflow-scroll scroll-smooth gap-4 px-4 py-6 relative min-h-[400px] items-center"
+						>
+							{#each row.titles as title, colIndex}
+								<a
+									href="#/{title.type}/{title.id}"
+									class="poster shrink-0 w-[15rem]"
+									class:active={rowIndex === $activeRow &&
+										colIndex ===
+											$rows[$activeRow].activeCol}
+								>
+									{#if rowIndex === $activeRow || Math.abs(colIndex - $rows[rowIndex].activeCol) < 10}
+										<Poster {title} />
+									{/if}
+								</a>
+							{/each}
+						</div>
 					</div>
-				</div>
+				{/if}
 			{/each}
 		</div>
 	{:else}
