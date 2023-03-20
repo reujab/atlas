@@ -21,7 +21,9 @@
 </script>
 
 <div class="error flex absolute left-0 right-0 justify-center" class:active>
-	<div class="flex rounded-full bg-red-400 text-white items-center p-4 gap-4">
+	<div
+		class="flex rounded-full bg-red-400/90 text-white items-center p-4 gap-4"
+	>
 		<div class="h-16 w-16">
 			<FaCircleExclamation />
 		</div>

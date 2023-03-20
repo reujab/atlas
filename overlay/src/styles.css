@@ -13,7 +13,7 @@ image {
 }
 
 .container {
-	background: #222;
+	background: rgba(34, 34, 34, 0.95);
 	box-shadow: 0 -0.5rem 1.5rem #222;
 	color: white;
 }
