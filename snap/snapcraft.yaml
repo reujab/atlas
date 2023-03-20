@@ -11,6 +11,7 @@ apps:
   frontend:
     daemon: simple
     restart-condition: always
+    restart-delay: 1s
     command-chain:
       - bin/wayland-launch
       - bin/dbus-launch
