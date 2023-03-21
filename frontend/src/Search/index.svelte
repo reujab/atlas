@@ -164,7 +164,7 @@
 		// remove old search results
 		const blacklist = new Set();
 		for (let i = 1; i < $query.length - 1; i++) {
-			const titles = autocompleteCache[$query.slice(0, i)];
+			const titles = autocompleteCache[$query.slice(0, i)].slice(0, 2);
 			if (titles) {
 				for (const title of titles) {
 					blacklist.add(title.id);

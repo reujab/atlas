@@ -1,3 +1,3 @@
-import { writable, Writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 export const query = writable("");
