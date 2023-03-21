@@ -3,7 +3,7 @@ mod mpv_worker;
 
 use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
 use log::info;
-use mpv_worker::{send_command, Command as MPVCommand};
+use mpv_worker::send_command;
 use relm4::prelude::*;
 use std::{
     cmp::max,
@@ -325,11 +325,39 @@ fn main() {
             }
         }
     };
+
     info!("Waiting for file to load");
     mpv_worker::wait_for_event(&stream, "file-loaded");
+    info!("File loaded. Waiting for playback");
+    send_command(
+        vec!["set_property".into(), "pause".into(), false.into()],
+        &mut stream,
+    )
+    .unwrap();
+    let mut start = None;
+    loop {
+        let time = mpv_worker::get_property("time-pos", &mut stream)
+            .unwrap()
+            .as_f64()
+            .unwrap();
 
-    info!("Sleeping");
-    thread::sleep(Duration::from_secs(4));
+        if time == 0.0 {
+            continue;
+        }
+
+        match start {
+            Some(start) => {
+                if time >= start + 0.5 {
+                    break;
+                }
+            }
+            None => {
+                start = Some(time);
+            }
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+
     Command::new("killall")
         .args(&["-STOP", "frontend"])
         .output()
@@ -345,11 +373,5 @@ fn main() {
         .output()
         .unwrap();
 
-    let _ = send_command(
-        MPVCommand {
-            id: 0,
-            command: vec!["quit-watch-later"],
-        },
-        &mut stream,
-    );
+    let _ = send_command(vec!["quit-watch-later".into()], &mut stream);
 }

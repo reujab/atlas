@@ -1,4 +1,4 @@
-use crate::mpv_worker::{send_command, Command};
+use crate::mpv_worker::send_command;
 use gilrs::{ev::Button, Event, Gilrs};
 use log::{debug, info};
 use relm4::prelude::*;
@@ -21,18 +21,15 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                 let mut stream = mutex.lock().unwrap();
                 debug!("locked");
                 match button {
-                    Button::South => {
-                        send_command(
-                            Command {
-                                id: 0,
-                                command: vec!["cycle", "pause"],
-                            },
-                            &mut stream,
-                        )
-                        .unwrap();
+                    Button::North => {
+                        send_command(vec!["cycle".into(), "sub-visibility".into()], &mut stream)
+                            .unwrap();
                     }
                     Button::East => {
                         sender.input(super::Msg::Quit);
+                    }
+                    Button::South => {
+                        send_command(vec!["cycle".into(), "pause".into()], &mut stream).unwrap();
                     }
                     _ => {}
                 }
@@ -45,27 +42,13 @@ pub(crate) fn handle_gamepad(sender: ComponentSender<super::App>, mutex: Arc<Mut
                 debug!("locking");
                 let mut stream = mutex.lock().unwrap();
                 debug!("locked");
-                send_command(
-                    Command {
-                        id: 0,
-                        command: vec!["seek", "-10"],
-                    },
-                    &mut stream,
-                )
-                .unwrap();
+                send_command(vec!["seek".into(), "-10".into()], &mut stream).unwrap();
                 debug!("unlocking");
             } else if gamepad.is_pressed(Button::DPadRight) {
                 debug!("locking");
                 let mut stream = mutex.lock().unwrap();
                 debug!("locked");
-                send_command(
-                    Command {
-                        id: 0,
-                        command: vec!["seek", "10"],
-                    },
-                    &mut stream,
-                )
-                .unwrap();
+                send_command(vec!["seek".into(), "10".into()], &mut stream).unwrap();
                 debug!("unlocking");
             }
         }

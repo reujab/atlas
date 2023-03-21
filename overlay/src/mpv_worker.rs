@@ -3,6 +3,7 @@ use log::{debug, error, info};
 use regex::Regex;
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::{
     io::{prelude::*, BufReader},
     os::unix::net::UnixStream,
@@ -12,10 +13,8 @@ use std::{
 };
 
 #[derive(Serialize)]
-pub struct Command {
-    #[serde(rename = "request_id")]
-    pub id: u32,
-    pub command: Vec<&'static str>,
+struct Command {
+    pub command: Vec<Value>,
 }
 
 #[derive(Deserialize)]
@@ -74,11 +73,11 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
 }
 
 pub(crate) fn send_command(
-    command: Command,
+    command: Vec<Value>,
     stream: &mut UnixStream,
 ) -> Result<serde_json::Value, String> {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
-    let command_str = serde_json::to_string(&command).unwrap() + "\n";
+    let command_str = serde_json::to_string(&Command { command }).unwrap() + "\n";
     debug!("> {}", command_str.trim());
     if let Err(err) = stream.write_all(&command_str.into_bytes()) {
         return Err(err.to_string());
@@ -93,7 +92,7 @@ pub(crate) fn send_command(
         debug!("< {}", res.trim());
         match serde_json::from_str::<Data>(&res) {
             Ok(data) => {
-                if data.id == command.id {
+                if data.id == 0 {
                     if data.error != "success" {
                         return Err(data.error);
                     }
@@ -109,18 +108,12 @@ pub(crate) fn send_command(
     }
 }
 
-fn get_property(
+pub(crate) fn get_property(
     property: &'static str,
     stream: &mut UnixStream,
 ) -> Result<serde_json::Value, String> {
     debug!("getting property: {}", property);
-    return send_command(
-        Command {
-            id: 1,
-            command: vec!["get_property", property],
-        },
-        stream,
-    );
+    return send_command(vec!["get_property".into(), property.into()], stream);
 }
 
 pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {
