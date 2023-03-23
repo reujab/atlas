@@ -5,7 +5,7 @@
 
 	import FaArrowLeft from "svelte-icons/fa/FaArrowLeft.svelte";
 	import FaSearch from "svelte-icons/fa/FaSearch.svelte";
-	import GamepadButton from "../GamepadButton/index.svelte";
+	import GamepadButton from "../GamepadButton.svelte";
 </script>
 
 <h1 class="text-8xl font-light pt-10 flex items-center mb-2">

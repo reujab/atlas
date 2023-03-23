@@ -2,6 +2,7 @@
 import { error, log } from "./log";
 
 import HomeScreen from "./HomeScreen/index.svelte";
+import Init from "./Init/index.svelte";
 import Play from "./Play/index.svelte";
 import Router, { routes } from "svelte-hash-router";
 import Search from "./Search/index.svelte";
@@ -9,6 +10,7 @@ import Seasons from "./Seasons/index.svelte";
 import TitleDetails from "./TitleDetails/index.svelte";
 import Titles from "./Titles/index.svelte";
 import Trailer from "./Trailer/index.svelte";
+import Wifi from "./Wifi/index.svelte";
 
 addEventListener("error", (err) => {
 	if (
@@ -20,7 +22,9 @@ addEventListener("error", (err) => {
 });
 
 routes.set({
-	"/": HomeScreen,
+	"/": Init,
+	"/wifi": Wifi,
+	"/home": HomeScreen,
 	"/search": Search,
 	"/results/:query/play": Play,
 	"/tv/:id/view": Seasons,

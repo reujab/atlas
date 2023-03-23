@@ -15,6 +15,7 @@
 	import childProcess from "child_process";
 	import seedrandom from "seedrandom";
 	import state from "./State";
+	import titlesState from "../Titles/State";
 	import { onDestroy } from "svelte";
 	import { subscribe, unsubscribe } from "../gamepad";
 
@@ -37,6 +38,11 @@
 			title: "TV Shows",
 			path: "/tv",
 			icon: require("../img/tv.png"),
+		},
+		{
+			title: "Wifi",
+			path: "/wifi",
+			icon: require("../img/wifi.png"),
 		},
 		{
 			title: "Reboot",
@@ -74,6 +80,9 @@
 			Math.min(tiles.length - 1, state.activeTile)
 		);
 	}
+
+	titlesState.movie.init();
+	titlesState.tv.init();
 
 	subscribe(gamepadHandler);
 	onDestroy(() => {

@@ -3,6 +3,8 @@ import { writable } from "svelte/store";
 import { error } from "../log";
 
 class State {
+	type: TitleType;
+
 	rows = writable([{
 		name: "My list",
 		titles: [],
@@ -13,8 +15,12 @@ class State {
 	activeRow = writable(1);
 
 	constructor(type: TitleType) {
+		this.type = type;
+	}
+
+	init(): void {
 		this.rows.update((rows) => {
-			const titles = JSON.parse(localStorage.myList)[type];
+			const titles = JSON.parse(localStorage.myList)[this.type];
 			rows[0].titles = cacheTitles(titles);
 			if (rows[0].titles.length) this.activeRow.set(0);
 			return rows;
@@ -24,11 +30,11 @@ class State {
 			const myList = JSON.parse(localStorage.myList);
 			localStorage.myList = JSON.stringify({
 				...myList,
-				[type]: rows[0].titles,
+				[this.type]: rows[0].titles,
 			});
 		});
 
-		getRows(type).then((rows) => {
+		getRows(this.type).then((rows) => {
 			this.rows.update((myList) => [
 				...myList,
 				...rows,

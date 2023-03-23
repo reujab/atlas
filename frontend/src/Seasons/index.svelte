@@ -2,7 +2,7 @@
 	import Carousel from "svelte-carousel";
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import FaPlay from "svelte-icons/fa/FaPlay.svelte";
-	import GamepadButton from "../GamepadButton/index.svelte";
+	import GamepadButton from "../GamepadButton.svelte";
 	import Header from "../Header/index.svelte";
 	import playState from "../Play/State";
 	import state from "./State";

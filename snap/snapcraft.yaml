@@ -25,7 +25,7 @@ apps:
       - network-bind
       - process-control
       - joystick
-      - audio-playback
+      - network-manager
       - alsa
       - shutdown
 
@@ -97,6 +97,7 @@ parts:
       - libgtk-3-0
       - libasound2
       - libffi7
+      - network-manager
       - mpv
       - yt-dlp
 
@@ -240,7 +241,7 @@ layout:
   /usr/share/alsa:
     bind: $SNAP/usr/share/alsa
   $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2.1400.0
+    bind-file: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libva.so.2.1400.0
 
 architectures:
   - build-on: amd64
