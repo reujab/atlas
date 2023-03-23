@@ -3,36 +3,41 @@
 	import ErrorBanner from "../ErrorBanner/index.svelte";
 	import childProcess from "child_process";
 	import { connected } from "./state";
-	import { error } from "../log";
+	import { error, log } from "../log";
 
-	const network = /ethernet|wireless/;
+	const start = Date.now();
+	const connectedRegex = /^(full|connected)/;
 
-	childProcess.exec(
-		"nmcli -t -f TYPE con show --active",
-		(err, stdout, stderr) => {
-			if (err || stderr) {
-				error("nmcli err", err || stderr);
-				location.hash = "#/wifi";
-				return;
+	// if network isn't connected within 3 seconds, redirect to wifi setup
+	// else load the home page
+	function updateConnected(): void {
+		childProcess.exec(
+			"nmcli -t -f CONNECTIVITY general",
+			(err, stdout, stderr) => {
+				if (err || stderr) {
+					error("nmcli err", err || stderr);
+					location.hash = "#/wifi";
+					return;
+				}
+
+				log("connectivity: %O", stdout);
+
+				$connected = connectedRegex.test(stdout);
+				if ($connected) {
+					location.hash = "#/home";
+				} else if (Date.now() - start < 3000) {
+					setTimeout(updateConnected, 500);
+				} else {
+					location.hash = "#/wifi";
+				}
 			}
-
-			$connected =
-				stdout
-					.trim()
-					.split("\n")
-					.findIndex((l) => network.test(l)) !== -1;
-
-			if ($connected) {
-				location.hash = "#/home";
-			} else {
-				location.hash = "#/wifi";
-			}
-		}
-	);
+		);
+	}
+	updateConnected();
 </script>
 
 <ErrorBanner />
 
-<div class="h-screen px-48 flex items-center content-center">
+<div class="h-screen px-48 flex items-center justify-center">
 	<Circle2 size={256} />
 </div>
