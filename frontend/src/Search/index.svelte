@@ -6,11 +6,10 @@
 	import seasonsState from "../Seasons/State";
 	import { getAutocomplete, Title } from "../db";
 	import { onDestroy } from "svelte";
-	import { query } from "./state";
+	import { query, autocompleteCache } from "./state";
 	import { subscribe, unsubscribe } from "../gamepad";
 	import MdSearch from "svelte-icons/md/MdSearch.svelte";
 
-	const autocompleteCache: { [query: string]: Title[] } = {};
 	const seasons = seasonsState.seasons;
 	let activeTitle = 0;
 	let autocomplete: Title[] = [];
@@ -24,6 +23,7 @@
 			if (showKeyboard) {
 				setTimeout(() => {
 					$query = "";
+					$autocompleteCache = {};
 				});
 				history.back();
 			} else {
@@ -61,15 +61,15 @@
 	async function update(): Promise<void> {
 		if (!$query) return;
 
-		if (autocompleteCache[$query]) {
-			autocomplete = autocompleteCache[$query];
+		if ($autocompleteCache[$query]) {
+			autocomplete = $autocompleteCache[$query];
 			return;
 		}
 
 		// remove old search results
 		const blacklist = new Set();
 		for (let i = 1; i < $query.length - 1; i++) {
-			const titles = autocompleteCache[$query.slice(0, i)].slice(0, 2);
+			const titles = $autocompleteCache[$query.slice(0, i)].slice(0, 2);
 			if (titles) {
 				for (const title of titles) {
 					blacklist.add(title.id);
@@ -80,7 +80,7 @@
 		const res = await getAutocomplete($query, [...blacklist] as number[]);
 		if (res) {
 			autocomplete = res;
-			autocompleteCache[$query] = res;
+			$autocompleteCache[$query] = res;
 		}
 	}
 
