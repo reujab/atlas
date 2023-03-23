@@ -75,6 +75,10 @@
 		});
 
 	function gamepadHandler(button: string): void {
+		if (button === "home") {
+			location.hash = "#/";
+		}
+
 		if (button === "B") {
 			history.back();
 		}

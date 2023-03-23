@@ -57,6 +57,9 @@
 
 	function gamepadHandler(button: string): void {
 		switch (button) {
+			case "search":
+				location.hash = "#/search";
+				break;
 			case "A":
 				const tile = tiles[state.activeTile];
 				tile.onClick?.();

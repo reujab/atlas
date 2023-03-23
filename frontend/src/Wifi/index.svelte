@@ -31,7 +31,12 @@
 	function gamepadHandler(button: string): void {
 		if (connecting) return;
 
-		if (button === "B") {
+		if (button === "home" && $connected) {
+			location.hash = "#/";
+			return;
+		}
+
+		if (button === "B" && $connected) {
 			if (selected) {
 				selected = false;
 				timeout = setTimeout(updateNetworks, 1000);

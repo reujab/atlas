@@ -95,6 +95,12 @@
 
 	function gamepadHandler(button: string): void {
 		switch (button) {
+			case "search":
+				location.hash = "#/search";
+				break;
+			case "home":
+				location.hash = "#/";
+				break;
 			case "A":
 				buttons[activeButton].onClick();
 				break;

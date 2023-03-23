@@ -41,6 +41,22 @@
 	let shiftMode = ShiftMode.Disabled;
 	let lastShift = 0;
 
+	function keyDown(e): void {
+		if (!active) return;
+		if (e.key === "Backspace") return backspace();
+		if (e.key === "CapsLock") {
+			shiftMode =
+				shiftMode === ShiftMode.Caps
+					? ShiftMode.Disabled
+					: ShiftMode.Caps;
+			return;
+		}
+		if (e.key.length > 1) return;
+
+		$text += e.key;
+		$depressed = e.key.toUpperCase();
+	}
+
 	function gamepadHandler(button: string): void {
 		if (!active) return;
 
@@ -143,8 +159,10 @@
 		}, 120);
 	});
 
+	addEventListener("keydown", keyDown);
 	subscribe(gamepadHandler);
 	onDestroy(() => {
+		removeEventListener("keydown", keyDown);
 		unsubscribe(gamepadHandler);
 		depressedUnsub();
 	});

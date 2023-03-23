@@ -17,8 +17,18 @@
 	$: activeTitle = $rows[$activeRow]?.titles[$rows[$activeRow].activeCol];
 
 	function gamepadHandler(button: string): void {
+		if (button === "home") {
+			location.hash = "#/";
+			return;
+		}
+
 		if (button === "B") {
 			history.back();
+			return;
+		}
+
+		if (button === "search" || button === "y") {
+			location.hash = "#/search";
 			return;
 		}
 
@@ -27,13 +37,13 @@
 		const row = $rows[$activeRow];
 		const title = row.titles[row.activeCol];
 		switch (button) {
+			case "search":
+				location.hash = "#/search";
+				break;
 			case "A":
 				seasonsState.seasonIndex = 0;
 				$seasons = [];
 				location.hash = `#/${title.type}/${title.id}`;
-				break;
-			case "Y":
-				location.hash = "#/search";
 				break;
 			case "up":
 				if ($activeRow === 1 && !$rows[0].titles.length) break;

@@ -19,6 +19,11 @@
 		: 0;
 
 	function gamepadHandler(button: string): void {
+		if (button === "home") {
+			location.hash = "#/";
+			return;
+		}
+
 		if (button === "B") {
 			if (showKeyboard) {
 				setTimeout(() => {

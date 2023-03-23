@@ -73,6 +73,19 @@ listener.on("gamepad:button", ({ detail }: any) => {
 
 onkeydown = (e) => {
 	switch (e.key) {
+		case "BrowserSearch":
+			dispatch("search");
+			break;
+		case "BrowserHome":
+			dispatch("home");
+			break;
+		case "ContextMenu":
+			e.preventDefault();
+			break;
+		case "BrowserBack":
+		case "Escape":
+			dispatch("B");
+			break;
 		case "ArrowLeft":
 			dispatch("left");
 			break;
@@ -87,15 +100,6 @@ onkeydown = (e) => {
 			break;
 		case "Enter":
 			dispatch("A");
-			break;
-		case "Escape":
-			dispatch("B");
-			break;
-		case "x":
-			dispatch("X");
-			break;
-		case "y":
-			dispatch("Y");
 			break;
 		default:
 			return;
