@@ -67,7 +67,7 @@
 	}
 
 	function scroll(): void {
-		container?.scrollTo(0, networks[networkIndex].element?.offsetTop - 16);
+		container?.scrollTo(0, networks[networkIndex]?.element?.offsetTop - 16);
 	}
 
 	function updateNetworks(): void {
@@ -96,12 +96,13 @@
 					};
 				})
 				.filter((network) => network.name);
+			timeout = setTimeout(updateNetworks, 10000);
+			if (!networks.length) return;
 			const index = networks.findIndex((n) => n.name === oldName);
 			if (index !== -1) networkIndex = index;
 			if (networkIndex > networks.length - 1)
 				networkIndex = networks.length - 1;
 			setTimeout(scroll);
-			timeout = setTimeout(updateNetworks, 10000);
 		});
 	}
 
