@@ -20,7 +20,7 @@
 
 	function gamepadHandler(button: string): void {
 		if (button === "home") {
-			location.hash = "#/";
+			location.hash = "#/home";
 			return;
 		}
 

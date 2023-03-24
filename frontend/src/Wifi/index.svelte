@@ -32,7 +32,7 @@
 		if (connecting) return;
 
 		if (button === "home" && $connected) {
-			location.hash = "#/";
+			location.hash = "#/home";
 			return;
 		}
 

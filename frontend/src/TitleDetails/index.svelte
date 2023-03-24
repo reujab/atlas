@@ -99,7 +99,7 @@
 				location.hash = "#/search";
 				break;
 			case "home":
-				location.hash = "#/";
+				location.hash = "#/home";
 				break;
 			case "A":
 				buttons[activeButton].onClick();
