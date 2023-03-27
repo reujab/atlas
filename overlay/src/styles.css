@@ -62,3 +62,7 @@ image {
 	background: tomato;
 	border-radius: 2rem;
 }
+
+.invisible {
+	color: rgba(0, 0, 0, 0);
+}

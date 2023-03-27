@@ -1,7 +1,10 @@
 mod input_worker;
 mod mpv_worker;
 
-use gtk::{prelude::*, Align, ApplicationWindow, Box, Image, Label, Orientation, Revealer};
+use gtk::{
+    prelude::*, Align, ApplicationWindow, Box, EventControllerKey, Image, Label, Orientation,
+    Revealer,
+};
 use log::info;
 use mpv_worker::send_command;
 use relm4::prelude::*;
@@ -120,6 +123,13 @@ impl SimpleComponent for App {
                             },
                         },
                     },
+                },
+
+                // this is required for keyboard events
+                // the window only spawns when there is a "visible" widget
+                Label {
+                    set_label: ".",
+                    add_css_class: "invisible",
                 },
 
                 Revealer {
@@ -265,7 +275,12 @@ impl SimpleComponent for App {
         let stream_clone = stream.clone();
         thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream_clone));
         let sender_clone = sender.clone();
-        thread::spawn(move || mpv_worker::start(sender_clone, stream));
+        let stream_clone = stream.clone();
+        thread::spawn(move || mpv_worker::start(sender_clone, stream_clone));
+        let sender_clone = sender.clone();
+        let kbd_controller = EventControllerKey::new();
+        input_worker::handle_keyboard(sender_clone, stream, &kbd_controller);
+        root.add_controller(&kbd_controller);
 
         ComponentParts { model, widgets }
     }
