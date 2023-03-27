@@ -13,6 +13,7 @@
 	import HomeTile from "./HomeTile.svelte";
 	import Weather from "./Weather.svelte";
 	import childProcess from "child_process";
+	import * as icons from "./icons";
 	import seedrandom from "seedrandom";
 	import state from "./State";
 	import titlesState from "../Titles/State";
@@ -32,17 +33,17 @@
 		{
 			title: "Movies",
 			path: "/movie",
-			icon: require("../img/popcorn.png"),
+			icon: icons.popcorn,
 		},
 		{
 			title: "TV Shows",
 			path: "/tv",
-			icon: require("../img/tv.png"),
+			icon: icons.tv,
 		},
 		{
 			title: "Wifi",
 			path: "/wifi",
-			icon: require("../img/wifi.png"),
+			icon: icons.wifi,
 		},
 		{
 			title: "Reboot",
@@ -51,7 +52,7 @@
 					"dbus-send --system --dest=org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager.Reboot"
 				);
 			},
-			icon: require("../img/shutdown.png"),
+			icon: icons.reboot,
 		},
 	];
 
