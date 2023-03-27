@@ -46,7 +46,7 @@
 			mpv = childProcess.spawn(
 				"mpv",
 				[
-					"--audio-device=alsa/hw:CARD=PCH,DEV=3",
+					"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
 					"--input-ipc-server=/tmp/mpv",
 					"--save-position-on-quit",
 					"--network-timeout=300",
