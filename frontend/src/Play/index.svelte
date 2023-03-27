@@ -5,9 +5,8 @@
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, TitleType, progress } from "../db";
+	import { cache, TitleType, progress, getStream } from "../db";
 	import { error, log } from "../log";
-	import { get } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -31,17 +30,11 @@
 	let mpv: childProcess.ChildProcess;
 	let cancelled = false;
 
-	get(
-		`${process.env.SEEDBOX_HOST}:8000/stream?magnet=${encodeURIComponent(
-			state.magnet
-		)}${state.season ? `&s=${state.season}&e=${state.episode}` : ""}`
-	)
-		.then(async (res) => {
+	getStream(state.magnet, state.season, state.episode)
+		.then((stream) => {
 			if (cancelled) {
 				return;
 			}
-
-			const stream = await res.text();
 
 			mpv = childProcess.spawn(
 				"mpv",
@@ -69,7 +62,7 @@
 				}
 			});
 		})
-		.catch((err) => {
+		.catch((err: any) => {
 			error("Stream failed", err);
 			history.back();
 		});

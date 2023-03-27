@@ -124,7 +124,7 @@ export default function stream(req: express.Request, res: express.Response): voi
 			console.error(err);
 			cleanup();
 		});
-		const port = 8001 + ++streamID % 999;
+		const port = Number(process.env.PORT) + 1 + ++streamID % 999;
 		torrentServer.listen(port, "0.0.0.0", undefined, () => {
 			streams.set(magnet, `:${port}/${index}/${encodeURIComponent(file.name)}`);
 			res.end(streams.get(magnet));

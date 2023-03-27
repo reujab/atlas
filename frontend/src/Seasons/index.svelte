@@ -7,17 +7,11 @@
 	import playState from "../Play/State";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, Season, progress } from "../db";
+	import { cache, Season, progress, getMagnet } from "../db";
 	import { onDestroy, onMount } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
-	import { get } from "..";
 	import { log } from "../log";
-
-	interface Magnet {
-		magnet: string;
-		seasons: number[];
-	}
 
 	const title = cache.tv[$params.id];
 	let seasons = state.seasons;
@@ -119,7 +113,12 @@
 
 		const season = activeSeason;
 		const episode = activeEpisode;
-		const source = await search(title.title, season.number, episode.number);
+		const source = await getMagnet(
+			title.type,
+			title.title,
+			season.number,
+			episode.number
+		);
 
 		seasons.update((): Season[] => {
 			if (source?.seasons) {
@@ -137,27 +136,6 @@
 
 			return $seasons;
 		});
-	}
-
-	async function search(
-		query: string,
-		season: number,
-		episode: number
-	): Promise<null | Magnet> {
-		try {
-			return (
-				await get(
-					`${process.env.SEEDBOX_HOST}:${
-						process.env.SEEDBOX_PORT
-					}/tv/magnet?q=${encodeURIComponent(
-						query
-					)}&s=${season}&e=${episode}`
-				)
-			).json();
-		} catch (err) {
-			log("Error searching", err);
-			return null;
-		}
 	}
 
 	function retry(e: any): void {

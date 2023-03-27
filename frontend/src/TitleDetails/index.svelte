@@ -12,9 +12,8 @@
 	import seasonsState from "../Seasons/State";
 	import titlesState from "../Titles/State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, getSeasons, Season, TitleType } from "../db";
+	import { cache, getMagnet, getSeasons, Season, TitleType } from "../db";
 	import { error, log } from "../log";
-	import { get } from "..";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
@@ -124,28 +123,23 @@
 	playState.season = null;
 	playState.episode = null;
 	if (title.type === "movie") {
-		get(
-			`${
-				process.env.SEEDBOX_HOST
-			}:8000/movie/magnet?q=${encodeURIComponent(
-				`${title.title} ${
-					title.released ? title.released.getFullYear() : ""
-				}`
-			)}`
-		)
-			.then(async (res) => {
-				const source = await res.json();
-				console.log(source.magnet);
-				playState.magnet = source.magnet;
-				playState.season = null;
-				playState.episode = null;
-				buttons[0].icon = FaPlay;
-			})
-			.catch((err) => {
-				console.error(err);
+		getMagnet(
+			title.type,
+			`${title.title} ${
+				title.released ? title.released.getFullYear() : ""
+			}`
+		).then((source) => {
+			if (!source) {
 				buttons[0].title = "Unavailable";
 				buttons[0].icon = null;
-			});
+				return;
+			}
+
+			playState.magnet = source.magnet;
+			playState.season = null;
+			playState.episode = null;
+			buttons[0].icon = FaPlay;
+		});
 	}
 
 	// preload seasons
