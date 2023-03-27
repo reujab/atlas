@@ -82,6 +82,8 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 
 app.get("/stream", stream);
 
+app.use("/update", express.static("/usr/share/atlas-updater"));
+
 app.listen(Number(process.env.PORT), () => {
 	console.log("Listening to port", process.env.PORT);
 });

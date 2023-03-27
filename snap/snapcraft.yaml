@@ -215,6 +215,7 @@ parts:
              help pkgconfig libthai metainfo themes thumbnailers xml
       cd $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
       rm -rf libLLVM* libGLX_mesa* libpulse-simple* libjacket* libtheora* libvulkan* libwayland-server* libdconf*
+      echo $SNAPCRAFT_PROJECT_VERSION > $SNAPCRAFT_PRIME/VERSION
 
 layout:
   /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs

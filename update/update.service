@@ -1,0 +1,6 @@
+[Unit]
+Description=Atlas updater
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/update.sh
