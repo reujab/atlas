@@ -66,6 +66,7 @@ environment:
   # other
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
   SEEDBOX_HOST: http://192.168.1.129
+  SEEDBOX_PORT: 8000
   PKG_CONFIG_PATH: $SNAP/gnome-platform/usr/lib/pkgconfig
   PYTHONPATH: $PYTHONPATH:$SNAP/usr/lib/python3/dist-packages
 

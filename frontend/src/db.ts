@@ -50,7 +50,7 @@ export interface Episode {
 	magnet: undefined | null | string;
 }
 
-const db = `${process.env.SEEDBOX_HOST}:8000`;
+const db = `${process.env.SEEDBOX_HOST}:${process.env.SEEDBOX_PORT}`;
 
 export const cache: { [type: string]: { [id: number]: Title } } = {
 	movie: {},

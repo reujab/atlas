@@ -147,9 +147,9 @@
 		try {
 			return (
 				await get(
-					`${
-						process.env.SEEDBOX_HOST
-					}:8000/tv/magnet?q=${encodeURIComponent(
+					`${process.env.SEEDBOX_HOST}:${
+						process.env.SEEDBOX_PORT
+					}/tv/magnet?q=${encodeURIComponent(
 						query
 					)}&s=${season}&e=${episode}`
 				)

@@ -82,8 +82,8 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 
 app.get("/stream", stream);
 
-app.listen(8000, () => {
-	console.log("Listening to :8000");
+app.listen(Number(process.env.PORT), () => {
+	console.log("Listening to port", process.env.PORT);
 });
 
 export async function get(...args: Parameters<typeof fetch>): Promise<Response> {

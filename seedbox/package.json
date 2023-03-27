@@ -7,7 +7,7 @@
     "lint": "eslint *.ts",
     "dev": "tsc -w --sourceMap",
     "build": "rm -rf dist && tsc && uglifyjs --compress --mangle -o dist/index.js dist/index.js",
-    "start": ". ../.env && export TMDB_KEY && node ."
+    "start": ". ../.env && export TMDB_KEY && PORT=8000 node ."
   },
   "author": "",
   "license": "ISC",
