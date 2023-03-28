@@ -1,11 +1,18 @@
 import express from "express";
+import fs from "fs";
+import getRows from "./rows";
+import getSeasons from "./seasons";
+import https from "https";
+import http from "http";
 import morgan from "morgan";
 import search from "./search";
 import searchMagnets from "./magnet";
 import stream from "./stream";
-import getSeasons from "./seasons";
-import getRows from "./rows";
 
+const httpsKey = process.env.HTTPS === "1" ? {
+	key: fs.readFileSync(`${process.env.KEY_DIR}/privkey.pem`),
+	cert: fs.readFileSync(`${process.env.KEY_DIR}/fullchain.pem`),
+} : {};
 const app = express();
 
 app.disable("x-powered-by");
@@ -94,7 +101,7 @@ app.get("/stream", stream);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 
-app.listen(Number(process.env.PORT), () => {
+((process.env.HTTPS === "1" ? https : http) as typeof https).createServer(httpsKey, app).listen(Number(process.env.PORT), () => {
 	console.log("Listening to port", process.env.PORT);
 });
 

@@ -124,12 +124,10 @@ export async function getMagnet(type: TitleType, query: string, s?: number, e?: 
 	}
 }
 
-export async function getStream(magnet: string, s?: number, e?: number): Promise<string> {
-	return (await get(
-		`${db}/stream?magnet=${encodeURIComponent(
-			magnet
-		)}${s ? `&s=${s}&e=${e}` : ""}&key=${key}`
-	)).text();
+export function getStream(magnet: string, s?: number, e?: number): string {
+	return `${db}/stream?magnet=${encodeURIComponent(
+		magnet
+	)}${s ? `&s=${s}&e=${e}` : ""}&key=${key}`;
 }
 
 progress.subscribe((p) => {

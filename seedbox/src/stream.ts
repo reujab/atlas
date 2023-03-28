@@ -2,10 +2,11 @@ import WebTorrent from "webtorrent";
 import express from "express";
 import http from "http";
 import parseName from "./parse";
+import url from "url";
 
 const webtorrent = new WebTorrent({
-	// uploadLimit: 0,
-});
+	uploadLimit: 1000,
+} as any);
 const maxStreams = 10;
 
 const streams: Map<string, null | string> = new Map();
@@ -30,7 +31,6 @@ export default function stream(req: express.Request, res: express.Response): voi
 		return;
 	}
 
-	console.log(magnet);
 	if (streams.get(magnet) !== undefined) {
 		if (streams.get(magnet) === null) {
 			const then = Date.now();
@@ -46,7 +46,7 @@ export default function stream(req: express.Request, res: express.Response): voi
 				}
 			}, 100);
 		} else {
-			res.end(streams.get(magnet));
+			proxy(req, res, streams.get(magnet) as string);
 		}
 
 		return;
@@ -125,9 +125,21 @@ export default function stream(req: express.Request, res: express.Response): voi
 			cleanup();
 		});
 		const port = Number(process.env.PORT) + 1 + ++streamID % 999;
-		torrentServer.listen(port, "0.0.0.0", undefined, () => {
-			streams.set(magnet, `:${port}/${index}/${encodeURIComponent(file.name)}`);
-			res.end(streams.get(magnet));
+		torrentServer.listen(port, "127.0.0.1", undefined, () => {
+			const path = `http://127.0.0.1:${port}/${index}/${encodeURIComponent(file.name)}`;
+			streams.set(magnet, path);
+			proxy(req, res, path);
 		});
+	});
+}
+
+function proxy(req: express.Request, res: express.Response, path: string): void {
+	const options = url.parse(path) as http.RequestOptions;
+	options.headers = req.headers;
+	http.get(options, (streamRes) => {
+		for (const header of Object.keys(streamRes.headers)) {
+			res.header(header, streamRes.headers[header]);
+		}
+		streamRes.pipe(res);
 	});
 }
