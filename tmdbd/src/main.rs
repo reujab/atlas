@@ -34,9 +34,9 @@ impl ToString for TitleType {
 #[tokio::main]
 async fn main() {
     env_logger::init_from_env(Env::default().default_filter_or("tmdbd=info"));
-    dotenv::dotenv().unwrap();
+    dotenv::dotenv().expect("Couldn't find .env file");
 
-    let db_url = env::var("DATABASE_URL").unwrap();
+    let db_url = env::var("DATABASE_URL").expect("Couldn't find $DATABASE_URL");
     info!("Connecting to {db_url}...");
     let pool = PgPoolOptions::new()
         .max_connections(10)
