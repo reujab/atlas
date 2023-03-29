@@ -63,11 +63,11 @@ export default function stream(req: express.Request, res: express.Response): voi
 		let torrentServer: http.Server, interval: NodeJS.Timer;
 
 		function cleanup(): void {
+			streams.delete(magnet);
 			torrentServer?.close();
 			torrent.destroy();
 			clearInterval(interval);
 			res.end();
-			streams.delete(magnet);
 		}
 
 		torrent.on("error", (err) => {
@@ -138,8 +138,13 @@ function proxy(req: express.Request, res: express.Response, path: string): void 
 	options.headers = req.headers;
 	http.get(options, (streamRes) => {
 		for (const header of Object.keys(streamRes.headers)) {
+			if (header.includes("dlna")) continue;
 			res.header(header, streamRes.headers[header]);
 		}
-		streamRes.pipe(res);
+		streamRes.pipe(res, { end: true });
+
+		req.on("close", () => {
+			streamRes.destroy();
+		});
 	});
 }
