@@ -9,6 +9,7 @@ app.whenReady().then(() => {
 		},
 	});
 
+	mainWindow.webContents.setUserAgent(`atlas v${process.env.SNAP_VERSION}`);
 	mainWindow.setMenuBarVisibility(false);
 	mainWindow.maximize();
 	mainWindow.loadFile("http/index.html");
