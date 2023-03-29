@@ -1,15 +1,14 @@
 import express from "express";
-import fs from "fs";
 import getRows from "./rows";
 import getSeasons from "./seasons";
-import https from "https";
-import http from "http";
 import morgan from "morgan";
 import search from "./search";
 import searchMagnets from "./magnet";
 import stream from "./stream";
 
 const app = express();
+
+app.disable("x-powered-by");
 
 app.use(morgan("dev"));
 
