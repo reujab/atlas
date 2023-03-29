@@ -9,13 +9,7 @@ import search from "./search";
 import searchMagnets from "./magnet";
 import stream from "./stream";
 
-const httpsKey = process.env.KEY_DIR ? {
-	key: fs.readFileSync(`${process.env.KEY_DIR}/privkey.pem`),
-	cert: fs.readFileSync(`${process.env.KEY_DIR}/fullchain.pem`),
-} : {};
 const app = express();
-
-app.disable("x-powered-by");
 
 app.use(morgan("dev"));
 
@@ -101,7 +95,7 @@ app.get("/stream", stream);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 
-((process.env.KEY_DIR ? https : http) as typeof https).createServer(httpsKey, app).listen(Number(process.env.PORT), () => {
+app.listen(Number(process.env.PORT), () => {
 	console.log("Listening to port", process.env.PORT);
 });
 
