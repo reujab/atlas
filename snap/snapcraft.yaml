@@ -65,9 +65,6 @@ environment:
   GTK_A11Y: none
   # other
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
-  SEEDBOX_HOST: http://192.168.1.129
-  SEEDBOX_PORT: 8000
-  SEEDBOX_KEY: super-secret-seedbox
   PKG_CONFIG_PATH: $SNAP/gnome-platform/usr/lib/pkgconfig
   PYTHONPATH: $PYTHONPATH:$SNAP/usr/lib/python3/dist-packages
 
@@ -131,6 +128,14 @@ parts:
       - usr/share/fonts/opentype/cantarell
       - usr/share/fonts/truetype/noto/NotoSansMono-*.ttf
       - usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
+
+  dotenv:
+    plugin: dump
+    source: .
+    organize:
+      client.env: .env
+    stage:
+      - .env
 
   wrapper:
     plugin: dump
