@@ -61,6 +61,7 @@ export function streamHandler(req: express.Request, res: express.Response): void
 				}
 
 				if (existingStream.torrent) {
+					clearInterval(interval);
 					redirect(res, existingStream, season, episode);
 				}
 			}, 500);

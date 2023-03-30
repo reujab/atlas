@@ -55,7 +55,7 @@ export interface Magnet {
 	seasons: number[];
 }
 
-const host = `${process.env.SEEDBOX_HOST}:${process.env.SEEDBOX_PORT}`;
+const host = process.env.SEEDBOX_HOST;
 const key = process.env.SEEDBOX_KEY;
 
 export const cache: { [type: string]: { [id: number]: Title } } = {

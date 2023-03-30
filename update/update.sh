@@ -1,6 +1,6 @@
 #!/bin/bash -e
 . /.env
-export IP="${SEEDBOX_HOST}:$SEEDBOX_PORT"
+export IP="$SEEDBOX_HOST"
 
 version=$(</snap/atlas/current/VERSION)
 echo Current version: "$version"
