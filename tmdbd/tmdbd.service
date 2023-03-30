@@ -1,15 +1,14 @@
 [Unit]
 Description=The movie database daemon
-After=network-online.target postgresql.service windscribe.service
+After=network-online.target postgresql.service
 
 [Service]
-WorkingDirectory=/home/atlas
-ExecStartPre=/usr/bin/find /home/atlas/posters -type f -empty -delete -print
-ExecStartPre=/usr/bin/echo Done
-ExecStartPre=/usr/bin/sleep 30
-ExecStart=/usr/local/bin/tmdbd
+Type=exec
 User=atlas
 Group=atlas
+WorkingDirectory=/home/atlas
+ExecStart=/home/atlas/tmdbd
+Restart=always
 
 [Install]
-WantedBy=graphical.target
+WantedBy=multi-user.target

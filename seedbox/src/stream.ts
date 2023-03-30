@@ -8,31 +8,51 @@ const webtorrent = new WebTorrent({
 	uploadLimit: 1000,
 } as any);
 const maxStreams = 10;
+const streams: Stream[] = [];
 
-const streams: Map<string, null | string> = new Map();
 let streamID = -1;
+class Stream {
+	id: number;
+
+	port: number;
+
+	magnet: string;
+
+	torrent: null | WebTorrent.Torrent = null;
+
+	constructor(magnet: string) {
+		do {
+			this.id = streamID = (streamID + 1) % maxStreams;
+		} while (streams.find((s) => s.id === this.id)); // eslint-disable-line
+		this.port = 1 + Number(process.env.PORT) + this.id % maxStreams;
+		this.magnet = magnet;
+	}
+}
 
 webtorrent.on("error", (err) => {
 	console.error(err);
 });
 
-export default function stream(req: express.Request, res: express.Response): void {
-	if (streams.size >= maxStreams) {
+export function streamHandler(req: express.Request, res: express.Response): void {
+	if (streams.length >= maxStreams) {
 		res.status(500).end("Too many active streams");
 		return;
 	}
 
 	const magnet = req.query.magnet as string;
-	const season = req.query.s;
-	const episode = req.query.e;
+	const season = req.query.s as string;
+	const episode = req.query.e as string;
 
 	if (!magnet) {
 		res.status(400).end();
 		return;
 	}
 
-	if (streams.get(magnet) !== undefined) {
-		if (streams.get(magnet) === null) {
+	const existingStream = streams.find((s) => s.magnet === magnet);
+	if (existingStream) {
+		if (existingStream.torrent) {
+			redirect(res, existingStream, season, episode);
+		} else {
 			const then = Date.now();
 			const interval = setInterval(() => {
 				if (Date.now() - then >= 10000) {
@@ -41,18 +61,16 @@ export default function stream(req: express.Request, res: express.Response): voi
 					return;
 				}
 
-				if (streams.get(magnet)) {
-					res.end(streams.get(magnet));
+				if (existingStream.torrent) {
+					redirect(res, existingStream, season, episode);
 				}
 			}, 100);
-		} else {
-			proxy(req, res, streams.get(magnet) as string);
 		}
-
 		return;
 	}
 
-	streams.set(magnet, null);
+	const stream = new Stream(magnet);
+	streams.push(stream);
 
 	console.log("Connecting");
 	const then = Date.now();
@@ -62,8 +80,14 @@ export default function stream(req: express.Request, res: express.Response): voi
 
 		let torrentServer: http.Server, interval: NodeJS.Timer;
 
+		stream.torrent = torrent;
+
 		function cleanup(): void {
-			streams.delete(magnet);
+			console.log("Cleaning up");
+			const index = streams.indexOf(stream);
+			// eslint-disable-next-line no-negated-condition
+			if (index !== -1) streams.splice(index, 1);
+			else console.warn("cleanup called but stream not found");
 			torrentServer?.close();
 			torrent.destroy();
 			clearInterval(interval);
@@ -76,26 +100,6 @@ export default function stream(req: express.Request, res: express.Response): voi
 		});
 
 		console.log(torrent.files.map((f) => f.name));
-		const index = season
-			? torrent.files.findIndex((file) => {
-				const parsed = parseName(file.name);
-				return parsed.seasons.includes(Number(season)) && parsed.episode === Number(episode);
-			})
-			: torrent.files
-				.map((file, originalIndex) => ({ file, originalIndex }))
-				.sort((a, b) => b.file.length - a.file.length)
-				.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name))?.originalIndex;
-		if (index === undefined || index === -1) {
-			console.error("File not found");
-			res.status(404);
-			cleanup();
-			return;
-		}
-
-		const file = torrent.files[index];
-		console.log(`Selecting "${file.name}"`);
-		file.select();
-
 		torrentServer = torrent.createServer();
 		let timeout: NodeJS.Timeout;
 		let connections = 0;
@@ -103,7 +107,6 @@ export default function stream(req: express.Request, res: express.Response): voi
 		function updateTimeout(): void {
 			clearTimeout(timeout);
 			timeout = setTimeout(() => {
-				console.log("Timeout");
 				cleanup();
 			}, 10000);
 		}
@@ -124,16 +127,49 @@ export default function stream(req: express.Request, res: express.Response): voi
 			console.error(err);
 			cleanup();
 		});
-		const port = Number(process.env.PORT) + 1 + ++streamID % 999;
-		torrentServer.listen(port, "127.0.0.1", undefined, () => {
-			const path = `http://127.0.0.1:${port}/${index}/${encodeURIComponent(file.name)}`;
-			streams.set(magnet, path);
-			proxy(req, res, path);
+		torrentServer.listen(stream.port, "127.0.0.1", undefined, () => {
+			redirect(res, stream, season, episode);
 		});
 	});
 }
 
-function proxy(req: express.Request, res: express.Response, path: string): void {
+function redirect(res: express.Response, stream: Stream, season?: string, episode?: string): void {
+	if (!stream.torrent) throw new Error("torrent is null");
+
+	console.log(season, episode);
+	const index = findFile(stream.torrent, season, episode);
+	if (index === -1) {
+		console.error("File not found");
+		res.status(404).end();
+		return;
+	}
+	const file = stream.torrent.files[index];
+	const path = `/stream/${stream.id}/${index}/${encodeURIComponent(file.name)}`;
+	res.end(path);
+}
+
+function findFile(torrent: WebTorrent.Torrent, season?: string, episode?: string): number {
+	const index = season
+		? torrent.files.findIndex((file) => {
+			const parsed = parseName(file.name);
+			return parsed.seasons.includes(Number(season)) && parsed.episode === Number(episode);
+		})
+		: torrent.files
+			.map((file, originalIndex) => ({ file, originalIndex }))
+			.sort((a, b) => b.file.length - a.file.length)
+			.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name))?.originalIndex;
+	if (index === undefined) return -1;
+	return index;
+}
+
+export function proxy(req: express.Request, res: express.Response): void {
+	const id = Number(req.params.id);
+	const stream = streams.find((s) => s.id === id);
+	if (!stream) {
+		res.status(500).end("stream not found");
+		return;
+	}
+	const path = `http://127.0.0.1:${stream.port}${req.path}`;
 	const options = url.parse(path) as http.RequestOptions;
 	options.headers = req.headers;
 	http.get(options, (streamRes) => {

@@ -4,7 +4,7 @@ import getSeasons from "./seasons";
 import morgan from "morgan";
 import search from "./search";
 import searchMagnets from "./magnet";
-import stream from "./stream";
+import { streamHandler, proxy } from "./stream";
 
 const app = express();
 
@@ -90,7 +90,9 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 	});
 });
 
-app.get("/stream", stream);
+app.get("/stream", streamHandler);
+
+app.use("/stream/:id(\\d+)/", proxy);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 

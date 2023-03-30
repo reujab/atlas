@@ -26,40 +26,49 @@
 		}
 		history.back();
 	});
-	const stream = getStream(state.magnet, state.season, state.episode);
-	const mpv = childProcess.spawn(
-		"mpv",
-		[
-			"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
-			"--input-ipc-server=/tmp/mpv",
-			"--save-position-on-quit",
-			"--network-timeout=300",
-			"--hwdec=vaapi",
-			"--vo=wlshm",
-			stream,
-		],
-		{ stdio: "inherit" }
-	);
 
-	mpv.on("error", (err) => {
-		console.error(err);
-		history.back();
-	});
+	let mpv: childProcess.ChildProcess;
+	let cancelled = false;
 
-	mpv.on("exit", (code, signal) => {
-		log("mpv exited %O %O", code, signal);
+	getStream(state.magnet, state.season, state.episode).then((stream) => {
+		if (cancelled) return;
 
-		if (code === 1) {
-			error("mpv was unable to play file");
-		}
+		mpv = childProcess.spawn(
+			"mpv",
+			[
+				"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
+				"--input-ipc-server=/tmp/mpv",
+				"--save-position-on-quit",
+				"--network-timeout=300",
+				"--hwdec=vaapi",
+				"--vo=wlshm",
+				stream,
+			],
+			{ stdio: "inherit" }
+		);
+
+		mpv.on("error", (err) => {
+			console.error(err);
+			history.back();
+		});
+
+		mpv.on("exit", (code, signal) => {
+			log("mpv exited %O %O", code, signal);
+
+			if (code) {
+				error("mpv was unable to play file");
+			}
+		});
 	});
 
 	function gamepadHandler(button: string): void {
 		if (button === "home") {
+			cancelled = true;
 			location.hash = "#/home";
 		}
 
 		if (button === "B") {
+			cancelled = true;
 			history.back();
 		}
 	}

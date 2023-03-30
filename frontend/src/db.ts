@@ -55,7 +55,7 @@ export interface Magnet {
 	seasons: number[];
 }
 
-const db = `${process.env.SEEDBOX_HOST}:${process.env.SEEDBOX_PORT}`;
+const host = `${process.env.SEEDBOX_HOST}:${process.env.SEEDBOX_PORT}`;
 const key = process.env.SEEDBOX_KEY;
 
 export const cache: { [type: string]: { [id: number]: Title } } = {
@@ -93,7 +93,7 @@ export function cacheTitles(titles: Title[], delay?: boolean): Title[] {
 }
 
 export async function getRows(type: TitleType): Promise<Row[]> {
-	const res = await get(`${db}/${type}/rows?key=${key}`);
+	const res = await get(`${host}/${type}/rows?key=${key}`);
 	const rows = await res.json();
 	for (const row of rows) {
 		row.titles = cacheTitles(row.titles);
@@ -104,11 +104,11 @@ export async function getRows(type: TitleType): Promise<Row[]> {
 }
 
 export async function getSeasons(title: Title): Promise<Season[]> {
-	return (await get(`${db}/seasons/${title.id}?key=${key}`)).json();
+	return (await get(`${host}/seasons/${title.id}?key=${key}`)).json();
 }
 
 export async function getAutocomplete(query: string, blacklist: number[] = []): Promise<null | Title[]> {
-	const res = await get(`${db}/search?q=${encodeURIComponent(query)}&blacklist=${blacklist.join(",")}&key=${key}`);
+	const res = await get(`${host}/search?q=${encodeURIComponent(query)}&blacklist=${blacklist.join(",")}&key=${key}`);
 	const titles = await res.json();
 	return cacheTitles(titles, false);
 }
@@ -116,7 +116,7 @@ export async function getAutocomplete(query: string, blacklist: number[] = []): 
 export async function getMagnet(type: TitleType, query: string, s?: number, e?: number): Promise<null | Magnet> {
 	try {
 		const res = await get(
-			`${db}/${type}/magnet?q=${encodeURIComponent(query)}${type === "tv" ? `&s=${s}&e=${e}` : ""}&key=${key}`
+			`${host}/${type}/magnet?q=${encodeURIComponent(query)}${type === "tv" ? `&s=${s}&e=${e}` : ""}&key=${key}`
 		);
 		return res.json();
 	} catch (err) {
@@ -124,10 +124,13 @@ export async function getMagnet(type: TitleType, query: string, s?: number, e?: 
 	}
 }
 
-export function getStream(magnet: string, s?: number, e?: number): string {
-	return `${db}/stream?magnet=${encodeURIComponent(
+export async function getStream(magnet: string, s?: number, e?: number): Promise<string> {
+	const path = `${host}/stream?magnet=${encodeURIComponent(
 		magnet
 	)}${s ? `&s=${s}&e=${e}` : ""}&key=${key}`;
+	const res = await get(path);
+	const stream = await res.text();
+	return host + stream;
 }
 
 progress.subscribe((p) => {
