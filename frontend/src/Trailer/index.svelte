@@ -18,6 +18,7 @@
 			"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
 			"--input-ipc-server=/tmp/mpv",
 			"--hwdec=vaapi",
+			"--vo=wlshm",
 			`ytdl://${title.trailer}`,
 		],
 		{ stdio: "inherit" }

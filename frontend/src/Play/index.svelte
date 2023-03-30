@@ -35,6 +35,7 @@
 			"--save-position-on-quit",
 			"--network-timeout=300",
 			"--hwdec=vaapi",
+			"--vo=wlshm",
 			stream,
 		],
 		{ stdio: "inherit" }
