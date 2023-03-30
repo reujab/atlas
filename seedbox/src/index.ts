@@ -12,14 +12,6 @@ app.disable("x-powered-by");
 
 app.use(morgan("dev"));
 
-app.use((req, res, next) => {
-	if (req.query.key === process.env.KEY) {
-		next();
-	} else {
-		res.status(403).end();
-	}
-});
-
 app.get("/:type(movie|tv)/rows", async (req, res) => {
 	res.json(await getRows(req.params.type as "movie" | "tv"));
 });
