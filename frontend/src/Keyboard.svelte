@@ -41,7 +41,7 @@
 	let shiftMode = ShiftMode.Disabled;
 	let lastShift = 0;
 
-	function keyDown(e): void {
+	function keyDown(e: KeyboardEvent): void {
 		if (!active) return;
 		if (e.key === "Backspace") return backspace();
 		if (e.key === "CapsLock") {

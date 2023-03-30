@@ -36,12 +36,14 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
 
     let mut stream = mutex.lock().unwrap();
     let censor = Regex::new(r"(?i)fuck").unwrap();
+    let key = Regex::new(r"\?key=.*").unwrap();
     let title = get_property("media-title", &mut stream)
         .unwrap()
         .as_str()
         .unwrap()
         .to_owned();
     let title = censor.replace_all(&title, "****").to_string();
+    let title = key.replace_all(&title, "").to_string();
     sender.input(Msg::SetTitle(title));
 
     let duration = get_property("duration", &mut stream)

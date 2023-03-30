@@ -130,7 +130,7 @@ export async function getStream(magnet: string, s?: number, e?: number): Promise
 	)}${s ? `&s=${s}&e=${e}` : ""}&key=${key}`;
 	const res = await get(path);
 	const stream = await res.text();
-	return host + stream;
+	return `${host}${stream}?key=${key}`;
 }
 
 progress.subscribe((p) => {

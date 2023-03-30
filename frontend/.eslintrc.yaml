@@ -176,7 +176,7 @@ rules:
   no-delete-var: warn
   no-label-var: warn
   no-restricted-globals: off
-  no-shadow:
+  "@typescript-eslint/no-shadow":
     - warn
     - allow:
       - err

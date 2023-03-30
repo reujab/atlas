@@ -2,7 +2,6 @@ import WebTorrent from "webtorrent";
 import express from "express";
 import http from "http";
 import parseName from "./parse";
-import url from "url";
 
 const webtorrent = new WebTorrent({
 	uploadLimit: 1000,
@@ -55,16 +54,16 @@ export function streamHandler(req: express.Request, res: express.Response): void
 		} else {
 			const then = Date.now();
 			const interval = setInterval(() => {
-				if (Date.now() - then >= 10000) {
+				if (Date.now() - then >= 60000) {
 					clearInterval(interval);
-					res.status(500).end("Stream never initialized");
+					res.status(408).end();
 					return;
 				}
 
 				if (existingStream.torrent) {
 					redirect(res, existingStream, season, episode);
 				}
-			}, 100);
+			}, 500);
 		}
 		return;
 	}
@@ -136,7 +135,6 @@ export function streamHandler(req: express.Request, res: express.Response): void
 function redirect(res: express.Response, stream: Stream, season?: string, episode?: string): void {
 	if (!stream.torrent) throw new Error("torrent is null");
 
-	console.log(season, episode);
 	const index = findFile(stream.torrent, season, episode);
 	if (index === -1) {
 		console.error("File not found");
@@ -166,13 +164,12 @@ export function proxy(req: express.Request, res: express.Response): void {
 	const id = Number(req.params.id);
 	const stream = streams.find((s) => s.id === id);
 	if (!stream) {
-		res.status(500).end("stream not found");
+		res.status(404).end("stream not found");
 		return;
 	}
 	const path = `http://127.0.0.1:${stream.port}${req.path}`;
-	const options = url.parse(path) as http.RequestOptions;
-	options.headers = req.headers;
-	http.get(options, (streamRes) => {
+	req.setTimeout(3 * 60 * 1000);
+	http.get(path, { headers: req.headers }, (streamRes) => {
 		for (const header of Object.keys(streamRes.headers)) {
 			if (header.includes("dlna")) continue;
 			res.header(header, streamRes.headers[header]);
