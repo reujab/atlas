@@ -32,6 +32,10 @@ webtorrent.on("error", (err) => {
 	console.error(err);
 });
 
+setInterval(() => {
+	if (streams.length) console.log("Speed:", Math.round(webtorrent.downloadSpeed / 1024), "KiB/s");
+}, 2000);
+
 export function streamHandler(req: express.Request, res: express.Response): void {
 	if (streams.length >= maxStreams) {
 		res.status(500).end("Too many active streams");
