@@ -2,7 +2,7 @@ import childProcess from "child_process";
 import { error, log } from "./log";
 import fs from "fs";
 
-export default function spawnOverlay(cb?: (progress: null | number) => void): childProcess.ChildProcess {
+export default function spawnOverlay(cb?: (progress: null | number[]) => void): childProcess.ChildProcess {
 	const overlay = childProcess.spawn("atlas-overlay", {
 		stdio: "inherit",
 	});
@@ -29,8 +29,7 @@ export default function spawnOverlay(cb?: (progress: null | number) => void): ch
 				if (err) error("Error deleting /tmp/progress", err);
 			});
 
-			log("Progress %O", data.toString());
-			cb?.(Number(data));
+			cb?.(data.toString().trim().split("\n").map(Number));
 		});
 	});
 

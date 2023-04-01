@@ -9,7 +9,7 @@
 	{#if title.type === "movie" && $progress[title.type][title.id]}
 		<div class="absolute bottom-0 left-0 right-0 h-1">
 			<div
-				style="width: {$progress[title.type][title.id] * 100}%"
+				style="width: {$progress[title.type][title.id][0] * 100}%"
 				class="bg-red-500 h-full"
 			/>
 		</div>

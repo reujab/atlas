@@ -15,11 +15,11 @@
 	const id = Number($params.id);
 	const title = cache[type][id];
 	const header = $params.type ? title.title : unescape($params.query);
+	const progressID =
+		type === "movie"
+			? String(id)
+			: `${id}-${state.season}-${state.episode}`;
 	const overlay = spawnOverlay((p) => {
-		const progressID =
-			type === "movie"
-				? String(id)
-				: `${id}-${state.season}-${state.episode}`;
 		$progress[type][progressID] = p;
 		if (type === "tv") {
 			$progress[type][String(id)] = `${state.season}-${state.episode}`;
@@ -33,15 +33,18 @@
 	getStream(state.magnet, state.season, state.episode).then((stream) => {
 		if (cancelled) return;
 
+		const start = $progress[type][progressID]
+			? [`--start=${$progress[type][progressID][1]}`]
+			: [];
 		mpv = childProcess.spawn(
 			"mpv",
 			[
 				"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
 				"--input-ipc-server=/tmp/mpv",
-				"--save-position-on-quit",
 				"--network-timeout=300",
 				"--hwdec=vaapi",
 				"--vo=gpu",
+				...start,
 				stream,
 			],
 			{ stdio: "inherit" }

@@ -63,7 +63,7 @@ export const cache: { [type: string]: { [id: number]: Title } } = {
 	tv: {},
 };
 
-export const progress: Writable<{ [type: string]: { [id: string]: number | string } }> = writable(localStorage.progress ? JSON.parse(localStorage.progress) : {
+export const progress: Writable<{ [type: string]: { [id: string]: number[] | string } }> = writable(localStorage.progress ? JSON.parse(localStorage.progress) : {
 	movie: {},
 	tv: {},
 });
