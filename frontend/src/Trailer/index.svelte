@@ -18,7 +18,7 @@
 			"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
 			"--input-ipc-server=/tmp/mpv",
 			"--hwdec=vaapi",
-			"--vo=wlshm",
+			"--vo=gpu",
 			`ytdl://${title.trailer}`,
 		],
 		{ stdio: "inherit" }
@@ -35,8 +35,8 @@
 	}
 
 	mpv.on("exit", (code) => {
-		if (code === 1) {
-			error("mpv exit code 1");
+		if (code !== 4) {
+			error(`mpv exit code ${code}`);
 		}
 
 		if (location.href.includes("/trailer")) history.back();

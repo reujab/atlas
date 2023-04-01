@@ -72,63 +72,56 @@ listener.on("gamepad:button", ({ detail }: any) => {
 });
 
 onkeydown = (e) => {
-	switch (e.key) {
-		case "BrowserSearch":
-			dispatch("search");
-			break;
-		case "BrowserHome":
-			dispatch("home");
-			break;
-		case "ContextMenu":
-			e.preventDefault();
-			break;
-		case "BrowserBack":
-		case "Escape":
-			dispatch("B");
-			break;
-		case "ArrowLeft":
-			dispatch("left");
-			break;
-		case "ArrowUp":
-			dispatch("up");
-			break;
-		case "ArrowRight":
-			dispatch("right");
-			break;
-		case "ArrowDown":
-			dispatch("down");
-			break;
-		case "Enter":
-			dispatch("A");
-			break;
-		default:
-			return;
-	}
+	if (e.key.length > 1) e.preventDefault();
+	const button = getButtonName(e.key);
+	if (!button || e.repeat) return;
 
-	e.preventDefault();
+	dispatch(button);
+	if (["up", "down", "left", "right"].includes(button)) {
+		e.preventDefault();
+		clearInterval(buttonInterval);
+		buttonInterval = setInterval(() => {
+			dispatch(button);
+		}, 300);
+	}
 };
 
-function getButtonName(id: number): string | null {
+onkeyup = (e) => {
+	e.preventDefault();
+	clearInterval(buttonInterval);
+};
+
+function getButtonName(id: number | string): string | null {
 	switch (id) {
 		case 0:
+		case "Enter":
 			return "A";
 		case 1:
+		case "BrowserBack":
+		case "Escape":
 			return "B";
 		case 2:
 			return "X";
 		case 3:
 			return "Y";
 		case 12:
+		case "ArrowUp":
 			return "up";
 		case 13:
+		case "ArrowDown":
 			return "down";
 		case 14:
+		case "ArrowLeft":
 			return "left";
 		case 15:
+		case "ArrowRight":
 			return "right";
-		default:
-			return null;
+		case "BrowserSearch":
+			return "search";
+		case "BrowserHome":
+			return "home";
 	}
+	return null;
 }
 
 function dispatch(e: string): void {

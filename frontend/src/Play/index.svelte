@@ -58,7 +58,7 @@
 		mpv.on("exit", (code, signal) => {
 			log("mpv exited %O %O", code, signal);
 
-			if (code) {
+			if (code !== 4) {
 				error("mpv was unable to play file");
 			}
 		});
