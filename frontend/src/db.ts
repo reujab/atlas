@@ -55,6 +55,11 @@ export interface Magnet {
 	seasons: number[];
 }
 
+export interface StreamInfo {
+	video: string;
+	subs: null | string;
+}
+
 const host = process.env.SEEDBOX_HOST;
 const key = process.env.SEEDBOX_KEY;
 
@@ -124,13 +129,16 @@ export async function getMagnet(type: TitleType, query: string, s?: number, e?: 
 	}
 }
 
-export async function getStream(magnet: string, s?: number, e?: number): Promise<string> {
-	const path = `${host}/stream?magnet=${encodeURIComponent(
+export async function initStream(magnet: string, s?: number, e?: number): Promise<StreamInfo> {
+	const path = `${host}/init?magnet=${encodeURIComponent(
 		magnet
 	)}${s ? `&s=${s}&e=${e}` : ""}&key=${key}`;
 	const res = await get(path);
-	const stream = await res.text();
-	return `${host}${stream}?key=${key}`;
+	const info = await res.json();
+	return {
+		video: `${host}${info.video}?key=${key}`,
+		subs: info.subs && `${host}${info.subs}?key=${key}`,
+	};
 }
 
 progress.subscribe((p) => {

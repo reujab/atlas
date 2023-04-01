@@ -36,7 +36,7 @@ setInterval(() => {
 	if (streams.length) console.log("Speed:", Math.round(webtorrent.downloadSpeed / 1024), "KiB/s");
 }, 10000);
 
-export function streamHandler(req: express.Request, res: express.Response): void {
+export function init(req: express.Request, res: express.Response): void {
 	if (streams.length >= maxStreams) {
 		res.status(500).end("Too many active streams");
 		return;
@@ -151,8 +151,13 @@ function redirect(res: express.Response, stream: Stream, season?: string, episod
 		return;
 	}
 	const file = stream.torrent.files[index];
-	const path = `/stream/${stream.id}/${index}/${encodeURIComponent(file.name)}`;
-	res.end(path);
+	const filePath = `/stream/${stream.id}/${index}/${encodeURIComponent(file.name)}`;
+	const subs = stream.torrent.files.find((s) => s.name === file.name.replace(/...$/, "srt"));
+	const subsPath = subs ? `/stream/${stream.id}/${stream.torrent.files.indexOf(subs)}/${encodeURIComponent(subs.name)}` : null;
+	res.json({
+		video: filePath,
+		subs: subsPath,
+	});
 }
 
 function findFile(torrent: WebTorrent.Torrent, season?: string, episode?: string): number {

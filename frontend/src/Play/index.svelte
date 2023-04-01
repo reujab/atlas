@@ -5,7 +5,7 @@
 	import spawnOverlay from "../spawnOverlay";
 	import state from "./State";
 	import { Circle2 } from "svelte-loading-spinners";
-	import { cache, TitleType, progress, getStream } from "../db";
+	import { cache, TitleType, progress, initStream } from "../db";
 	import { error, log } from "../log";
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
@@ -30,12 +30,14 @@
 	let mpv: childProcess.ChildProcess;
 	let cancelled = false;
 
-	getStream(state.magnet, state.season, state.episode).then((stream) => {
+	initStream(state.magnet, state.season, state.episode).then((streamInfo) => {
 		if (cancelled) return;
 
+		const { video, subs } = streamInfo;
 		const start = $progress[type][progressID]
 			? [`--start=${$progress[type][progressID][1]}`]
 			: [];
+		const subFile = subs ? [`--sub-file=${subs}`] : [];
 		mpv = childProcess.spawn(
 			"mpv",
 			[
@@ -44,8 +46,9 @@
 				"--network-timeout=300",
 				"--hwdec=vaapi",
 				"--vo=gpu",
+				...subFile,
 				...start,
-				stream,
+				video,
 			],
 			{ stdio: "inherit" }
 		);
