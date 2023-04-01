@@ -4,7 +4,7 @@ import http from "http";
 import parseName from "./parse";
 
 const webtorrent = new WebTorrent({
-	uploadLimit: 1000,
+	uploadLimit: 0.5 * 1024 * 1024,
 } as any);
 const maxStreams = 10;
 const streams: Stream[] = [];
