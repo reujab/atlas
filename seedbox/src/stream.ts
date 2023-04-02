@@ -4,7 +4,7 @@ import http from "http";
 import parseName from "./parse";
 
 const webtorrent = new WebTorrent({
-	uploadLimit: 0.5 * 1024 * 1024,
+	uploadLimit: 0.25 * 1024 * 1024,
 } as any);
 const maxStreams = 10;
 const streams: Stream[] = [];
@@ -33,7 +33,13 @@ webtorrent.on("error", (err) => {
 });
 
 setInterval(() => {
-	if (streams.length) console.log("Speed:", Math.round(webtorrent.downloadSpeed / 1024), "KiB/s");
+	if (streams.length)
+		console.log(
+			"DL:",
+			Math.round(webtorrent.downloadSpeed / 1024),
+			"KiB/s",
+			"UP:", Math.round(webtorrent.uploadSpeed / 1024), "KiB/s"
+		);
 }, 10000);
 
 export function init(req: express.Request, res: express.Response): void {
@@ -88,6 +94,7 @@ export function init(req: express.Request, res: express.Response): void {
 
 		const logInterval = setInterval(() => {
 			console.log("Downloaded", Math.floor(torrent.downloaded / torrent.length * 100), "%");
+			if (torrent.downloaded === torrent.length) clearInterval(logInterval);
 		}, 60000);
 
 		function cleanup(): void {
@@ -115,9 +122,7 @@ export function init(req: express.Request, res: express.Response): void {
 
 		function updateTimeout(): void {
 			clearTimeout(timeout);
-			timeout = setTimeout(() => {
-				cleanup();
-			}, 10000);
+			timeout = setTimeout(cleanup, 15 * 60 * 1000);
 		}
 
 		updateTimeout();
@@ -146,7 +151,6 @@ function redirect(res: express.Response, stream: Stream, season?: string, episod
 
 	const index = findFile(stream.torrent, season, episode);
 	if (index === -1) {
-		console.error("File not found");
 		res.status(404).end();
 		return;
 	}
@@ -178,7 +182,7 @@ export function proxy(req: express.Request, res: express.Response): void {
 	const id = Number(req.params.id);
 	const stream = streams.find((s) => s.id === id);
 	if (!stream) {
-		res.status(404).end("stream not found");
+		res.sendStatus(404);
 		return;
 	}
 	const path = `http://127.0.0.1:${stream.port}${req.path}`;
@@ -194,7 +198,7 @@ export function proxy(req: express.Request, res: express.Response): void {
 		});
 		streamRes.pipe(res, { end: true });
 		streamRes.on("close", () => {
-			console.log("Transferred", Math.round(bytes / 1024 / 1024), "MiB", `(${Math.floor(bytes / Number(streamRes.headers["content-length"]))}%)`);
+			console.log("Transferred", Math.round(bytes / 1024 / 1024), "MiB");
 		});
 
 		req.on("close", () => {

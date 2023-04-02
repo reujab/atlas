@@ -7,22 +7,23 @@ snap install ubuntu-frame
 snap install --dangerous atlas.snap
 cp update/update.sh /usr/local/bin
 cp update/update.{service,timer} /etc/systemd/system
-cp .env /
 
 # configure ntp
 systemctl enable systemd-timesyncd
 timedatectl set-ntp true
 
 # configure grub
-sed -i 's/TIMEOUT=5/TIMEOUT=0/g' /etc/default/grub
-sed -i 's/LINUX_DEFAULT=.*/LINUX_DEFAULT="quiet splash vt.cur_default=1"/' /etc/default/grub
-cat >> /etc/default/grub << EOF
+if [[ grep echo /etc/default/grub > /dev/null ]]; then
+	sed -i 's/TIMEOUT=5/TIMEOUT=0/g' /etc/default/grub
+	sed -i 's/LINUX_DEFAULT=.*/LINUX_DEFAULT="quiet splash vt.cur_default=1"/' /etc/default/grub
+	cat >> /etc/default/grub << EOF
 GRUB_RECORDFAIL_TIMEOUT=0
 GRUB_GFXMODE=1920x1080
 GRUB_GFXPAYLOAD_LINUX=keep
 EOF
-update-grub
-sed -i 's/^\s*echo.*//g' /boot/grub/grub.cfg
+	update-grub
+	sed -i 's/^\s*echo.*//g' /boot/grub/grub.cfg
+fi
 
 # configure plymouth
 plymouth-set-default-theme -R tribar
@@ -53,5 +54,5 @@ systemctl restart snap.atlas.frontend
 # disable tty1
 systemctl disable getty@tty1
 
-rm -rf *.snap update .env
+rm -rf *.snap update
 echo Success
