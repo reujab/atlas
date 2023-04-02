@@ -88,7 +88,7 @@ export function cacheTitles(titles: Title[], delay?: boolean): Title[] {
 		function setSrc(): void {
 			title.posterImg.src = `https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}`;
 		}
-		if (delay === undefined || delay === true) {
+		if (i > 6 && (delay === undefined || delay === true)) {
 			setTimeout(setSrc, i * 100);
 		} else {
 			setSrc();
