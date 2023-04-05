@@ -1,7 +1,7 @@
 set -e
 
 # install dependencies
-apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl
+apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest
 systemctl start systemd-timesyncd
 snap install ubuntu-frame
 snap install --dangerous atlas.snap
