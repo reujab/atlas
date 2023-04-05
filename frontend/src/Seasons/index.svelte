@@ -219,7 +219,7 @@
 											style="width: {Number(
 												$progress[title.type][
 													`${title.id}-${season.number}-${episode.number}`
-												] || 0
+												]?.[0] || 0
 											) * 100}%"
 											class="bg-red-500 h-full"
 										/>

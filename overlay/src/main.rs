@@ -389,5 +389,5 @@ fn main() {
         .output()
         .unwrap();
 
-    let _ = send_command(vec!["quit-watch-later".into()], &mut stream);
+    let _ = send_command(vec!["quit".into()], &mut stream);
 }

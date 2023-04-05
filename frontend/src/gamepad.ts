@@ -41,7 +41,7 @@ listener.on("gamepad:axis", ({ detail }: any) => {
 	}
 
 	dispatchButton();
-	axis.interval = setInterval(dispatchButton, 300);
+	axis.interval = setInterval(dispatchButton, 400);
 });
 
 listener.on("gamepad:button", ({ detail }: any) => {
@@ -66,7 +66,7 @@ listener.on("gamepad:button", ({ detail }: any) => {
 		case "right":
 			clearInterval(buttonInterval);
 			if (detail.pressed) {
-				buttonInterval = setInterval(dispatchButton, 300);
+				buttonInterval = setInterval(dispatchButton, 400);
 			}
 	}
 });
@@ -82,7 +82,7 @@ onkeydown = (e) => {
 		clearInterval(buttonInterval);
 		buttonInterval = setInterval(() => {
 			dispatch(button);
-		}, 300);
+		}, 400);
 	}
 };
 

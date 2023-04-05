@@ -35,7 +35,7 @@
 	}
 
 	mpv.on("exit", (code) => {
-		if (code !== 4) {
+		if (![0, 4].includes(code)) {
 			error(`mpv exit code ${code}`);
 		}
 
