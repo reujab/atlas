@@ -24,7 +24,7 @@ app.get("/search", search);
 
 app.get("/:type(movie|tv)/magnet", async (req, res) => {
 	const type = req.params.type;
-	const query = String(req.query.q);
+	const query = req.query.q;
 	const season = Number(req.query.s);
 	const episode = Number(req.query.e);
 
@@ -35,7 +35,7 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 
 	let sources;
 	if (type === "movie") {
-		sources = await searchMagnets(query, type);
+		sources = await searchMagnets(query as string, type);
 	} else {
 		sources = (
 			await Promise.all([
@@ -84,7 +84,9 @@ app.get("/:type(movie|tv)/magnet", async (req, res) => {
 
 app.get("/init", stream.init);
 
-app.use("/stream/:id(\\d+)/", stream.proxy);
+app.delete("/stream/:magnetBase64", stream.deleteStream);
+
+app.use("/stream/:magnetBase64/", stream.proxy);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 

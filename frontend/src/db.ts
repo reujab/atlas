@@ -58,6 +58,7 @@ export interface Magnet {
 export interface StreamInfo {
 	video: string;
 	subs: null | string;
+	delete: string;
 }
 
 const host = process.env.SEEDBOX_HOST;
@@ -138,6 +139,7 @@ export async function initStream(magnet: string, s?: number, e?: number): Promis
 	return {
 		video: `${host}${info.video}?key=${key}`,
 		subs: info.subs && `${host}${info.subs}?key=${key}`,
+		delete: `${host}${info.delete}?key=${key}`,
 	};
 }
 

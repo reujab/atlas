@@ -220,9 +220,7 @@ rules:
   "@typescript-eslint/func-call-spacing": warn
   func-name-matching: off
   func-names: warn
-  func-style:
-    - warn
-    - declaration
+  func-style: off
   function-paren-newline:
     - warn
     - consistent

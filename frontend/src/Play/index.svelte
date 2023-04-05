@@ -10,6 +10,7 @@
 	import { onDestroy } from "svelte";
 	import { params } from "svelte-hash-router";
 	import { subscribe, unsubscribe } from "../gamepad";
+	import { get } from "..";
 
 	const type: TitleType = $params.type;
 	const id = Number($params.id);
@@ -64,6 +65,10 @@
 			if (code !== 4) {
 				error("mpv was unable to play file");
 			}
+
+			get(streamInfo.delete, {
+				method: "DELETE",
+			});
 		});
 	});
 
