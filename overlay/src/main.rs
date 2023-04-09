@@ -269,7 +269,7 @@ impl SimpleComponent for App {
         };
         let widgets = view_output!();
 
-        relm4::set_global_css(include_bytes!("styles.css"));
+        relm4::set_global_css(include_str!("styles.css"));
 
         let sender_clone = sender.clone();
         let stream_clone = stream.clone();
