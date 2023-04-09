@@ -1,4 +1,4 @@
-set -e
+set -ex
 
 # install dependencies
 apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest
@@ -13,7 +13,7 @@ systemctl enable systemd-timesyncd
 timedatectl set-ntp true
 
 # configure grub
-if [[ grep echo /etc/default/grub > /dev/null ]]; then
+if grep echo /etc/default/grub > /dev/null; then
 	sed -i 's/TIMEOUT=5/TIMEOUT=0/g' /etc/default/grub
 	sed -i 's/LINUX_DEFAULT=.*/LINUX_DEFAULT="quiet splash vt.cur_default=1"/' /etc/default/grub
 	cat >> /etc/default/grub << EOF
