@@ -5,7 +5,7 @@ if grep -q "Pi 4" /proc/cpuinfo; then
 fi
 
 . $SNAP/.env
-export SEEDBOX_HOST SEEDBOX_PORT SEEDBOX_KEY
+export SEEDBOX_HOST SEEDBOX_KEY AUDIO_DEVICE
 
 exec $SNAP/frontend/frontend \
 	--enable-features=UseOzonePlatform \
