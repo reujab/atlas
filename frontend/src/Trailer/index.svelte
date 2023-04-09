@@ -15,7 +15,9 @@
 	const mpv = childProcess.spawn(
 		"mpv",
 		[
-			"--audio-device=alsa/plughw:CARD=PCH,DEV=3",
+			`--audio-device=${
+				process.env.AUDIO_DEVICE || "alsa/plughw:CARD=PCH,DEV=3"
+			}`,
 			"--input-ipc-server=/tmp/mpv",
 			"--hwdec=vaapi",
 			"--vo=gpu",
