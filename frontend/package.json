@@ -8,7 +8,7 @@
     "dev": "webpack watch -c webpack.dev & tailwindcss -o http/index.css -w & sleep 10; npm run start; kill %1 %2",
     "build": "webpack build -c webpack.prod & tailwindcss -o http/index.css -m & wait",
     "start": ". ../.env; export SEEDBOX_HOST SEEDBOX_KEY; electron . --enable-features=UseOzonePlatform --ozone-platform=wayland",
-    "package": "npm run build && electron-packager . --overwrite --platform=linux --output=release-build --prune=true --out=dist"
+    "package": "npm run build && electron-packager . --overwrite --platform=linux --output=release-build --prune=true --out=dist --ignore=node_modules"
   },
   "author": "reujab <reujab@gmail.com>",
   "license": "Unlicense",
