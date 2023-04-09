@@ -28,6 +28,10 @@ fi
 # configure plymouth
 plymouth-set-default-theme -R tribar
 
+# configure network manager
+systemctl enable NetworkManager
+systemctl start NetworkManager
+
 # configure atlas
 snap connect atlas:alsa
 snap connect atlas:hardware-observe
