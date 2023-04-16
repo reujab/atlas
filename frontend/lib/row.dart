@@ -48,6 +48,7 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       widget.onRowHeight((context.findRenderObject() as RenderBox).size.height);
       scroll();
     });
