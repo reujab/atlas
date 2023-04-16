@@ -1,4 +1,5 @@
 import "const.dart";
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "package:flutter/services.dart";
@@ -25,6 +26,8 @@ class _TitlesState extends State<Titles> {
   int index = 0;
 
   double rowHeight = 0;
+
+  Timer? inputTimer;
 
   RowData? get row {
     return rows?[index];
@@ -122,10 +125,24 @@ class _TitlesState extends State<Titles> {
   }
 
   onKeyEvent(KeyEvent event) {
-    final rows = this.rows, row = this.row;
-    if (event is! KeyDownEvent || rows == null || row == null) return;
+    if (event is! KeyRepeatEvent) {
+      inputTimer?.cancel();
+      inputTimer = null;
+    }
 
-    switch (event.logicalKey.keyLabel) {
+    if (event is! KeyDownEvent) return;
+
+    inputTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+      handleKey(event.logicalKey.keyLabel);
+    });
+
+    handleKey(event.logicalKey.keyLabel);
+  }
+
+  void handleKey(String key) {
+    final rows = this.rows, row = this.row;
+    if (rows == null || row == null) return;
+    switch (key) {
       case "Arrow Up":
         setState(() {
           if (index > 0) {
