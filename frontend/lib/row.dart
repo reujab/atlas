@@ -126,7 +126,7 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
   void scroll() {
     scrollController.animateTo(
       widget.index * getImgWidthScaled(),
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }

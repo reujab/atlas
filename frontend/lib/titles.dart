@@ -6,6 +6,7 @@ import "package:flutter/widgets.dart" hide Title, Row;
 import "package:http/http.dart" as http;
 import "row.dart";
 import "row_data.dart";
+import "title.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key});
@@ -27,6 +28,10 @@ class _TitlesState extends State<Titles> {
 
   RowData? get row {
     return rows?[index];
+  }
+
+  Title? get title {
+    return row?.titles[row!.index];
   }
 
   @override
@@ -53,8 +58,8 @@ class _TitlesState extends State<Titles> {
 
   @override
   Widget build(BuildContext context) {
-    final rows = this.rows;
-    if (rows == null) return const Text("loading...");
+    final rows = this.rows, title = this.title;
+    if (rows == null || title == null) return const Text("loading...");
 
     return KeyboardListener(
       focusNode: focusNode,
@@ -70,9 +75,29 @@ class _TitlesState extends State<Titles> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: mainPadX),
         child: Column(children: [
-          const Align(
-            alignment: Alignment.topLeft,
-            child: Text("Movies", style: TextStyle(fontSize: 96)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                "Movies",
+                style: TextStyle(fontSize: 96),
+              ),
+              Text(
+                title.genres.join(" • "),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                // minLines: 3
+                "${title.overview}\n\n",
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
           Expanded(
             child: ListView(
@@ -145,7 +170,7 @@ class _TitlesState extends State<Titles> {
   void scroll() {
     scrollController.animateTo(
       rowHeight * index.toDouble(),
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
   }
