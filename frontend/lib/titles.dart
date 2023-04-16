@@ -40,24 +40,24 @@ class Titles extends StatefulWidget {
 
 class _TitlesState extends State<Titles> {
   int index = 0;
-  int active = 0;
 
   final focusNode = FocusNode();
 
+  final rows = [
+    RowData(name: "Trending", titles: List.from(titles)..addAll(titles)),
+    RowData(
+      name: "Top rated",
+      titles: List.from(titles.reversed.toList())
+        ..addAll(titles.reversed.toList()),
+    ),
+  ];
+
+  RowData get row {
+    return rows[index];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final rows = [
-      Row(
-          name: "Trending",
-          titles: List.from(titles)..addAll(titles),
-          index: index == 0 ? active : -1),
-      Row(
-          name: "Top rated",
-          titles: List.from(titles.reversed.toList())
-            ..addAll(titles.reversed.toList()),
-          index: index == 1 ? active : -1),
-    ];
-
     return KeyboardListener(
       focusNode: focusNode,
       autofocus: true,
@@ -78,7 +78,15 @@ class _TitlesState extends State<Titles> {
           ),
           Expanded(
             child: ListView(
-              children: rows,
+              children: [
+                for (var i = 0; i < rows.length; i++)
+                  Row(
+                    index: rows[i].index,
+                    name: rows[i].name,
+                    titles: rows[i].titles,
+                    active: i == index,
+                  )
+              ],
             ),
           ),
         ]),
@@ -110,22 +118,30 @@ class _TitlesState extends State<Titles> {
         break;
       case "Arrow Left":
         setState(() {
-          if (active > 0) {
-            active--;
+          if (row.index > 0) {
+            row.index--;
           } else {
-            active = titles.length * 2 - 1;
+            row.index = titles.length * 2 - 1;
           }
         });
         break;
       case "Arrow Right":
         setState(() {
-          if (active < titles.length * 2 - 1) {
-            active++;
+          if (row.index < titles.length * 2 - 1) {
+            row.index++;
           } else {
-            active = 0;
+            row.index = 0;
           }
         });
         break;
     }
   }
+}
+
+class RowData {
+  RowData({required this.name, required this.titles, this.index = 0});
+
+  final String name;
+  final List<Title> titles;
+  int index;
 }

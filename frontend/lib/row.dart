@@ -9,11 +9,13 @@ class Row extends StatefulWidget {
     super.key,
     required this.name,
     required this.titles,
+    required this.active,
     required this.index,
   });
 
   final String name;
   final List<Title> titles;
+  final bool active;
   final int index;
 
   @override
@@ -43,11 +45,12 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Row oldRow) {
     super.didUpdateWidget(oldRow);
-    if (oldRow.index == widget.index) return;
-    if (oldRow.index != -1) animate(oldRow.index, 1);
-    if (widget.index != -1) {
-      animate(widget.index, scale);
+    if (oldRow.index != widget.index) {
+      animate(oldRow.index, 1);
       scroll();
+    }
+    if (oldRow.index != widget.index || oldRow.active != widget.active) {
+      animate(widget.index, widget.active ? scale : 1);
     }
   }
 
