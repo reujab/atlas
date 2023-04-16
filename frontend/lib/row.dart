@@ -11,18 +11,24 @@ class Row extends StatefulWidget {
     required this.titles,
     required this.active,
     required this.index,
+    required this.onRowHeight,
   });
 
   final String name;
   final List<Title> titles;
   final bool active;
   final int index;
+  final Function(double) onRowHeight;
 
   @override
   State<Row> createState() => _RowState();
 }
 
 class _RowState extends State<Row> with TickerProviderStateMixin {
+  static final _curve = CurveTween(curve: Curves.ease);
+
+  final scrollController = ScrollController();
+
   late final controllers = List.generate(
     widget.titles.length,
     (i) => AnimationController(
@@ -31,16 +37,21 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
     )..animateTo(1),
   );
 
-  static final _curve = CurveTween(curve: Curves.ease);
-
   late final animations = List.generate(
     widget.titles.length,
     (i) => controllers[i]
         .drive(_curve)
-        .drive(Tween<double>(begin: 0, end: i == widget.index ? 1.1 : 1)),
+        .drive(Tween<double>(begin: 0, end: i == widget.index ? scale : 1)),
   );
 
-  final scrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onRowHeight((context.findRenderObject() as RenderBox).size.height);
+      scroll();
+    });
+  }
 
   @override
   void didUpdateWidget(Row oldRow) {
@@ -63,14 +74,6 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
     controllers[index].animateTo(1);
   }
 
-  void scroll() {
-    scrollController.animateTo(
-      widget.index * getImgWidthScaled(),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.ease,
-    );
-  }
-
   double getImgWidthScaled() {
     return ((MediaQuery.of(context).size.width - mainPadX * 2) / visibleTitles);
   }
@@ -88,7 +91,11 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
           padding: EdgeInsets.symmetric(vertical: imgPadY, horizontal: imgPadX),
           child: ScaleTransition(
             scale: animations[i],
-            child: Image(image: widget.titles[i].img, width: imgWidth),
+            child: Image(
+              image: NetworkImage(
+                  "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.titles[i].poster}"),
+              width: imgWidth,
+            ),
           ),
         )
     ];
@@ -114,5 +121,21 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
         ),
       ),
     ]);
+  }
+
+  void scroll() {
+    scrollController.animateTo(
+      widget.index * getImgWidthScaled(),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.ease,
+    );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in controllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 }

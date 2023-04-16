@@ -1,35 +1,11 @@
 import "const.dart";
+import "dart:convert";
+import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title, Row;
+import "package:http/http.dart" as http;
 import "row.dart";
-import "title.dart";
-
-const List<Title> titles = [
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/A3ZbZsmsvNGdprRi2lKgGEeVLEH.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/s1VzVhXlqsevi8zeCMG9A16nEUf.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/9JBEPLTPSm0d1mbEcLxULjJq9Eh.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/gOnmaxHo0412UVr1QM5Nekv1xPi.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/gbGHezV6yrhua0KfAgwrknSOiIY.jpg")),
-  Title(
-      img: NetworkImage(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2/rzRb63TldOKdKydCvWJM8B6EkPM.jpg")),
-];
+import "row_data.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key});
@@ -39,25 +15,47 @@ class Titles extends StatefulWidget {
 }
 
 class _TitlesState extends State<Titles> {
-  int index = 0;
-
   final focusNode = FocusNode();
 
-  final rows = [
-    RowData(name: "Trending", titles: List.from(titles)..addAll(titles)),
-    RowData(
-      name: "Top rated",
-      titles: List.from(titles.reversed.toList())
-        ..addAll(titles.reversed.toList()),
-    ),
-  ];
+  final scrollController = ScrollController();
 
-  RowData get row {
-    return rows[index];
+  List<RowData>? rows;
+
+  int index = 0;
+
+  double rowHeight = 0;
+
+  RowData? get row {
+    return rows?[index];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initRows();
+  }
+
+  Future<void> initRows() async {
+    var client = http.Client();
+    try {
+      var res = await client.get(Uri.parse(
+          "${Platform.environment["SEEDBOX_HOST"]}/movie/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
+      List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+      setState(() {
+        rows = json.map((j) => RowData.fromJson(j)).toList();
+      });
+    } catch (err) {
+      print("err $err");
+    } finally {
+      client.close();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final rows = this.rows;
+    if (rows == null) return const Text("loading...");
+
     return KeyboardListener(
       focusNode: focusNode,
       autofocus: true,
@@ -78,6 +76,7 @@ class _TitlesState extends State<Titles> {
           ),
           Expanded(
             child: ListView(
+              controller: scrollController,
               children: [
                 for (var i = 0; i < rows.length; i++)
                   Row(
@@ -85,6 +84,9 @@ class _TitlesState extends State<Titles> {
                     name: rows[i].name,
                     titles: rows[i].titles,
                     active: i == index,
+                    onRowHeight: (double height) {
+                      rowHeight = height;
+                    },
                   )
               ],
             ),
@@ -95,7 +97,8 @@ class _TitlesState extends State<Titles> {
   }
 
   onKeyEvent(KeyEvent event) {
-    if (event is! KeyDownEvent) return;
+    final rows = this.rows, row = this.row;
+    if (event is! KeyDownEvent || rows == null || row == null) return;
 
     switch (event.logicalKey.keyLabel) {
       case "Arrow Up":
@@ -103,31 +106,33 @@ class _TitlesState extends State<Titles> {
           if (index > 0) {
             index--;
           } else {
-            index = 1;
+            index = rows.length - 1;
           }
         });
+        scroll();
         break;
       case "Arrow Down":
         setState(() {
-          if (index < 1) {
+          if (index < rows.length - 1) {
             index++;
           } else {
             index = 0;
           }
         });
+        scroll();
         break;
       case "Arrow Left":
         setState(() {
           if (row.index > 0) {
             row.index--;
           } else {
-            row.index = titles.length * 2 - 1;
+            row.index = row.titles.length - 1;
           }
         });
         break;
       case "Arrow Right":
         setState(() {
-          if (row.index < titles.length * 2 - 1) {
+          if (row.index < row.titles.length - 1) {
             row.index++;
           } else {
             row.index = 0;
@@ -136,12 +141,12 @@ class _TitlesState extends State<Titles> {
         break;
     }
   }
-}
 
-class RowData {
-  RowData({required this.name, required this.titles, this.index = 0});
-
-  final String name;
-  final List<Title> titles;
-  int index;
+  void scroll() {
+    scrollController.animateTo(
+      rowHeight * index.toDouble(),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.ease,
+    );
+  }
 }
