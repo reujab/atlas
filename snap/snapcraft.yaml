@@ -14,20 +14,19 @@ apps:
     restart-delay: 1s
     command-chain:
       - bin/wayland-launch
-      - bin/dbus-launch
     command: usr/bin/wrapper
     plugs:
       - opengl
       - wayland
-      - browser-support
-      - hardware-observe
+      # - browser-support
+      # - hardware-observe
       - network
-      - network-bind
-      - process-control
-      - joystick
-      - network-manager
-      - alsa
-      - shutdown
+      # - network-bind
+      # - process-control
+      # - joystick
+      # - network-manager
+      # - alsa
+      # - shutdown
 
   overlay:
     command: bin/atlas-overlay
@@ -72,30 +71,27 @@ parts:
   frontend:
     plugin: nil
     source: frontend
-    override-build: |
-      set +u # core20 base does not allow unbound variables !
-      # workaround for build.snapcraft.io builds
-      # https://bugs.launchpad.net/bugs/1886861
-      if [ -n "$http_proxy" ]; then
-        export ELECTRON_GET_USE_PROXY=1
-        export GLOBAL_AGENT_HTTP_PROXY="${http_proxy}"
-        export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy}"
-      fi
-
-      npm i
-      npm run package
-      cp -a dist/frontend-linux-* $SNAPCRAFT_PART_INSTALL/frontend
-      chmod a+rx $SNAPCRAFT_PART_INSTALL/frontend
     build-snaps:
-      - node/16/stable
+      - flutter/latest/stable
+    build-environment:
+      - C_INCLUDE_PATH: /snap/flutter/current/usr/include
+      - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:/snap/flutter/current/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
+      - PKG_CONFIG_PATH: $PKG_CONFIG_PATH:/snap/flutter/current/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig
+      - XDG_DATA_DIRS: /snap/flutter/current/usr/share:$XDG_DATA_DIRS
+    override-build: |
+      set -eux
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin/lib
+      flutter channel stable
+      flutter upgrade
+      flutter config --enable-linux-desktop
+      flutter doctor
+      flutter pub get
+      flutter build linux --release -v
+      cp -r build/linux/*/release/bundle/* $SNAPCRAFT_PART_INSTALL/bin
     stage-packages:
-      - libnspr4
-      - libnss3
-      - libatk-bridge2.0-0
-      - libcups2
       - libgtk-3-0
+      - libgl1
       - libasound2
-      - libffi7
       - network-manager
       - mpv
       - yt-dlp
@@ -175,14 +171,6 @@ parts:
       mkdir -p ${SNAPCRAFT_PART_INSTALL}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/
       /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/libgtk-3-0/gtk-query-immodules-3.0 > ${SNAPCRAFT_PART_INSTALL}/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
 
-  dbus:
-    plugin: dump
-    source: dbus
-    override-prime: |
-      snapcraftctl prime
-      # replace the SNAP_NAME placeholder with our actual project name
-      sed -i "s/SNAP_NAME/$SNAPCRAFT_PROJECT_NAME/" $SNAPCRAFT_PRIME/etc/dbus-1/session.conf
-
   # Some utility scripts for setting up the Wayland environment
   wayland-launch:
     plugin: dump
@@ -206,7 +194,6 @@ parts:
       - overlay
       - wrapper
       - wayland-launch
-      - dbus
       - gsettings+pixbuf
       - immodules
     build-snaps: [ mesa-core20 ]
@@ -216,9 +203,7 @@ parts:
       find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/{} \;
       rm -fr "$SNAPCRAFT_PRIME/usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri"
       cd "$SNAPCRAFT_PRIME/usr/share/"
-      rm -rf bug drirc.d glvnd libdrm lintian man
-      rm -rf applications apport bash-completion dbus-1 doc-base doc gtk-doc\
-             help pkgconfig libthai metainfo themes thumbnailers xml
+      rm -rf bug drirc.d glvnd libdrm lintian man alsa bash-completion dbus-1 help kconf_update kservices5 libinput locale openal pkgconfig applications doc kf5 kservicetypes5 libthai metainfo perl qlogging-categories5 thumbnailers xml apport config.kcfg doc-base GConf gnupg info knotifications5 kxmlgui5 libwacom themes sounds
       cd $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
       rm -rf libLLVM* libGLX_mesa* libpulse-simple* libjacket* libtheora* libvulkan* libwayland-server* libdconf*
       echo $SNAPCRAFT_PROJECT_VERSION > $SNAPCRAFT_PRIME/VERSION
@@ -253,5 +238,4 @@ layout:
 
 architectures:
   - build-on: amd64
-  - build-on: armhf
   - build-on: arm64
