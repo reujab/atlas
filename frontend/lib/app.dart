@@ -1,5 +1,16 @@
 import "package:flutter/widgets.dart";
+import "package:go_router/go_router.dart";
 import "titles.dart";
+
+final router = GoRouter(
+  routes: [
+    GoRoute(
+      path: "/titles",
+      builder: (BuildContext context, GoRouterState state) => const Titles(),
+    ),
+  ],
+  initialLocation: "/titles",
+);
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -13,17 +24,10 @@ class App extends StatelessWidget {
         fontSize: 48,
         fontWeight: FontWeight.w200,
       ),
-      child: WidgetsApp(
+      child: WidgetsApp.router(
         title: "Atlas",
-        color: const Color(0xFF000000),
-        home: const Titles(),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-            PageRouteBuilder<T>(
-          settings: settings,
-          pageBuilder: (BuildContext context, Animation<double> _,
-                  Animation<double> __) =>
-              builder(context),
-        ),
+        color: const Color(0x00000000),
+        routerConfig: router,
       ),
     );
   }
