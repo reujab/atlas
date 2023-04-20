@@ -4,6 +4,7 @@ import "dart:convert";
 import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:http/http.dart" as http;
 import "row_data.dart";
 import "title.dart";
@@ -81,16 +82,21 @@ class _TitlesState extends State<Titles> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                "Movies",
-                style: TextStyle(fontSize: 96),
-              ),
+              Row(children: const [
+                FaIcon(FontAwesomeIcons.arrowLeft,
+                    size: 56, color: Color(0xFFEEEEEE)),
+                SizedBox(width: 32),
+                Text("Movies", style: TextStyle(fontSize: 96)),
+                Spacer(),
+                FaIcon(FontAwesomeIcons.magnifyingGlass,
+                    size: 56, color: Color(0xFFEEEEEE)),
+              ]),
               Text(
                 title.genres.join(" • "),
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 // minLines: 3
                 "${title.overview}\n\n",
@@ -99,7 +105,7 @@ class _TitlesState extends State<Titles> {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
             ],
           ),
           Expanded(
@@ -115,7 +121,8 @@ class _TitlesState extends State<Titles> {
                     onRowHeight: (double height) {
                       rowHeight = height;
                     },
-                  )
+                  ),
+                SizedBox(height: MediaQuery.of(context).size.height)
               ],
             ),
           ),
