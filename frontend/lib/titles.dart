@@ -74,70 +74,52 @@ class _TitlesState extends State<Titles> {
   @override
   Widget build(BuildContext context) {
     final rows = this.rows, title = this.title;
-    if (rows == null || title == null) return const Text("loading...");
+    if (rows == null || title == null) {
+      return const Background(child: Text("loading..."));
+    }
 
     return KeyboardListener(
       focusNode: focusNode,
       autofocus: true,
       onKeyEvent: onKeyEvent,
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(-0.2, -1),
-            end: Alignment(.2, 1),
-            colors: [Color(0xFF444444), Color(0xFF1A1A1A)],
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: mainPadX),
-        child: Column(children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(children: const [
-                FaIcon(FontAwesomeIcons.arrowLeft,
-                    size: 56, color: Color(0xFFEEEEEE)),
-                SizedBox(width: 32),
-                Text("Movies", style: TextStyle(fontSize: 96)),
-                Spacer(),
-                FaIcon(FontAwesomeIcons.magnifyingGlass,
-                    size: 56, color: Color(0xFFEEEEEE)),
-              ]),
-              Text(
-                title.genres.join(" • "),
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                // minLines: 3
-                "${title.overview}\n\n",
-                style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-          Expanded(
-            child: ListView(
-              controller: scrollController,
-              children: [
-                for (var i = 0; i < rows.length; i++)
-                  TitlesRow(
-                    index: rows[i].index,
-                    name: rows[i].name,
-                    titles: rows[i].titles,
-                    active: i == index,
-                    onRowHeight: (double height) {
-                      rowHeight = height;
-                    },
-                  ),
-                SizedBox(height: MediaQuery.of(context).size.height)
-              ],
+      child: Background(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Header("Movies", search: true),
+            Text(
+              title.genres.join(" • "),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
             ),
-          ),
-        ]),
+            const SizedBox(height: 8),
+            Text(
+              // minLines: 3
+              "${title.overview}\n\n",
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  for (var i = 0; i < rows.length; i++)
+                    TitlesRow(
+                      index: rows[i].index,
+                      name: rows[i].name,
+                      titles: rows[i].titles,
+                      active: i == index,
+                      onRowHeight: (double height) {
+                        rowHeight = height;
+                      },
+                    ),
+                  SizedBox(height: MediaQuery.of(context).size.height)
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -150,9 +132,12 @@ class _TitlesState extends State<Titles> {
 
     if (event is! KeyDownEvent) return;
 
-    inputTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
-      handleKey(event.logicalKey.keyLabel);
-    });
+    // it appears the keyup doesn't register for the enter key
+    if (event.logicalKey.keyLabel != "Enter") {
+      inputTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+        handleKey(event.logicalKey.keyLabel);
+      });
+    }
 
     handleKey(event.logicalKey.keyLabel);
   }
@@ -199,7 +184,12 @@ class _TitlesState extends State<Titles> {
           }
         });
         break;
+      case "Enter":
+        router.push("/title");
+        break;
     }
+
+    TitleDetails.title = title;
   }
 
   void scroll() {
