@@ -1,14 +1,16 @@
-import "const.dart";
 import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
-import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:frontend/header.dart";
+import "package:frontend/title_details.dart";
+import "router.dart" as router;
 import "package:http/http.dart" as http;
 import "row_data.dart";
 import "title.dart";
 import "titles_row.dart";
+import "background.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key});
@@ -18,6 +20,8 @@ class Titles extends StatefulWidget {
 }
 
 class _TitlesState extends State<Titles> {
+  static List<RowData>? rowsCache;
+
   final focusNode = FocusNode();
 
   final scrollController = ScrollController();
@@ -45,14 +49,21 @@ class _TitlesState extends State<Titles> {
   }
 
   Future<void> initRows() async {
+    if (rowsCache != null) {
+      rows = rowsCache;
+      return;
+    }
+
     var client = http.Client();
     try {
       var res = await client.get(Uri.parse(
           "${Platform.environment["SEEDBOX_HOST"]}/movie/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
       List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+      rowsCache = json.map((j) => RowData.fromJson(j)).toList();
       setState(() {
-        rows = json.map((j) => RowData.fromJson(j)).toList();
+        rows = rowsCache;
       });
+      rowsCache = rows;
     } catch (err) {
       print("err $err");
     } finally {

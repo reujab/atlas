@@ -1,16 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:go_router/go_router.dart";
-import "titles.dart";
-
-final router = GoRouter(
-  routes: [
-    GoRoute(
-      path: "/titles",
-      builder: (BuildContext context, GoRouterState state) => const Titles(),
-    ),
-  ],
-  initialLocation: "/titles",
-);
+import "router.dart";
 
 class App extends StatelessWidget {
   const App({super.key});
