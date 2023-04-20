@@ -213,6 +213,7 @@ class _TitlesState extends State<Titles> {
   @override
   void dispose() {
     inputTimer?.cancel();
+    focusNode.dispose();
     scrollController.dispose();
     super.dispose();
   }
