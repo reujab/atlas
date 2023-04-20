@@ -145,6 +145,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    scrollController.dispose();
     for (var controller in controllers) {
       controller.dispose();
     }

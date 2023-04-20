@@ -198,4 +198,11 @@ class _TitlesState extends State<Titles> {
       curve: Curves.ease,
     );
   }
+
+  @override
+  void dispose() {
+    inputTimer?.cancel();
+    scrollController.dispose();
+    super.dispose();
+  }
 }
