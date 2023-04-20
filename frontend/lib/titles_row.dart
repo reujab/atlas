@@ -1,11 +1,11 @@
 import "const.dart";
-import "package:flutter/widgets.dart" hide Title, Row;
+import "package:flutter/widgets.dart" hide Title;
 import "title.dart";
 
 const visibleTitles = 6, scale = 1.1;
 
-class Row extends StatefulWidget {
-  const Row({
+class TitlesRow extends StatefulWidget {
+  const TitlesRow({
     super.key,
     required this.name,
     required this.titles,
@@ -21,10 +21,10 @@ class Row extends StatefulWidget {
   final Function(double) onRowHeight;
 
   @override
-  State<Row> createState() => _RowState();
+  State<TitlesRow> createState() => _TitlesRowState();
 }
 
-class _RowState extends State<Row> with TickerProviderStateMixin {
+class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   static final _curve = CurveTween(curve: Curves.ease);
 
   final scrollController = ScrollController();
@@ -39,9 +39,8 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
 
   late final animations = List.generate(
     widget.titles.length,
-    (i) => controllers[i]
-        .drive(_curve)
-        .drive(Tween<double>(begin: 0, end: i == widget.index ? scale : 1)),
+    (i) => controllers[i].drive(_curve).drive(Tween<double>(
+        begin: 0, end: widget.active && i == widget.index ? scale : 1)),
   );
 
   @override
@@ -55,7 +54,7 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(Row oldRow) {
+  void didUpdateWidget(TitlesRow oldRow) {
     super.didUpdateWidget(oldRow);
     if (oldRow.index != widget.index) {
       animate(oldRow.index, 1);
@@ -82,23 +81,35 @@ class _RowState extends State<Row> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final imgWidthScaled = getImgWidthScaled();
-    final imgPadX = imgWidthScaled * (scale - 1) / 2;
+    final imgPadX = imgWidthScaled * (scale - 1) / 2 + 4;
     final imgWidth = imgWidthScaled - imgPadX * 2;
     final imgHeight = 450 / 300 * imgWidth;
-    final imgPadY = imgHeight * (scale - 1) / 2;
+    final imgPadY = imgHeight * (scale - 1) / 2 + 12;
     final posters = [
       for (int i = 0; i < widget.titles.length; i++)
         Padding(
           padding: EdgeInsets.symmetric(vertical: imgPadY, horizontal: imgPadX),
           child: ScaleTransition(
             scale: animations[i],
-            child: Image(
-              image: NetworkImage(
-                  "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.titles[i].poster}"),
-              width: imgWidth,
+            child: Container(
+              decoration: const BoxDecoration(boxShadow: [
+                BoxShadow(
+                  blurRadius: 3,
+                  color: Color(0x77555555),
+                  spreadRadius: 3,
+                )
+              ]),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                child: Image(
+                  image: NetworkImage(
+                      "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.titles[i].poster}"),
+                  width: imgWidth,
+                ),
+              ),
             ),
           ),
-        )
+        ),
     ];
 
     return Column(children: [

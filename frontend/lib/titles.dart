@@ -3,11 +3,11 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "package:flutter/services.dart";
-import "package:flutter/widgets.dart" hide Title, Row;
+import "package:flutter/widgets.dart" hide Title;
 import "package:http/http.dart" as http;
-import "row.dart";
 import "row_data.dart";
 import "title.dart";
+import "titles_row.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key});
@@ -107,7 +107,7 @@ class _TitlesState extends State<Titles> {
               controller: scrollController,
               children: [
                 for (var i = 0; i < rows.length; i++)
-                  Row(
+                  TitlesRow(
                     index: rows[i].index,
                     name: rows[i].name,
                     titles: rows[i].titles,
