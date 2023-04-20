@@ -2,7 +2,7 @@ import "const.dart";
 import "package:flutter/widgets.dart" hide Title;
 import "title.dart";
 
-const visibleTitles = 6, scale = 1.1;
+const visibleTitles = 6, scale = 1.1, shadow = 3;
 
 class TitlesRow extends StatefulWidget {
   const TitlesRow({
@@ -81,10 +81,10 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final imgWidthScaled = getImgWidthScaled();
-    final imgPadX = imgWidthScaled * (scale - 1) / 2 + 4;
+    final imgPadX = imgWidthScaled * (scale - 1) / 2 + shadow;
     final imgWidth = imgWidthScaled - imgPadX * 2;
     final imgHeight = 450 / 300 * imgWidth;
-    final imgPadY = imgHeight * (scale - 1) / 2 + 12;
+    final imgPadY = imgHeight * (scale - 1) / 2 + shadow + 8;
     final posters = [
       for (int i = 0; i < widget.titles.length; i++)
         Padding(
