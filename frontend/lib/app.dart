@@ -10,7 +10,7 @@ class App extends StatelessWidget {
       style: const TextStyle(
         color: Color(0xFFEEEEEE),
         fontFamily: "Cantarell",
-        fontSize: 48,
+        fontSize: 30,
         fontWeight: FontWeight.w200,
       ),
       child: WidgetsApp.router(

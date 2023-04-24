@@ -37,6 +37,7 @@ CustomTransitionPage<dynamic> Function(BuildContext, GoRouterState)
   };
 }
 
+// workaround because router.pop() wasn't working
 push(String uri) {
   location.add(uri);
   router.go(uri);

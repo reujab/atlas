@@ -1,3 +1,5 @@
+import "package:frontend/poster.dart";
+
 import "const.dart";
 import "package:flutter/widgets.dart" hide Title;
 import "title.dart";
@@ -13,6 +15,8 @@ class TitlesRow extends StatefulWidget {
     required this.index,
     required this.onRowHeight,
   });
+
+  static double imgWidth = 0;
 
   final String name;
   final List<Title> titles;
@@ -75,7 +79,9 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   }
 
   double getImgWidthScaled() {
-    return ((MediaQuery.of(context).size.width - mainPadX * 2) / visibleTitles);
+    TitlesRow.imgWidth =
+        ((MediaQuery.of(context).size.width - mainPadX * 2) / visibleTitles);
+    return TitlesRow.imgWidth;
   }
 
   @override
@@ -91,23 +97,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
           padding: EdgeInsets.symmetric(vertical: imgPadY, horizontal: imgPadX),
           child: ScaleTransition(
             scale: animations[i],
-            child: Container(
-              decoration: const BoxDecoration(boxShadow: [
-                BoxShadow(
-                  blurRadius: 3,
-                  color: Color(0x77555555),
-                  spreadRadius: 3,
-                )
-              ]),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                child: Image(
-                  image: NetworkImage(
-                      "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.titles[i].poster}"),
-                  width: imgWidth,
-                ),
-              ),
-            ),
+            child: Poster(title: widget.titles[i], width: imgWidth),
           ),
         ),
     ];

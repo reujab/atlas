@@ -4,6 +4,7 @@ import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
 import "package:frontend/header.dart";
+import "package:frontend/overview.dart";
 import "package:frontend/title_details.dart";
 import "router.dart" as router;
 import "package:http/http.dart" as http;
@@ -87,19 +88,7 @@ class _TitlesState extends State<Titles> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Header("Movies", search: true),
-            Text(
-              title.genres.join(" • "),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              // minLines: 3
-              "${title.overview}\n\n",
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
+            Overview(title: title, maxLines: 3),
             Expanded(
               child: ListView(
                 controller: scrollController,
