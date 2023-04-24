@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "router.dart";
+import "package:frontend/router.dart";
 
 class App extends StatelessWidget {
   const App({super.key});

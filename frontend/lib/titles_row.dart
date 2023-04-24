@@ -1,8 +1,7 @@
-import "package:frontend/poster.dart";
-
-import "const.dart";
 import "package:flutter/widgets.dart" hide Title;
-import "title.dart";
+import "package:frontend/const.dart";
+import "package:frontend/poster.dart";
+import "package:frontend/title.dart";
 
 const visibleTitles = 6, scale = 1.1, shadow = 3;
 

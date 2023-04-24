@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/title_details.dart";
+import "package:frontend/titles.dart";
 import "package:go_router/go_router.dart";
-import "titles.dart";
 
 const root = "/titles";
 

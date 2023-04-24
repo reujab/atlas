@@ -3,15 +3,15 @@ import "dart:convert";
 import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
+import "package:frontend/background.dart";
 import "package:frontend/header.dart";
 import "package:frontend/overview.dart";
+import "package:frontend/router.dart" as router;
+import "package:frontend/row_data.dart";
+import "package:frontend/title.dart";
 import "package:frontend/title_details.dart";
-import "router.dart" as router;
+import "package:frontend/titles_row.dart";
 import "package:http/http.dart" as http;
-import "row_data.dart";
-import "title.dart";
-import "titles_row.dart";
-import "background.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key});

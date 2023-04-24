@@ -1,5 +1,5 @@
 import "package:json_annotation/json_annotation.dart";
-import "title.dart";
+import "package:frontend/title.dart";
 
 part "row_data.g.dart";
 

@@ -1,4 +1,3 @@
-import "package:flutter/widgets.dart";
 import "package:json_annotation/json_annotation.dart";
 
 part "title.g.dart";
