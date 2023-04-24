@@ -1,7 +1,7 @@
-import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
 import "package:frontend/background.dart";
 import "package:frontend/header.dart";
+import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/poster.dart";
 import "package:frontend/router.dart" as router;
@@ -23,10 +23,8 @@ class TitleDetails extends StatelessWidget {
         ? []
         : [Text(DateFormat.yMMMMd("en_US").format(title!.released!))];
 
-    return KeyboardListener(
-      focusNode: focusNode,
-      autofocus: true,
-      onKeyEvent: onKeyEvent,
+    return InputListener(
+      onKeyDown: onKeyDown,
       child: Background(
         child: Column(
           children: [
@@ -51,7 +49,7 @@ class TitleDetails extends StatelessWidget {
     );
   }
 
-  onKeyEvent(KeyEvent event) {
-    if (event is KeyDownEvent) router.pop();
+  onKeyDown(String key) {
+    router.pop();
   }
 }

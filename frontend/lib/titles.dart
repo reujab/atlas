@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
-import "package:flutter/services.dart";
 import "package:flutter/widgets.dart" hide Title;
 import "package:frontend/background.dart";
 import "package:frontend/header.dart";
+import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/row_data.dart";
@@ -79,10 +79,8 @@ class _TitlesState extends State<Titles> {
       return const Background(child: Text("loading..."));
     }
 
-    return KeyboardListener(
-      focusNode: focusNode,
-      autofocus: true,
-      onKeyEvent: onKeyEvent,
+    return InputListener(
+      onKeyDown: onKeyDown,
       child: Background(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,25 +111,7 @@ class _TitlesState extends State<Titles> {
     );
   }
 
-  onKeyEvent(KeyEvent event) {
-    if (event is! KeyRepeatEvent) {
-      inputTimer?.cancel();
-      inputTimer = null;
-    }
-
-    if (event is! KeyDownEvent) return;
-
-    // it appears the keyup doesn't register for the enter key
-    if (event.logicalKey.keyLabel != "Enter") {
-      inputTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
-        handleKey(event.logicalKey.keyLabel);
-      });
-    }
-
-    handleKey(event.logicalKey.keyLabel);
-  }
-
-  void handleKey(String key) {
+  void onKeyDown(String key) {
     final rows = this.rows, row = this.row;
     if (rows == null || row == null) return;
     switch (key) {
