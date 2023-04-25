@@ -1,17 +1,23 @@
 import "package:flutter/widgets.dart";
+import "package:frontend/home.dart";
 import "package:frontend/title_details.dart";
 import "package:frontend/titles.dart";
 import "package:go_router/go_router.dart";
 
-const root = "/titles";
+const root = "/home";
 
 final location = [root];
 
 final router = GoRouter(
   routes: [
     GoRoute(
-      path: "/titles",
-      pageBuilder: _getPageBuilder((_) => const Titles()),
+      path: "/home",
+      pageBuilder: _getPageBuilder((_) => const Home()),
+    ),
+    GoRoute(
+      path: "/:type/titles",
+      pageBuilder:
+          _getPageBuilder((state) => Titles(type: state.params["type"]!)),
     ),
     GoRoute(
       path: "/title",

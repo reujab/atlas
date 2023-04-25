@@ -14,14 +14,16 @@ import "package:frontend/titles_row.dart";
 import "package:http/http.dart" as http;
 
 class Titles extends StatefulWidget {
-  const Titles({super.key});
+  const Titles({super.key, required this.type});
+
+  final String type;
 
   @override
   State<Titles> createState() => _TitlesState();
 }
 
 class _TitlesState extends State<Titles> {
-  static List<RowData>? rowsCache;
+  static Map<String, List<RowData>> rowsCache = {};
 
   final focusNode = FocusNode();
 
@@ -50,21 +52,20 @@ class _TitlesState extends State<Titles> {
   }
 
   Future<void> initRows() async {
-    if (rowsCache != null) {
-      rows = rowsCache;
+    if (rowsCache[widget.type] != null) {
+      rows = rowsCache[widget.type];
       return;
     }
 
     var client = http.Client();
     try {
       var res = await client.get(Uri.parse(
-          "${Platform.environment["SEEDBOX_HOST"]}/movie/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
+          "${Platform.environment["SEEDBOX_HOST"]}/${widget.type}/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
       List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
-      rowsCache = json.map((j) => RowData.fromJson(j)).toList();
+      rowsCache[widget.type] = json.map((j) => RowData.fromJson(j)).toList();
       setState(() {
-        rows = rowsCache;
+        rows = rowsCache[widget.type];
       });
-      rowsCache = rows;
     } catch (err) {
       print("err $err");
     } finally {
@@ -85,7 +86,7 @@ class _TitlesState extends State<Titles> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Header("Movies", search: true),
+            Header(widget.type == "movie" ? "Movies" : "TV", search: true),
             Overview(title: title, maxLines: 3),
             Expanded(
               child: ListView(
@@ -155,6 +156,9 @@ class _TitlesState extends State<Titles> {
         break;
       case "Enter":
         router.push("/title");
+        break;
+      case "Escape":
+        router.pop();
         break;
     }
 

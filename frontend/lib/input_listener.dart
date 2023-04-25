@@ -37,13 +37,22 @@ class _InputListenerState extends State<InputListener> {
 
     if (event is! KeyDownEvent) return;
 
-    // it appears the keyup doesn't register for the enter key
-    if (event.logicalKey.keyLabel != "Enter") {
+    final key = event.logicalKey.keyLabel;
+    // the repeat interval is faster than the page transition, so don't repeat
+    // keys that change the route
+    if (!["Enter", "Escape"].contains(key)) {
       timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
-        widget.onKeyDown(event.logicalKey.keyLabel);
+        widget.onKeyDown(key);
       });
     }
 
-    widget.onKeyDown(event.logicalKey.keyLabel);
+    widget.onKeyDown(key);
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    timer?.cancel();
+    super.dispose();
   }
 }
