@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart";
+import "package:frontend/const.dart";
 import "package:frontend/home.dart";
 import "package:frontend/scale_animation.dart";
 
@@ -39,15 +40,9 @@ class _TileState extends State<Tile>
       scale: animation,
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFEEEEEE),
+          color: Colors.text,
           borderRadius: BorderRadius.all(Radius.circular(5)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 3,
-              color: Color(0x55AAAAAA),
-              spreadRadius: 3,
-            ),
-          ],
+          boxShadow: lightBoxShadow,
         ),
         margin: EdgeInsets.all(size / 3),
         width: size,
@@ -58,7 +53,7 @@ class _TileState extends State<Tile>
             Image(image: widget.tile.img, height: size * 5 / 8),
             Text(
               widget.tile.name,
-              style: const TextStyle(color: Color(0xFF000000)),
+              style: const TextStyle(color: Colors.black),
             ),
           ],
         ),

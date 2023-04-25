@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart" hide Title;
+import "package:frontend/const.dart";
 import "package:frontend/title.dart";
 
 class Poster extends StatelessWidget {
@@ -10,13 +11,7 @@ class Poster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(boxShadow: [
-        BoxShadow(
-          blurRadius: 3,
-          color: Color(0x77555555),
-          spreadRadius: 3,
-        ),
-      ]),
+      decoration: const BoxDecoration(boxShadow: boxShadow),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         child: Image(

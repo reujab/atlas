@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart" hide Title;
+import "package:frontend/const.dart";
 import "package:frontend/title.dart";
 
 class Overview extends StatelessWidget {
@@ -16,7 +17,7 @@ class Overview extends StatelessWidget {
         Row(children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFEEEEEE)),
+              border: Border.all(color: Colors.text),
               borderRadius: const BorderRadius.all(Radius.circular(5)),
             ),
             margin: const EdgeInsets.only(right: 8),

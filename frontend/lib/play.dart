@@ -1,8 +1,10 @@
 import "dart:convert";
 import "dart:io";
+
 import "package:flutter/widgets.dart" hide Title;
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/background.dart";
+import "package:frontend/const.dart";
 import "package:frontend/header.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/router.dart" as router;
@@ -37,7 +39,7 @@ class _PlayState extends State<Play> {
     print("init stream");
     try {
       var uri = Uri.parse(
-          "${Platform.environment["SEEDBOX_HOST"]}/init?magnet=${Uri.encodeComponent(widget.magnet)}&key=${Platform.environment["SEEDBOX_KEY"]}");
+          "$host/init?magnet=${Uri.encodeComponent(widget.magnet)}&key=$key");
       print("getting");
       var res = await client.get(uri);
       print("got ${res.statusCode}");
@@ -67,7 +69,7 @@ class _PlayState extends State<Play> {
       "--hwdec=vaapi",
       "--vo=gpu",
       ...subs,
-      "${Platform.environment["SEEDBOX_HOST"]}${stream["video"]}?key=${Platform.environment["SEEDBOX_KEY"]}",
+      "$host${stream["video"]}?key=$key",
     ]);
     mpv!.stdout.transform(utf8.decoder).forEach(print);
     mpv!.stderr.transform(utf8.decoder).forEach(print);
@@ -87,7 +89,7 @@ class _PlayState extends State<Play> {
           children: [
             Header(title.title),
             const Spacer(),
-            const SpinKitRipple(color: Color(0xFFEEEEEE), size: 256),
+            const SpinKitRipple(color: Colors.text, size: 256),
             const Spacer(),
           ],
         ),
@@ -101,10 +103,7 @@ class _PlayState extends State<Play> {
 
   @override
   dispose() {
-    if (stream != null) {
-      deleteStream(
-          "${Platform.environment["SEEDBOX_HOST"]!}${stream!["delete"]!}?key=${Platform.environment["SEEDBOX_KEY"]}");
-    }
+    if (stream != null) deleteStream("$host${stream!["delete"]!}?key=$key");
     mpv?.kill();
     super.dispose();
   }

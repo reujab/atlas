@@ -1,14 +1,13 @@
 import "dart:convert";
-import "dart:io";
 
 import "package:flutter/widgets.dart" hide Title;
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/background.dart";
 import "package:frontend/button.dart";
+import "package:frontend/const.dart";
 import "package:frontend/header.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
-import "package:frontend/play.dart";
 import "package:frontend/poster.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/title.dart";
@@ -66,7 +65,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     var client = http.Client();
     try {
       var uri = Uri.parse(
-          "${Platform.environment["SEEDBOX_HOST"]}/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=${Platform.environment["SEEDBOX_KEY"]}");
+          "$host/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
       var res = await client.get(uri);
       if (res.statusCode == 404) {
         // TODO: unavailable

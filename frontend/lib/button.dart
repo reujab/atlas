@@ -1,6 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:frontend/const.dart";
 import "package:frontend/scale_animation.dart";
 
 class Button extends StatefulWidget {
@@ -45,11 +46,9 @@ class _ButtonState extends State<Button>
       scale: animation,
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFEEEEEE),
+          color: Colors.text,
           borderRadius: BorderRadius.all(Radius.circular(1024)),
-          boxShadow: [
-            BoxShadow(blurRadius: 3, color: Color(0x77555555), spreadRadius: 3)
-          ],
+          boxShadow: boxShadow,
         ),
         padding: const EdgeInsets.all(42),
         child: Row(
@@ -58,14 +57,14 @@ class _ButtonState extends State<Button>
               width: 64,
               height: 56,
               child: widget.loading
-                  ? const SpinKitRipple(color: Color(0xFF000000))
+                  ? const SpinKitRipple(color: Colors.black)
                   : Align(
                       alignment: Alignment.center,
                       child: FaIcon(widget.icon, size: 56)),
             ),
             const SizedBox(width: 16),
             Text(widget.name,
-                style: const TextStyle(fontSize: 56, color: Color(0xFF000000))),
+                style: const TextStyle(fontSize: 56, color: Colors.black)),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart";
+import "package:frontend/const.dart";
 import "package:frontend/router.dart";
 
 class App extends StatelessWidget {
@@ -8,14 +9,14 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(
-        color: Color(0xFFEEEEEE),
+        color: Colors.text,
         fontFamily: "Cantarell",
         fontSize: 36,
         fontWeight: FontWeight.w200,
       ),
       child: WidgetsApp.router(
         title: "Atlas",
-        color: const Color(0x00000000),
+        color: Colors.transparent,
         routerConfig: router,
       ),
     );

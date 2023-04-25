@@ -1,6 +1,8 @@
 import "dart:async";
+
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
+import "package:frontend/const.dart";
 
 class InputListener extends StatefulWidget {
   const InputListener(
@@ -41,7 +43,7 @@ class _InputListenerState extends State<InputListener> {
     // the repeat interval is faster than the page transition, so don't repeat
     // keys that change the route
     if (!["Enter", "Escape"].contains(key)) {
-      timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+      timer = Timer.periodic(duration, (_) {
         widget.onKeyDown(key);
       });
     }
