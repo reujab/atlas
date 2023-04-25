@@ -26,8 +26,8 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/play",
-      pageBuilder: _getPageBuilder(
-          (state) => Play(magnet: state.queryParams["magnet"]!)),
+      pageBuilder: _getPageBuilder((state) => Play(
+          magnet: state.queryParams["magnet"], url: state.queryParams["url"])),
     ),
   ],
   initialLocation: root,

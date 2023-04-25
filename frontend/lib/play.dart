@@ -14,9 +14,10 @@ import "package:frontend/title_details.dart";
 import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
-  const Play({super.key, required this.magnet});
+  const Play({super.key, this.magnet, this.url});
 
-  final String magnet;
+  final String? magnet;
+  final String? url;
 
   @override
   createState() => _PlayState();
@@ -26,7 +27,13 @@ class _PlayState extends State<Play> {
   @override
   initState() {
     super.initState();
-    initStream();
+
+    final url = widget.url;
+    if (widget.magnet != null) {
+      initStream();
+    } else if (url != null) {
+      spawnMPV(url);
+    }
   }
 
   Map<String, dynamic>? stream;
@@ -36,7 +43,7 @@ class _PlayState extends State<Play> {
   initStream() async {
     try {
       stream = await getJson(
-          "$host/init?magnet=${Uri.encodeComponent(widget.magnet)}&key=$key");
+          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}&key=$key");
       if (!mounted) _deleteStream();
     } catch (err) {
       log.severe(err);
@@ -44,12 +51,12 @@ class _PlayState extends State<Play> {
       return;
     }
 
-    if (stream != null) spawnMPV();
+    if (stream != null) spawnMPV("$host${stream!["video"]}?key=$key");
   }
 
-  spawnMPV() async {
-    final stream = this.stream!;
-    final subs = stream["subs"] == null ? [] : ["--sub-file=${stream["subs"]}"];
+  spawnMPV(url) async {
+    final subs =
+        stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"];
     mpv = await Process.start("mpv", [
       "--audio-device=${Platform.environment["AUDIO_DEVICE"] ?? "alsa/plughw:CARD=PCH,DEV=3"}",
       "--input-ipc-server=/tmp/mpv",
@@ -57,7 +64,7 @@ class _PlayState extends State<Play> {
       "--hwdec=vaapi",
       "--vo=gpu",
       ...subs,
-      "$host${stream["video"]}?key=$key",
+      url,
     ]);
     mpv!.stdout.transform(utf8.decoder).forEach(log.fine);
     mpv!.stderr.transform(utf8.decoder).forEach(log.warning);
