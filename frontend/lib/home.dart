@@ -1,6 +1,5 @@
 import "dart:io";
 import "dart:math";
-
 import "package:flutter/widgets.dart";
 import "package:frontend/home_tile.dart";
 import "package:frontend/input_listener.dart";
@@ -58,7 +57,7 @@ class _HomeState extends State<Home> {
     final timeOfDay = hour >= 7 && hour <= 17 ? "day" : "night";
     final max = timeOfDay == "day" ? 4 : 23;
     final rng = Random(now.day);
-    final bgIndex = rng.nextInt(max + 1);
+    final bgIndex = rng.nextInt(max);
     final img = AssetImage("img/bg/$timeOfDay/$bgIndex.webp");
 
     return InputListener(
