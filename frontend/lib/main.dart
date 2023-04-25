@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/app.dart";
 
-void main() async {
+main() async {
   Paint.enableDithering = true;
   runApp(const App());
 }

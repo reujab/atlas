@@ -50,7 +50,7 @@ class _InputListenerState extends State<InputListener> {
   }
 
   @override
-  void dispose() {
+  dispose() {
     focusNode.dispose();
     timer?.cancel();
     super.dispose();

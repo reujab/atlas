@@ -13,7 +13,7 @@ class Tile extends StatefulWidget {
 }
 
 class _TileState extends State<Tile> with TickerProviderStateMixin {
-  void animate(double end) {
+  animate(double end) {
     final value = animation.value;
     animation = controller
         .drive(CurveTween(curve: Curves.ease))
@@ -23,7 +23,7 @@ class _TileState extends State<Tile> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(Tile oldTile) {
+  didUpdateWidget(Tile oldTile) {
     super.didUpdateWidget(oldTile);
     if (oldTile.active != widget.active) {
       animate(widget.active ? 1.1 : 1);
