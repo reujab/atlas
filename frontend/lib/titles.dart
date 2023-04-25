@@ -18,12 +18,12 @@ class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
 
   static Map<String, List<RowData>> rowsCache = {};
-
   static int indexCache = 0;
+  static List<Image> imgCache = [];
 
   final String type;
 
-  static initRows(String type) async {
+  static Future<void> initRows(String type) async {
     try {
       List<dynamic> json = await getJson("$host/$type/rows?key=$key");
       rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();

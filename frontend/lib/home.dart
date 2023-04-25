@@ -6,6 +6,7 @@ import "package:frontend/home_tile.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/titles.dart";
+import "package:frontend/titles_row.dart";
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -44,21 +45,37 @@ class _HomeState extends State<Home> {
   int index = Home.indexCache;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     Titles.indexCache = 0;
-    Titles.initRows("movie");
-    Titles.initRows("tv");
+    precacheRows();
+  }
+
+  precacheRows() async {
+    await Future.wait([
+      Titles.initRows("movie"),
+      Titles.initRows("tv"),
+    ]);
+    for (final rows in Titles.rowsCache.values) {
+      for (final row in rows.sublist(0, 2)) {
+        for (final title in row.titles.sublist(0, visibleTitles)) {
+          _precacheImage(NetworkImage(
+              "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}"));
+        }
+      }
+    }
+  }
+
+  _precacheImage(NetworkImage img) {
+    if (mounted) precacheImage(img, context);
   }
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final hour = now.hour;
-    final timeOfDay = hour >= 7 && hour <= 17 ? "day" : "night";
+    final timeOfDay = now.hour >= 7 && now.hour <= 17 ? "day" : "night";
     final max = timeOfDay == "day" ? 4 : 23;
-    final rng = Random(now.day);
-    final bgIndex = rng.nextInt(max);
+    final bgIndex = Random(now.day).nextInt(max);
     final img = AssetImage("img/bg/$timeOfDay/$bgIndex.webp");
 
     return InputListener(

@@ -19,7 +19,7 @@ class _TileState extends State<Tile>
   static const scale = 1.1;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     animate(widget.active ? scale : 1);
   }

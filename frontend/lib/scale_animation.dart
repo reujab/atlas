@@ -21,7 +21,7 @@ mixin ScaleAnimation<T extends StatefulWidget> on TickerProviderStateMixin<T> {
   }
 
   @override
-  void dispose() {
+  dispose() {
     controller.dispose();
     super.dispose();
   }
