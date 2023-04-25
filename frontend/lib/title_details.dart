@@ -6,13 +6,13 @@ import "package:frontend/background.dart";
 import "package:frontend/button.dart";
 import "package:frontend/const.dart";
 import "package:frontend/header.dart";
+import "package:frontend/http.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/poster.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/title.dart";
 import "package:frontend/titles_row.dart";
-import "package:http/http.dart" as http;
 import "package:intl/intl.dart";
 
 class TitleDetails extends StatefulWidget {
@@ -62,27 +62,23 @@ class _TitleDetailsState extends State<TitleDetails> {
   }
 
   getMagnet() async {
-    var client = http.Client();
+    Map<String, dynamic> json;
     try {
-      var uri = Uri.parse(
+      var res = await get(
           "$host/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
-      var res = await client.get(uri);
       if (res.statusCode == 404) {
         // TODO: unavailable
         return;
-      } else if (res.statusCode != 200) {
-        // TODO: handle err
-        return;
       }
-      Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
-      setState(() {
-        magnet = json["magnet"];
-      });
+      json = jsonDecode(utf8.decode(res.bodyBytes));
     } catch (err) {
-      print("err $err");
-    } finally {
-      client.close();
+      // TODO: handle err
+      return;
     }
+
+    setState(() {
+      magnet = json["magnet"];
+    });
   }
 
   @override

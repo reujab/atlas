@@ -1,11 +1,11 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:flutter/widgets.dart" hide Title;
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/background.dart";
 import "package:frontend/const.dart";
 import "package:frontend/header.dart";
+import "package:frontend/http.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/router.dart" as router;
@@ -13,7 +13,6 @@ import "package:frontend/row_data.dart";
 import "package:frontend/title.dart";
 import "package:frontend/title_details.dart";
 import "package:frontend/titles_row.dart";
-import "package:http/http.dart" as http;
 
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
@@ -25,15 +24,11 @@ class Titles extends StatefulWidget {
   final String type;
 
   static initRows(String type) async {
-    var client = http.Client();
     try {
-      var res = await client.get(Uri.parse("$host/$type/rows?key=$key"));
-      List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+      List<dynamic> json = await getJson("$host/$type/rows?key=$key");
       rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
     } catch (err) {
-      print("err $err");
-    } finally {
-      client.close();
+      // TODO: handle err;
     }
   }
 

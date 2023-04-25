@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:flutter/widgets.dart";
+import "package:logging/logging.dart";
 
 const boxShadow = [
   BoxShadow(blurRadius: 3, color: Color(0x77555555), spreadRadius: 3),
@@ -22,3 +23,5 @@ class Colors {
 
 final host = Platform.environment["SEEDBOX_HOST"]!;
 final key = Platform.environment["SEEDBOX_KEY"]!;
+
+final log = Logger("atlas");

@@ -6,6 +6,7 @@ import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/background.dart";
 import "package:frontend/const.dart";
 import "package:frontend/header.dart";
+import "package:frontend/http.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/title.dart";
@@ -24,7 +25,6 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   @override
   initState() {
-    print("init state");
     super.initState();
     initStream();
   }
@@ -34,33 +34,20 @@ class _PlayState extends State<Play> {
   Process? mpv;
 
   initStream() async {
-    print(widget.magnet);
-    var client = http.Client();
-    print("init stream");
     try {
-      var uri = Uri.parse(
+      stream = await getJson(
           "$host/init?magnet=${Uri.encodeComponent(widget.magnet)}&key=$key");
-      print("getting");
-      var res = await client.get(uri);
-      print("got ${res.statusCode}");
-      if (res.statusCode != 200) {
-        // TODO: handle err
-        return;
-      }
-      stream = jsonDecode(utf8.decode(res.bodyBytes));
       if (!mounted) _deleteStream();
-      print(stream);
     } catch (err) {
-      print("err $err");
-    } finally {
-      client.close();
+      log.severe(err);
+      router.pop();
+      return;
     }
 
     if (stream != null) spawnMPV();
   }
 
   spawnMPV() async {
-    print("spawning mpv");
     final stream = this.stream!;
     final subs = stream["subs"] == null ? [] : ["--sub-file=${stream["subs"]}"];
     mpv = await Process.start("mpv", [
@@ -72,9 +59,9 @@ class _PlayState extends State<Play> {
       ...subs,
       "$host${stream["video"]}?key=$key",
     ]);
-    mpv!.stdout.transform(utf8.decoder).forEach(print);
-    mpv!.stderr.transform(utf8.decoder).forEach(print);
-    print("Mpv exited with ${await mpv!.exitCode}");
+    mpv!.stdout.transform(utf8.decoder).forEach(log.fine);
+    mpv!.stderr.transform(utf8.decoder).forEach(log.warning);
+    log.info("mpv exited with ${await mpv!.exitCode}");
     mpv = null;
     router.pop();
   }
@@ -114,19 +101,14 @@ class _PlayState extends State<Play> {
   }
 
   static deleteStream(String deleteUri) async {
-    var client = http.Client();
     try {
       var uri = Uri.parse(deleteUri);
-      var res = await client.delete(uri);
-      print("got ${res.statusCode}");
+      var res = await http.delete(uri);
       if (res.statusCode != 200) {
-        print("deleting $deleteUri failed with ${res.statusCode}");
-        return;
+        log.severe("deleting $deleteUri failed with ${res.statusCode}");
       }
     } catch (err) {
-      print("err $err");
-    } finally {
-      client.close();
+      log.severe(err);
     }
   }
 }
