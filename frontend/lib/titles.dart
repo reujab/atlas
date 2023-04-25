@@ -40,8 +40,6 @@ class Titles extends StatefulWidget {
 }
 
 class _TitlesState extends State<Titles> {
-  final focusNode = FocusNode();
-
   final scrollController = ScrollController();
 
   List<RowData>? rows;
@@ -49,8 +47,6 @@ class _TitlesState extends State<Titles> {
   int index = 0;
 
   double rowHeight = 0;
-
-  Timer? inputTimer;
 
   RowData? get row {
     return rows?[index];
@@ -176,8 +172,6 @@ class _TitlesState extends State<Titles> {
 
   @override
   dispose() {
-    inputTimer?.cancel();
-    focusNode.dispose();
     scrollController.dispose();
     super.dispose();
   }

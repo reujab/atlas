@@ -15,7 +15,7 @@ class Poster extends StatelessWidget {
           blurRadius: 3,
           color: Color(0x77555555),
           spreadRadius: 3,
-        )
+        ),
       ]),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),

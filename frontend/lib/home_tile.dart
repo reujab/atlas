@@ -74,4 +74,10 @@ class _TileState extends State<Tile> with TickerProviderStateMixin {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 }
