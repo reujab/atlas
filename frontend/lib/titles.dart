@@ -19,13 +19,27 @@ class Titles extends StatefulWidget {
 
   final String type;
 
+  static Map<String, List<RowData>> rowsCache = {};
+
+  static initRows(String type) async {
+    var client = http.Client();
+    try {
+      var res = await client.get(Uri.parse(
+          "${Platform.environment["SEEDBOX_HOST"]}/$type/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
+      List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+      rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
+    } catch (err) {
+      print("err $err");
+    } finally {
+      client.close();
+    }
+  }
+
   @override
   State<Titles> createState() => _TitlesState();
 }
 
 class _TitlesState extends State<Titles> {
-  static Map<String, List<RowData>> rowsCache = {};
-
   final focusNode = FocusNode();
 
   final scrollController = ScrollController();
@@ -49,29 +63,21 @@ class _TitlesState extends State<Titles> {
   @override
   initState() {
     super.initState();
-    initRows();
+
+    if (Titles.rowsCache[widget.type] == null) {
+      Timer.periodic(const Duration(milliseconds: 100), (timer) {
+        _setFromCache();
+        if (rows != null) timer.cancel();
+      });
+    } else {
+      _setFromCache();
+    }
   }
 
-  initRows() async {
-    if (rowsCache[widget.type] != null) {
-      rows = rowsCache[widget.type];
-      return;
-    }
-
-    var client = http.Client();
-    try {
-      var res = await client.get(Uri.parse(
-          "${Platform.environment["SEEDBOX_HOST"]}/${widget.type}/rows?key=${Platform.environment["SEEDBOX_KEY"]}"));
-      List<dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
-      rowsCache[widget.type] = json.map((j) => RowData.fromJson(j)).toList();
-      setState(() {
-        rows = rowsCache[widget.type];
-      });
-    } catch (err) {
-      print("err $err");
-    } finally {
-      client.close();
-    }
+  _setFromCache() {
+    setState(() {
+      rows = Titles.rowsCache[widget.type];
+    });
   }
 
   @override
@@ -89,7 +95,7 @@ class _TitlesState extends State<Titles> {
                 ? [
                     const Expanded(
                       child: SpinKitRipple(color: Color(0xFFEEEEEE), size: 256),
-                    )
+                    ),
                   ]
                 : [
                     Overview(title: title, maxLines: 3),

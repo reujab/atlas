@@ -5,6 +5,7 @@ import "package:flutter/widgets.dart";
 import "package:frontend/home_tile.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/router.dart" as router;
+import "package:frontend/titles.dart";
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -39,6 +40,13 @@ class _HomeState extends State<Home> {
   ];
 
   int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Titles.initRows("movie");
+    Titles.initRows("tv");
+  }
 
   @override
   Widget build(BuildContext context) {
