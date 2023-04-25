@@ -1,5 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:frontend/scale_animation.dart";
 
 class Button extends StatefulWidget {
   const Button(this.name,
@@ -13,31 +14,21 @@ class Button extends StatefulWidget {
   createState() => _ButtonState();
 }
 
-class _ButtonState extends State<Button> with TickerProviderStateMixin {
-  late final controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 300),
-    value: 1,
-  );
+class _ButtonState extends State<Button>
+    with TickerProviderStateMixin, ScaleAnimation {
+  static const scale = 1.1;
 
-  late var animation = controller
-      .drive(CurveTween(curve: Curves.ease))
-      .drive(Tween<double>(begin: 0, end: widget.active ? 1.1 : 1));
-
-  animate(double end) {
-    final value = animation.value;
-    animation = controller
-        .drive(CurveTween(curve: Curves.ease))
-        .drive(Tween<double>(begin: value, end: end));
-    controller.value = 1 - value;
-    controller.animateTo(1);
+  @override
+  initState() {
+    super.initState();
+    animate(widget.active ? scale : 1);
   }
 
   @override
   didUpdateWidget(Button oldButton) {
     super.didUpdateWidget(oldButton);
     if (oldButton.active != widget.active) {
-      animate(widget.active ? 1.1 : 1);
+      animate(widget.active ? scale : 1);
     }
   }
 
@@ -64,11 +55,5 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/home.dart";
+import "package:frontend/scale_animation.dart";
 
 class Tile extends StatefulWidget {
   const Tile(this.tile, {super.key, required this.active});
@@ -12,33 +13,23 @@ class Tile extends StatefulWidget {
   State<Tile> createState() => _TileState();
 }
 
-class _TileState extends State<Tile> with TickerProviderStateMixin {
-  animate(double end) {
-    final value = animation.value;
-    animation = controller
-        .drive(CurveTween(curve: Curves.ease))
-        .drive(Tween<double>(begin: value, end: end));
-    controller.value = 1 - value;
-    controller.animateTo(1);
+class _TileState extends State<Tile>
+    with TickerProviderStateMixin, ScaleAnimation {
+  static const scale = 1.1;
+
+  @override
+  void initState() {
+    super.initState();
+    animate(widget.active ? scale : 1);
   }
 
   @override
   didUpdateWidget(Tile oldTile) {
     super.didUpdateWidget(oldTile);
     if (oldTile.active != widget.active) {
-      animate(widget.active ? 1.1 : 1);
+      animate(widget.active ? scale : 1);
     }
   }
-
-  late final controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 300),
-    value: 1,
-  );
-
-  late var animation = controller
-      .drive(CurveTween(curve: Curves.ease))
-      .drive(Tween<double>(begin: 0, end: widget.active ? 1.1 : 1));
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +64,5 @@ class _TileState extends State<Tile> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }
