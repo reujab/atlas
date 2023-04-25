@@ -48,6 +48,7 @@ class _PlayState extends State<Play> {
         return;
       }
       stream = jsonDecode(utf8.decode(res.bodyBytes));
+      if (!mounted) _deleteStream();
       print(stream);
     } catch (err) {
       print("err $err");
@@ -103,9 +104,13 @@ class _PlayState extends State<Play> {
 
   @override
   dispose() {
-    if (stream != null) deleteStream("$host${stream!["delete"]!}?key=$key");
+    _deleteStream();
     mpv?.kill();
     super.dispose();
+  }
+
+  _deleteStream() {
+    if (stream != null) deleteStream("$host${stream!["delete"]!}?key=$key");
   }
 
   static deleteStream(String deleteUri) async {
