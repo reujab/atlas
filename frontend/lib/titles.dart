@@ -125,6 +125,11 @@ class _TitlesState extends State<Titles> {
   }
 
   onKeyDown(String key) {
+    if (key == "Escape") {
+      router.pop();
+      return;
+    }
+
     final rows = this.rows, row = this.row;
     if (rows == null || row == null) return;
     switch (key) {
@@ -142,9 +147,6 @@ class _TitlesState extends State<Titles> {
         break;
       case "Enter":
         router.push("/title");
-        break;
-      case "Escape":
-        router.pop();
         break;
     }
 
