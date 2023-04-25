@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 import "package:flutter/widgets.dart" hide Title;
+import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/background.dart";
 import "package:frontend/header.dart";
 import "package:frontend/input_listener.dart";
@@ -76,9 +77,6 @@ class _TitlesState extends State<Titles> {
   @override
   Widget build(BuildContext context) {
     final rows = this.rows, title = this.title;
-    if (rows == null || title == null) {
-      return const Background(child: Text("loading..."));
-    }
 
     return InputListener(
       onKeyDown: onKeyDown,
@@ -87,25 +85,33 @@ class _TitlesState extends State<Titles> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Header(widget.type == "movie" ? "Movies" : "TV", search: true),
-            Overview(title: title, maxLines: 3),
-            Expanded(
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  for (var i = 0; i < rows.length; i++)
-                    TitlesRow(
-                      index: rows[i].index,
-                      name: rows[i].name,
-                      titles: rows[i].titles,
-                      active: i == index,
-                      onRowHeight: (double height) {
-                        rowHeight = height;
-                      },
+            ...(rows == null || title == null
+                ? [
+                    const Expanded(
+                      child: SpinKitRipple(color: Color(0xFFEEEEEE), size: 256),
+                    )
+                  ]
+                : [
+                    Overview(title: title, maxLines: 3),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        children: [
+                          for (var i = 0; i < rows.length; i++)
+                            TitlesRow(
+                              index: rows[i].index,
+                              name: rows[i].name,
+                              titles: rows[i].titles,
+                              active: i == index,
+                              onRowHeight: (double height) {
+                                rowHeight = height;
+                              },
+                            ),
+                          SizedBox(height: MediaQuery.of(context).size.height)
+                        ],
+                      ),
                     ),
-                  SizedBox(height: MediaQuery.of(context).size.height)
-                ],
-              ),
-            ),
+                  ]),
           ],
         ),
       ),
