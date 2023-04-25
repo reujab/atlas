@@ -1,14 +1,21 @@
 import "package:flutter/widgets.dart";
+import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/scale_animation.dart";
 
 class Button extends StatefulWidget {
-  const Button(this.name,
-      {super.key, required this.icon, required this.active});
+  const Button(
+    this.name, {
+    super.key,
+    required this.icon,
+    required this.active,
+    this.loading = false,
+  });
 
   final String name;
   final IconData icon;
   final bool active;
+  final bool loading;
 
   @override
   createState() => _ButtonState();
@@ -47,8 +54,16 @@ class _ButtonState extends State<Button>
         padding: const EdgeInsets.all(42),
         child: Row(
           children: [
-            FaIcon(widget.icon, size: 56),
-            const SizedBox(width: 32),
+            SizedBox(
+              width: 64,
+              height: 56,
+              child: widget.loading
+                  ? const SpinKitRipple(color: Color(0xFF000000))
+                  : Align(
+                      alignment: Alignment.center,
+                      child: FaIcon(widget.icon, size: 56)),
+            ),
+            const SizedBox(width: 16),
             Text(widget.name,
                 style: const TextStyle(fontSize: 56, color: Color(0xFF000000))),
           ],

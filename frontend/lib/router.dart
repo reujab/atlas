@@ -1,5 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/home.dart";
+import "package:frontend/play.dart";
 import "package:frontend/title_details.dart";
 import "package:frontend/titles.dart";
 import "package:go_router/go_router.dart";
@@ -21,7 +22,12 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/title",
-      pageBuilder: _getPageBuilder((_) => TitleDetails()),
+      pageBuilder: _getPageBuilder((_) => const TitleDetails()),
+    ),
+    GoRoute(
+      path: "/play",
+      pageBuilder: _getPageBuilder(
+          (state) => Play(magnet: state.queryParams["magnet"]!)),
     ),
   ],
   initialLocation: root,

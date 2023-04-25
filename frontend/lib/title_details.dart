@@ -1,3 +1,6 @@
+import "dart:convert";
+import "dart:io";
+
 import "package:flutter/widgets.dart" hide Title;
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/background.dart";
@@ -5,10 +8,12 @@ import "package:frontend/button.dart";
 import "package:frontend/header.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
+import "package:frontend/play.dart";
 import "package:frontend/poster.dart";
 import "package:frontend/router.dart" as router;
 import "package:frontend/title.dart";
 import "package:frontend/titles_row.dart";
+import "package:http/http.dart" as http;
 import "package:intl/intl.dart";
 
 class TitleDetails extends StatefulWidget {
@@ -24,26 +29,68 @@ class TitleDetails extends StatefulWidget {
 class _TitleDetailsState extends State<TitleDetails> {
   int index = 0;
 
-  int buttonsNum = 0;
+  String? magnet;
+
+  final title = TitleDetails.title!;
+
+  late final buttons = [
+    ButtonData(
+      "Play",
+      icon: FontAwesomeIcons.play,
+      onClick: () {
+        if (magnet != null) {
+          router.push("/play?magnet=${Uri.encodeComponent(magnet!)}");
+        }
+      },
+    ),
+    ...(title.trailer == null
+        ? []
+        : [
+            ButtonData(
+              "Watch trailer",
+              icon: FontAwesomeIcons.youtube,
+              onClick: () {
+                // TODO
+              },
+            )
+          ]),
+  ];
+
+  @override
+  initState() {
+    super.initState();
+    getMagnet();
+  }
+
+  getMagnet() async {
+    var client = http.Client();
+    try {
+      var uri = Uri.parse(
+          "${Platform.environment["SEEDBOX_HOST"]}/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=${Platform.environment["SEEDBOX_KEY"]}");
+      var res = await client.get(uri);
+      if (res.statusCode == 404) {
+        // TODO: unavailable
+        return;
+      } else if (res.statusCode != 200) {
+        // TODO: handle err
+        return;
+      }
+      Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+      setState(() {
+        magnet = json["magnet"];
+      });
+    } catch (err) {
+      print("err $err");
+    } finally {
+      client.close();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final title = TitleDetails.title!;
-
     final released = title.released == null
         ? []
         : [Text(DateFormat.yMMMMd("en_US").format(title.released!))];
-
-    final buttons = [
-      const ButtonData("Play", icon: FontAwesomeIcons.play),
-    ];
-
-    if (title.trailer != null) {
-      buttons.add(
-          const ButtonData("Watch trailer", icon: FontAwesomeIcons.youtube));
-    }
-
-    buttonsNum = buttons.length;
 
     return InputListener(
       onKeyDown: onKeyDown,
@@ -69,8 +116,12 @@ class _TitleDetailsState extends State<TitleDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 for (int i = 0; i < buttons.length; i++)
-                  Button(buttons[i].name,
-                      icon: buttons[i].icon, active: i == index)
+                  Button(
+                    buttons[i].name,
+                    icon: buttons[i].icon,
+                    active: i == index,
+                    loading: i == 0 && magnet == null,
+                  ),
               ],
             ),
             const Spacer(),
@@ -90,11 +141,14 @@ class _TitleDetailsState extends State<TitleDetails> {
         }
         break;
       case "Arrow Right":
-        if (index < buttonsNum - 1) {
+        if (index < buttons.length - 1) {
           setState(() {
             index++;
           });
         }
+        break;
+      case "Enter":
+        buttons[index].onClick();
         break;
       case "Escape":
         router.pop();
@@ -104,8 +158,9 @@ class _TitleDetailsState extends State<TitleDetails> {
 }
 
 class ButtonData {
-  const ButtonData(this.name, {required this.icon});
+  const ButtonData(this.name, {required this.icon, required this.onClick});
 
   final String name;
   final IconData icon;
+  final Function onClick;
 }
