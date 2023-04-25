@@ -44,6 +44,8 @@ class Titles extends StatefulWidget {
 class _TitlesState extends State<Titles> {
   final scrollController = ScrollController();
 
+  Timer? timer;
+
   List<RowData>? rows;
 
   int index = Titles.indexCache;
@@ -65,7 +67,7 @@ class _TitlesState extends State<Titles> {
     super.initState();
 
     if (Titles.rowsCache[widget.type] == null) {
-      Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
         _setFromCache();
         if (rows != null) timer.cancel();
       });
@@ -181,6 +183,7 @@ class _TitlesState extends State<Titles> {
 
   @override
   dispose() {
+    timer?.cancel();
     scrollController.dispose();
     super.dispose();
   }
