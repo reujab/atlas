@@ -17,9 +17,11 @@ import "package:http/http.dart" as http;
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
 
-  final String type;
-
   static Map<String, List<RowData>> rowsCache = {};
+
+  static int indexCache = 0;
+
+  final String type;
 
   static initRows(String type) async {
     var client = http.Client();
@@ -44,7 +46,9 @@ class _TitlesState extends State<Titles> {
 
   List<RowData>? rows;
 
-  int index = 0;
+  int index = Titles.indexCache;
+
+  bool alreadyScrolled = false;
 
   double rowHeight = 0;
 
@@ -107,6 +111,10 @@ class _TitlesState extends State<Titles> {
                               active: i == index,
                               onRowHeight: (double height) {
                                 rowHeight = height;
+                                if (!alreadyScrolled) {
+                                  alreadyScrolled = true;
+                                  scroll();
+                                }
                               },
                             ),
                           SizedBox(height: MediaQuery.of(context).size.height)
@@ -150,6 +158,7 @@ class _TitlesState extends State<Titles> {
   }
 
   setIndex(int i) {
+    Titles.indexCache = i;
     setState(() {
       index = i;
     });

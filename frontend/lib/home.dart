@@ -10,6 +10,8 @@ import "package:frontend/titles.dart";
 class Home extends StatefulWidget {
   const Home({super.key});
 
+  static int indexCache = 0;
+
   @override
   State<Home> createState() => _HomeState();
 }
@@ -39,11 +41,12 @@ class _HomeState extends State<Home> {
     ),
   ];
 
-  int index = 0;
+  int index = Home.indexCache;
 
   @override
   void initState() {
     super.initState();
+    Titles.indexCache = 0;
     Titles.initRows("movie");
     Titles.initRows("tv");
   }
@@ -102,6 +105,7 @@ class _HomeState extends State<Home> {
   }
 
   setIndex(int i) {
+    Home.indexCache = i;
     setState(() {
       index = i;
     });
