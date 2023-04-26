@@ -34,10 +34,12 @@ class _TitleDetailsState extends State<TitleDetails> {
 
   late final buttons = [
     ButtonData(
-      "Play",
+      title.type == "tv" ? "View" : "Play",
       icon: FontAwesomeIcons.play,
       onClick: () {
-        if (magnet != null) {
+        if (title.type == "tv") {
+          router.push("/view");
+        } else if (magnet != null) {
           router.push("/play?magnet=${Uri.encodeComponent(magnet!)}");
         }
       },
@@ -67,12 +69,18 @@ class _TitleDetailsState extends State<TitleDetails> {
       var res = await get(
           "$host/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
       if (res.statusCode == 404) {
-        // TODO: unavailable
+        setState(() {
+          buttons[0].name = "Unavailable";
+          buttons[0].icon = FontAwesomeIcons.faceSadTear;
+        });
         return;
       }
       json = jsonDecode(utf8.decode(res.bodyBytes));
     } catch (err) {
-      // TODO: handle err
+      setState(() {
+        buttons[0].name = "Error";
+        buttons[0].icon = FontAwesomeIcons.bug;
+      });
       return;
     }
 
@@ -115,7 +123,10 @@ class _TitleDetailsState extends State<TitleDetails> {
                     buttons[i].name,
                     icon: buttons[i].icon,
                     active: i == index,
-                    loading: i == 0 && magnet == null,
+                    loading: title.type == "movie" &&
+                        i == 0 &&
+                        magnet == null &&
+                        buttons[i].icon == FontAwesomeIcons.play,
                   ),
               ],
             ),
@@ -153,9 +164,9 @@ class _TitleDetailsState extends State<TitleDetails> {
 }
 
 class ButtonData {
-  const ButtonData(this.name, {required this.icon, required this.onClick});
+  ButtonData(this.name, {required this.icon, required this.onClick});
 
-  final String name;
-  final IconData icon;
+  String name;
+  IconData? icon;
   final Function onClick;
 }
