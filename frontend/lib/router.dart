@@ -1,6 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/home.dart";
 import "package:frontend/play.dart";
+import "package:frontend/seasons.dart";
 import "package:frontend/title_details.dart";
 import "package:frontend/titles.dart";
 import "package:go_router/go_router.dart";
@@ -23,6 +24,10 @@ final router = GoRouter(
     GoRoute(
       path: "/title",
       pageBuilder: _getPageBuilder((_) => const TitleDetails()),
+    ),
+    GoRoute(
+      path: "/seasons",
+      pageBuilder: _getPageBuilder((_) => const Seasons()),
     ),
     GoRoute(
       path: "/play",

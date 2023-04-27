@@ -14,10 +14,13 @@ class App extends StatelessWidget {
         fontSize: 36,
         fontWeight: FontWeight.w200,
       ),
-      child: WidgetsApp.router(
-        title: "Atlas",
-        color: Colors.transparent,
-        routerConfig: router,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: WidgetsApp.router(
+          title: "Atlas",
+          color: Colors.transparent,
+          routerConfig: router,
+        ),
       ),
     );
   }

@@ -112,13 +112,10 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
       ),
       SizedBox(
         height: imgHeight + imgPadY * 2,
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            controller: scrollController,
-            children: posters,
-          ),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          controller: scrollController,
+          children: posters,
         ),
       ),
     ]);

@@ -95,7 +95,12 @@ class _TitlesState extends State<Titles> {
                     ),
                   ]
                 : [
-                    Overview(title: title, maxLines: 3),
+                    Overview(
+                      rating: title.rating,
+                      genres: title.genres,
+                      overview: title.overview,
+                      maxLines: 3,
+                    ),
                     Expanded(
                       child: ListView(
                         controller: scrollController,

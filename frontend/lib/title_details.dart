@@ -11,6 +11,8 @@ import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/poster.dart";
 import "package:frontend/router.dart" as router;
+import "package:frontend/season_data.dart";
+import "package:frontend/seasons.dart";
 import "package:frontend/title.dart";
 import "package:frontend/titles_row.dart";
 import "package:intl/intl.dart";
@@ -38,7 +40,7 @@ class _TitleDetailsState extends State<TitleDetails> {
       icon: FontAwesomeIcons.play,
       onClick: () {
         if (title.type == "tv") {
-          router.push("/view");
+          router.push("/seasons");
         } else if (magnet != null) {
           router.push("/play?magnet=${Uri.encodeComponent(magnet!)}");
         }
@@ -60,7 +62,25 @@ class _TitleDetailsState extends State<TitleDetails> {
   @override
   initState() {
     super.initState();
-    getMagnet();
+
+    if (title.type == "tv") {
+      getSeasons();
+    } else {
+      getMagnet();
+    }
+  }
+
+  getSeasons() async {
+    Seasons.seasons = null;
+
+    List<dynamic> json;
+    try {
+      json = await getJson("$host/seasons/${title.id}?key=$key");
+    } catch (err) {
+      return;
+    }
+
+    Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
 
   getMagnet() async {
@@ -111,7 +131,13 @@ class _TitleDetailsState extends State<TitleDetails> {
                   ...released,
                 ]),
                 const SizedBox(width: 32),
-                Expanded(child: Overview(title: title)),
+                Expanded(
+                  child: Overview(
+                    rating: title.rating,
+                    genres: title.genres,
+                    overview: title.overview,
+                  ),
+                ),
               ],
             ),
             const Spacer(),
