@@ -1,9 +1,9 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/home.dart";
+import "package:frontend/home/home.dart";
 import "package:frontend/play.dart";
-import "package:frontend/seasons.dart";
-import "package:frontend/title_details.dart";
-import "package:frontend/titles.dart";
+import "package:frontend/seasons/seasons.dart";
+import "package:frontend/title_details/title_details.dart";
+import "package:frontend/titles/titles.dart";
 import "package:go_router/go_router.dart";
 
 final router = GoRouter(

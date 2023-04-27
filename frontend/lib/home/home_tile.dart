@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
-import "package:frontend/home.dart";
+import "package:frontend/home/home.dart";
 import "package:frontend/scale_animation.dart";
 
 class Tile extends StatefulWidget {

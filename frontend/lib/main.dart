@@ -1,7 +1,7 @@
 import "dart:io";
 
 import "package:flutter/widgets.dart";
-import "package:frontend/app.dart";
+import "package:frontend/widgets/app.dart";
 import "package:logging/logging.dart";
 
 main() async {

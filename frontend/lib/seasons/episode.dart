@@ -3,7 +3,7 @@ import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/const.dart";
 import "package:frontend/scale_animation.dart";
-import "package:frontend/season_data.dart";
+import "package:frontend/seasons/season_data.dart";
 
 class Episode extends StatefulWidget {
   const Episode(this.episode, {super.key, required this.active});

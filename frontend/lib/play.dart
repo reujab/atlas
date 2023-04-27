@@ -3,14 +3,14 @@ import "dart:io";
 
 import "package:flutter/widgets.dart" hide Title;
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import "package:frontend/background.dart";
+import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
-import "package:frontend/header.dart";
+import "package:frontend/widgets/header.dart";
 import "package:frontend/http.dart";
-import "package:frontend/input_listener.dart";
+import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/router.dart";
 import "package:frontend/title.dart";
-import "package:frontend/title_details.dart";
+import "package:frontend/title_details/title_details.dart";
 import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
