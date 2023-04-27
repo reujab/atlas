@@ -14,8 +14,10 @@ mixin ScaleAnimation<T extends StatefulWidget> on TickerProviderStateMixin<T> {
 
   animate(double end) {
     final value = animation.value;
-    animation =
-        controller.drive(_curve).drive(Tween<double>(begin: value, end: end));
+    setState(() {
+      animation =
+          controller.drive(_curve).drive(Tween<double>(begin: value, end: end));
+    });
     controller.value = 1 - value;
     controller.animateTo(1);
   }
