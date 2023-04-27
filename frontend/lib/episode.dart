@@ -8,7 +8,7 @@ import "package:frontend/season_data.dart";
 class Episode extends StatefulWidget {
   const Episode(this.episode, {super.key, required this.active});
 
-  static const double scale = 1.1, height = 127, imgWidth = 227, padY = 22;
+  static const double scale = 1.1, height = 127 + 2, imgWidth = 227, padY = 22;
 
   final EpisodeData episode;
   final bool active;
@@ -48,6 +48,7 @@ class _EpisodeState extends State<Episode>
           // workaround to cover white flickering gap when an episode is animating
           border: Border.all(color: const Color(0xFF333333)),
         ),
+        clipBehavior: Clip.antiAlias,
         margin: const EdgeInsets.symmetric(
             horizontal: mainPadX, vertical: Episode.padY),
         height: Episode.height,
@@ -56,14 +57,15 @@ class _EpisodeState extends State<Episode>
             ...(widget.episode.still == null
                 ? []
                 : [
-                    SizedBox(
-                      width: Episode.imgWidth,
-                      height: Episode.height,
-                      child: Transform.scale(
-                        scale: 1.1,
+                    // workaround to prevent flickering
+                    Transform.scale(
+                      scale: 1.02,
+                      child: SizedBox(
+                        width: Episode.imgWidth,
+                        height: Episode.height,
                         child: CachedNetworkImage(
                           imageUrl:
-                              "https://image.tmdb.org/t/p/w${Episode.imgWidth.toInt()}_and_h${Episode.height.toInt()}_bestv2${widget.episode.still}",
+                              "https://image.tmdb.org/t/p/w227_and_h127_bestv2${widget.episode.still}",
                         ),
                       ),
                     ),
