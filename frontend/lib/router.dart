@@ -34,7 +34,7 @@ final router = GoRouter(
   ],
 );
 
-CustomTransitionPage<dynamic> Function(BuildContext, GoRouterState)
+CustomTransitionPage<Page> Function(BuildContext, GoRouterState)
     _getPageBuilder(Widget Function(GoRouterState) cb) {
   return (context, state) {
     return CustomTransitionPage(

@@ -3,9 +3,9 @@ import "dart:convert";
 import "package:frontend/const.dart";
 import "package:http/http.dart" as http;
 
-const maxTries = 5;
-
 Future<http.Response> get(String url) async {
+  const maxTries = 5;
+
   log.info("Getting $url");
 
   final then = DateTime.now();

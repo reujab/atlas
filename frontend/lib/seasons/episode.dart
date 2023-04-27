@@ -57,7 +57,7 @@ class _EpisodeState extends State<Episode>
             ...(widget.episode.still == null
                 ? []
                 : [
-                    // workaround to prevent flickering
+                    // workaround to prevent animation flickering
                     Transform.scale(
                       scale: 1.02,
                       child: SizedBox(
@@ -73,6 +73,7 @@ class _EpisodeState extends State<Episode>
             const SizedBox(width: 48),
             Expanded(
               child: RichText(
+                overflow: TextOverflow.fade,
                 text: TextSpan(
                   children: [
                     TextSpan(
@@ -88,7 +89,6 @@ class _EpisodeState extends State<Episode>
                   ],
                   style: DefaultTextStyle.of(context).style,
                 ),
-                overflow: TextOverflow.fade,
                 // softWrap: true,
               ),
             ),
@@ -100,7 +100,7 @@ class _EpisodeState extends State<Episode>
                     ),
                   ]
                 : []),
-            const SizedBox(width: 48)
+            const SizedBox(width: 48),
           ],
         ),
       ),
