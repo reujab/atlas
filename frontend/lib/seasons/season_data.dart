@@ -24,7 +24,7 @@ class SeasonData {
 
 @JsonSerializable()
 class EpisodeData {
-  const EpisodeData({
+  EpisodeData({
     required this.number,
     required this.date,
     required this.name,
@@ -39,6 +39,8 @@ class EpisodeData {
   final String? overview;
   final int? runtime;
   final String? still;
+  String? magnet;
+  bool unavailable = false;
 
   factory EpisodeData.fromJson(Map<String, dynamic> json) =>
       _$EpisodeDataFromJson(json);

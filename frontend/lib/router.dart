@@ -28,8 +28,14 @@ final router = GoRouter(
     ),
     GoRoute(
       path: "/play",
-      pageBuilder: _getPageBuilder((state) => Play(
-          magnet: state.queryParams["magnet"], url: state.queryParams["url"])),
+      pageBuilder: _getPageBuilder(
+        (state) => Play(
+          magnet: state.queryParams["magnet"],
+          url: state.queryParams["url"],
+          season: state.queryParams["s"],
+          episode: state.queryParams["e"],
+        ),
+      ),
     ),
   ],
 );

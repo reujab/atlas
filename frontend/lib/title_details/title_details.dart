@@ -87,7 +87,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     Map<String, dynamic> json;
     try {
       var res = await get(
-          "$host/${title.type}/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
+          "$host/movie/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
       if (res.statusCode == 404) {
         setState(() {
           buttons[0].name = "Unavailable";

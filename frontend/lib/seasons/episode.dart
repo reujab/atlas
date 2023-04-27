@@ -1,6 +1,7 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 import "package:frontend/scale_animation.dart";
 import "package:frontend/seasons/season_data.dart";
@@ -94,10 +95,18 @@ class _EpisodeState extends State<Episode>
             ),
             ...(widget.active
                 ? [
-                    const SpinKitRipple(
-                      color: Colors.black,
-                      size: Episode.height * 0.5,
-                    ),
+                    widget.episode.magnet == null &&
+                            widget.episode.unavailable == false
+                        ? const SpinKitRipple(
+                            color: Colors.black,
+                            size: Episode.height * 0.5,
+                          )
+                        : FaIcon(
+                            widget.episode.unavailable
+                                ? FontAwesomeIcons.ban
+                                : FontAwesomeIcons.play,
+                            size: Episode.height * 0.5,
+                          ),
                   ]
                 : []),
             const SizedBox(width: 48),

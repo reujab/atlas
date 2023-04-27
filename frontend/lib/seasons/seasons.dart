@@ -1,7 +1,9 @@
 import "dart:async";
+import "dart:convert";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
+import "package:frontend/http.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
 import "package:frontend/seasons/episode.dart";
@@ -33,6 +35,10 @@ class _SeasonsState extends State<Seasons> {
 
   Timer? timer;
 
+  SeasonData get season => seasons[index];
+
+  EpisodeData get episode => season.episodes[season.index];
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +50,10 @@ class _SeasonsState extends State<Seasons> {
         setState(() {
           seasons = Seasons.seasons!;
         });
+        getMagnet();
       });
+    } else {
+      getMagnet();
     }
   }
 
@@ -70,10 +79,7 @@ class _SeasonsState extends State<Seasons> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: mainPadX),
                     child: Overview(
-                      overview: seasons[index]
-                              .episodes[seasons[index].index]
-                              .overview ??
-                          "",
+                      overview: episode.overview ?? "",
                       maxLines: 3,
                     ),
                   ),
@@ -138,17 +144,16 @@ class _SeasonsState extends State<Seasons> {
       case "Arrow Right":
         if (index < seasons.length - 1) setIndex(index + 1);
         break;
+      case "Enter":
+        if (episode.magnet != null) {
+          router.push(
+              "/play?magnet=${Uri.encodeComponent(episode.magnet!)}&s=${season.number}&e=${episode.number}");
+        }
+        break;
       case "Escape":
         router.pop();
         break;
     }
-  }
-
-  void setEpisodeIndex(int i) {
-    setState(() {
-      seasons[index].index = i;
-    });
-    scrollY();
   }
 
   void setIndex(int i) {
@@ -156,6 +161,15 @@ class _SeasonsState extends State<Seasons> {
       index = i;
     });
     scrollX();
+    getMagnet();
+  }
+
+  void setEpisodeIndex(int i) {
+    setState(() {
+      seasons[index].index = i;
+    });
+    scrollY();
+    getMagnet();
   }
 
   void scrollX() {
@@ -173,15 +187,40 @@ class _SeasonsState extends State<Seasons> {
   }
 
   void scrollY() {
-    if (seasons[index].scrollController.hasClients) {
-      final y =
-          (Episode.height + Episode.padY * 2) * seasons[index].index.toDouble();
-      seasons[index]
-          .scrollController
-          .animateTo(y, duration: duration, curve: Curves.ease);
-    } else {
+    if (!seasons[index].scrollController.hasClients) {
       Timer(const Duration(milliseconds: 50), scrollY);
+      return;
     }
+
+    final y =
+        (Episode.height + Episode.padY * 2) * seasons[index].index.toDouble();
+    seasons[index]
+        .scrollController
+        .animateTo(y, duration: duration, curve: Curves.ease);
+  }
+
+  Future<void> getMagnet() async {
+    if (episode.magnet != null || episode.unavailable) return;
+
+    final res = await get(
+        "$host/tv/magnet?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}&key=$key");
+    if (res.statusCode == 404) {
+      setState(() {
+        episode.unavailable = true;
+      });
+      return;
+    }
+
+    final Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
+    setState(() {
+      episode.magnet = json["magnet"];
+      for (final seasonNum in json["seasons"] ?? []) {
+        final season = seasons.firstWhere((s) => s.number == seasonNum);
+        for (final episode in season.episodes) {
+          episode.magnet = json["magnet"];
+        }
+      }
+    });
   }
 
   @override

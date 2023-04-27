@@ -21,17 +21,16 @@ Future<http.Response> get(String url) async {
       continue;
     }
 
+    log.info(
+        "Got reply in ${DateTime.now().difference(then).inMilliseconds}ms");
+
     if (res.statusCode != 200) {
       final err = "$url responded with ${res.statusCode}";
       log.severe(err);
-      if (i == maxTries || res.statusCode < 500 && res.statusCode != 404) {
-        throw err;
-      }
+      if (res.statusCode == 404) return res;
+      if (i == maxTries || res.statusCode < 500) throw err;
       continue;
     }
-
-    log.info(
-        "Got response in ${DateTime.now().difference(then).inMilliseconds}ms");
 
     return res;
   }

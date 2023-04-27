@@ -14,10 +14,12 @@ import "package:frontend/title_details/title_details.dart";
 import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
-  const Play({super.key, this.magnet, this.url});
+  const Play({super.key, this.magnet, this.url, this.season, this.episode});
 
   final String? magnet;
   final String? url;
+  final String? season;
+  final String? episode;
 
   @override
   State<Play> createState() => _PlayState();
@@ -44,7 +46,7 @@ class _PlayState extends State<Play> {
   Future<void> initStream() async {
     try {
       stream = await getJson(
-          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}&key=$key");
+          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}&key=$key");
       if (!mounted) _deleteStream();
     } catch (err) {
       log.severe(err);
@@ -71,7 +73,7 @@ class _PlayState extends State<Play> {
     mpv!.stderr.transform(utf8.decoder).forEach(log.warning);
     log.info("mpv exited with ${await mpv!.exitCode}");
     mpv = null;
-    router.pop();
+    if (router.location.startsWith("/play")) router.pop();
   }
 
   @override
