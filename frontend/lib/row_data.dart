@@ -14,4 +14,6 @@ class RowData {
 
   factory RowData.fromJson(Map<String, dynamic> json) =>
       _$RowDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RowDataToJson(this);
 }
