@@ -8,7 +8,7 @@ import "package:frontend/seasons/season_data.dart";
 class Episode extends StatefulWidget {
   const Episode(this.episode, {super.key, required this.active});
 
-  static const double scale = 1.1, height = 127 + 2, imgWidth = 227, padY = 22;
+  static const height = 127.0 + 2, imgWidth = 227.0, padY = 22.0;
 
   final EpisodeData episode;
   final bool active;
@@ -24,7 +24,7 @@ class _EpisodeState extends State<Episode>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      animate(widget.active ? Episode.scale : 1);
+      animate(widget.active ? scale : 1);
     });
   }
 
@@ -32,7 +32,7 @@ class _EpisodeState extends State<Episode>
   void didUpdateWidget(Episode oldEpisode) {
     super.didUpdateWidget(oldEpisode);
     if (widget.active != oldEpisode.active) {
-      animate(widget.active ? Episode.scale : 1);
+      animate(widget.active ? scale : 1);
     }
   }
 

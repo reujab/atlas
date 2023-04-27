@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
     ]);
     for (final rows in Titles.rowsCache.values) {
       for (final row in rows.sublist(0, 2)) {
-        for (final title in row.titles.sublist(0, visibleTitles)) {
+        for (final title in row.titles.sublist(0, TitlesRow.visibleTitles)) {
           _precacheImage(NetworkImage(
               "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}"));
         }

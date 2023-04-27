@@ -3,17 +3,27 @@ import "dart:io";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 
-const boxShadow = [
-  BoxShadow(blurRadius: 3, color: Color(0x77555555), spreadRadius: 3),
-];
-
-const lightBoxShadow = [
-  BoxShadow(blurRadius: 3, color: Color(0x55AAAAAA), spreadRadius: 3),
-];
-
 const duration = Duration(milliseconds: 300);
 
 const mainPadX = 192.0;
+
+const scale = 1.1;
+
+const shadowRadius = 3.0;
+const boxShadow = [
+  BoxShadow(
+    blurRadius: shadowRadius,
+    color: Color(0x77555555),
+    spreadRadius: shadowRadius,
+  ),
+];
+const lightBoxShadow = [
+  BoxShadow(
+    blurRadius: shadowRadius,
+    color: Color(0x55AAAAAA),
+    spreadRadius: shadowRadius,
+  ),
+];
 
 class Colors {
   static const transparent = Color(0x00000000);

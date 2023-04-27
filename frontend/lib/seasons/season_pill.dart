@@ -16,8 +16,6 @@ class SeasonPill extends StatefulWidget {
 
 class _SeasonPillState extends State<SeasonPill>
     with TickerProviderStateMixin, ScaleAnimation {
-  static const scale = 1.1;
-
   @override
   void initState() {
     super.initState();

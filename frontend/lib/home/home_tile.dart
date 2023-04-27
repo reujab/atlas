@@ -16,8 +16,6 @@ class Tile extends StatefulWidget {
 
 class _TileState extends State<Tile>
     with TickerProviderStateMixin, ScaleAnimation {
-  static const scale = 1.1;
-
   @override
   void initState() {
     super.initState();

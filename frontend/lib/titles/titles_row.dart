@@ -3,8 +3,6 @@ import "package:frontend/const.dart";
 import "package:frontend/widgets/poster.dart";
 import "package:frontend/title.dart";
 
-const visibleTitles = 6, scale = 1.1, shadow = 3;
-
 class TitlesRow extends StatefulWidget {
   const TitlesRow({
     super.key,
@@ -14,6 +12,8 @@ class TitlesRow extends StatefulWidget {
     required this.index,
     required this.onRowHeight,
   });
+
+  static const visibleTitles = 6;
 
   static double imgWidth = 0;
 
@@ -78,18 +78,18 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   }
 
   double getImgWidthScaled() {
-    TitlesRow.imgWidth =
-        ((MediaQuery.of(context).size.width - mainPadX * 2) / visibleTitles);
+    TitlesRow.imgWidth = ((MediaQuery.of(context).size.width - mainPadX * 2) /
+        TitlesRow.visibleTitles);
     return TitlesRow.imgWidth;
   }
 
   @override
   Widget build(BuildContext context) {
     final imgWidthScaled = getImgWidthScaled();
-    final imgPadX = imgWidthScaled * (scale - 1) / 2 + shadow;
+    final imgPadX = imgWidthScaled * (scale - 1) / 2 + shadowRadius;
     final imgWidth = imgWidthScaled - imgPadX * 2;
     final imgHeight = 450 / 300 * imgWidth;
-    final imgPadY = imgHeight * (scale - 1) / 2 + shadow + 8;
+    final imgPadY = imgHeight * (scale - 1) / 2 + shadowRadius + 8;
     final posters = [
       for (int i = 0; i < widget.titles.length; i++)
         Padding(

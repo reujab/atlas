@@ -24,8 +24,6 @@ class Button extends StatefulWidget {
 
 class _ButtonState extends State<Button>
     with TickerProviderStateMixin, ScaleAnimation {
-  static const scale = 1.1;
-
   @override
   void initState() {
     super.initState();
