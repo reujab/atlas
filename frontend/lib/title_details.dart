@@ -10,7 +10,7 @@ import "package:frontend/http.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
 import "package:frontend/poster.dart";
-import "package:frontend/router.dart" as router;
+import "package:frontend/router.dart";
 import "package:frontend/season_data.dart";
 import "package:frontend/seasons.dart";
 import "package:frontend/title.dart";

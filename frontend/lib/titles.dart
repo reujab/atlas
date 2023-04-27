@@ -8,7 +8,7 @@ import "package:frontend/header.dart";
 import "package:frontend/http.dart";
 import "package:frontend/input_listener.dart";
 import "package:frontend/overview.dart";
-import "package:frontend/router.dart" as router;
+import "package:frontend/router.dart";
 import "package:frontend/row_data.dart";
 import "package:frontend/title.dart";
 import "package:frontend/title_details.dart";
@@ -18,7 +18,6 @@ class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
 
   static Map<String, List<RowData>> rowsCache = {};
-  static int indexCache = 0;
   static List<Image> imgCache = [];
 
   final String type;
@@ -43,7 +42,7 @@ class _TitlesState extends State<Titles> {
 
   List<RowData>? rows;
 
-  int index = Titles.indexCache;
+  int index = 0;
 
   bool alreadyScrolled = false;
 
@@ -160,7 +159,6 @@ class _TitlesState extends State<Titles> {
   }
 
   setIndex(int i) {
-    Titles.indexCache = i;
     setState(() {
       index = i;
     });

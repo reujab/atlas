@@ -4,14 +4,12 @@ import "dart:math";
 import "package:flutter/widgets.dart";
 import "package:frontend/home_tile.dart";
 import "package:frontend/input_listener.dart";
-import "package:frontend/router.dart" as router;
+import "package:frontend/router.dart";
 import "package:frontend/titles.dart";
 import "package:frontend/titles_row.dart";
 
 class Home extends StatefulWidget {
   const Home({super.key});
-
-  static int indexCache = 0;
 
   @override
   State<Home> createState() => _HomeState();
@@ -42,12 +40,11 @@ class _HomeState extends State<Home> {
     ),
   ];
 
-  int index = Home.indexCache;
+  int index = 0;
 
   @override
   initState() {
     super.initState();
-    Titles.indexCache = 0;
     precacheRows();
   }
 
@@ -122,7 +119,6 @@ class _HomeState extends State<Home> {
   }
 
   setIndex(int i) {
-    Home.indexCache = i;
     setState(() {
       index = i;
     });

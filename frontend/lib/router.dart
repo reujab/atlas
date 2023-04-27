@@ -6,11 +6,8 @@ import "package:frontend/title_details.dart";
 import "package:frontend/titles.dart";
 import "package:go_router/go_router.dart";
 
-const root = "/home";
-
-final location = [root];
-
 final router = GoRouter(
+  initialLocation: "/home",
   routes: [
     GoRoute(
       path: "/home",
@@ -35,7 +32,6 @@ final router = GoRouter(
           magnet: state.queryParams["magnet"], url: state.queryParams["url"])),
     ),
   ],
-  initialLocation: root,
 );
 
 CustomTransitionPage<dynamic> Function(BuildContext, GoRouterState)
@@ -52,19 +48,4 @@ CustomTransitionPage<dynamic> Function(BuildContext, GoRouterState)
       },
     );
   };
-}
-
-// workaround because router.pop() wasn't working
-push(String uri) {
-  location.add(uri);
-  router.go(uri);
-}
-
-pop() {
-  if (location.length == 1) {
-    throw ErrorDescription("root page cannot pop");
-  }
-
-  location.removeLast();
-  router.go(location.last);
 }

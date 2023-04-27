@@ -11,7 +11,7 @@ import "package:frontend/overview.dart";
 import "package:frontend/season_data.dart";
 import "package:frontend/season_pill.dart";
 import "package:frontend/title_details.dart";
-import "package:frontend/router.dart" as router;
+import "package:frontend/router.dart";
 
 class Seasons extends StatefulWidget {
   const Seasons({super.key});
@@ -25,15 +25,13 @@ class Seasons extends StatefulWidget {
 class _SeasonsState extends State<Seasons> {
   final title = TitleDetails.title!;
 
-  int index = 0;
+  final pillScrollController = ScrollController();
+  final scrollController = ScrollController();
 
+  int index = 0;
   List<SeasonData> seasons = Seasons.seasons ?? [];
 
   Timer? timer;
-
-  final pillScrollController = ScrollController();
-
-  final scrollController = ScrollController();
 
   @override
   initState() {
