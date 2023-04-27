@@ -57,7 +57,7 @@ class _TitlesState extends State<Titles> {
   }
 
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     if (Titles.rowsCache[widget.type] == null) {
@@ -70,7 +70,7 @@ class _TitlesState extends State<Titles> {
     }
   }
 
-  _setFromCache() {
+  void _setFromCache() {
     setState(() {
       rows = Titles.rowsCache[widget.type];
     });
@@ -129,7 +129,7 @@ class _TitlesState extends State<Titles> {
     );
   }
 
-  onKeyDown(String key) {
+  void onKeyDown(String key) {
     if (key == "Escape") {
       router.pop();
       return;
@@ -158,20 +158,20 @@ class _TitlesState extends State<Titles> {
     TitleDetails.title = title;
   }
 
-  setIndex(int i) {
+  void setIndex(int i) {
     setState(() {
       index = i;
     });
     scroll();
   }
 
-  setRowIndex(int i) {
+  void setRowIndex(int i) {
     setState(() {
       row!.index = i;
     });
   }
 
-  scroll() {
+  void scroll() {
     scrollController.animateTo(
       rowHeight * index.toDouble(),
       duration: duration,
@@ -180,7 +180,7 @@ class _TitlesState extends State<Titles> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     timer?.cancel();
     scrollController.dispose();
     super.dispose();

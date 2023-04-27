@@ -20,12 +20,17 @@ class Play extends StatefulWidget {
   final String? url;
 
   @override
-  createState() => _PlayState();
+  State<Play> createState() => _PlayState();
 }
 
 class _PlayState extends State<Play> {
+  final Title title = TitleDetails.title!;
+
+  Map<String, dynamic>? stream;
+  Process? mpv;
+
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     final url = widget.url;
@@ -36,11 +41,7 @@ class _PlayState extends State<Play> {
     }
   }
 
-  Map<String, dynamic>? stream;
-
-  Process? mpv;
-
-  initStream() async {
+  Future<void> initStream() async {
     try {
       stream = await getJson(
           "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}&key=$key");
@@ -54,7 +55,7 @@ class _PlayState extends State<Play> {
     if (stream != null) spawnMPV("$host${stream!["video"]}?key=$key");
   }
 
-  spawnMPV(url) async {
+  Future<void> spawnMPV(url) async {
     final subs =
         stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"];
     mpv = await Process.start("mpv", [
@@ -73,8 +74,6 @@ class _PlayState extends State<Play> {
     router.pop();
   }
 
-  final Title title = TitleDetails.title!;
-
   @override
   Widget build(BuildContext context) {
     return InputListener(
@@ -92,22 +91,22 @@ class _PlayState extends State<Play> {
     );
   }
 
-  onKeyDown(String key) {
+  void onKeyDown(String key) {
     if (key == "Escape") router.pop();
   }
 
   @override
-  dispose() {
+  void dispose() {
     _deleteStream();
     mpv?.kill();
     super.dispose();
   }
 
-  _deleteStream() {
+  void _deleteStream() {
     if (stream != null) deleteStream("$host${stream!["delete"]!}?key=$key");
   }
 
-  static deleteStream(String deleteUri) async {
+  static void deleteStream(String deleteUri) async {
     try {
       var uri = Uri.parse(deleteUri);
       var res = await http.delete(uri);

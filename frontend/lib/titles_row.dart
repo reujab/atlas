@@ -47,7 +47,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   );
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -57,7 +57,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   }
 
   @override
-  didUpdateWidget(TitlesRow oldRow) {
+  void didUpdateWidget(TitlesRow oldRow) {
     super.didUpdateWidget(oldRow);
     if (oldRow.index != widget.index) {
       animate(oldRow.index, 1);
@@ -68,7 +68,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
     }
   }
 
-  animate(int index, double end) {
+  void animate(int index, double end) {
     final value = animations[index].value;
     animations[index] = controllers[index]
         .drive(_curve)
@@ -121,7 +121,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
     ]);
   }
 
-  scroll() {
+  void scroll() {
     scrollController.animateTo(
       widget.index * getImgWidthScaled(),
       duration: duration,
@@ -130,7 +130,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   }
 
   @override
-  dispose() {
+  void dispose() {
     scrollController.dispose();
     for (final controller in controllers) {
       controller.dispose();

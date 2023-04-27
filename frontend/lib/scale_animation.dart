@@ -12,7 +12,7 @@ mixin ScaleAnimation<T extends StatefulWidget> on TickerProviderStateMixin<T> {
 
   late var animation = controller.drive(_curve);
 
-  animate(double end) {
+  void animate(double end) {
     final value = animation.value;
     setState(() {
       animation =
@@ -23,7 +23,7 @@ mixin ScaleAnimation<T extends StatefulWidget> on TickerProviderStateMixin<T> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     controller.dispose();
     super.dispose();
   }

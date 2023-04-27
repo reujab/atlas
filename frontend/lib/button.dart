@@ -19,7 +19,7 @@ class Button extends StatefulWidget {
   final bool loading;
 
   @override
-  createState() => _ButtonState();
+  State<Button> createState() => _ButtonState();
 }
 
 class _ButtonState extends State<Button>
@@ -27,13 +27,13 @@ class _ButtonState extends State<Button>
   static const scale = 1.1;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     animate(widget.active ? scale : 1);
   }
 
   @override
-  didUpdateWidget(Button oldButton) {
+  void didUpdateWidget(Button oldButton) {
     super.didUpdateWidget(oldButton);
     if (oldButton.active != widget.active) {
       animate(widget.active ? scale : 1);

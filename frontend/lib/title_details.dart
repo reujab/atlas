@@ -60,7 +60,7 @@ class _TitleDetailsState extends State<TitleDetails> {
   ];
 
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     if (title.type == "tv") {
@@ -70,7 +70,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     }
   }
 
-  getSeasons() async {
+  Future<void> getSeasons() async {
     Seasons.seasons = null;
 
     List<dynamic> json;
@@ -83,7 +83,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
 
-  getMagnet() async {
+  Future<void> getMagnet() async {
     Map<String, dynamic> json;
     try {
       var res = await get(
@@ -163,7 +163,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     );
   }
 
-  onKeyDown(String key) {
+  void onKeyDown(String key) {
     switch (key) {
       case "Arrow Left":
         if (index > 0) {

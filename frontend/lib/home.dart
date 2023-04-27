@@ -43,12 +43,12 @@ class _HomeState extends State<Home> {
   int index = 0;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     precacheRows();
   }
 
-  precacheRows() async {
+  Future<void> precacheRows() async {
     await Future.wait([
       Titles.initRows("movie"),
       Titles.initRows("tv"),
@@ -63,7 +63,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  _precacheImage(NetworkImage img) {
+  void _precacheImage(NetworkImage img) {
     if (mounted) precacheImage(img, context);
   }
 
@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  onKeyDown(String key) {
+  void onKeyDown(String key) {
     switch (key) {
       case "Arrow Up":
         if (index % 2 == 1) setIndex(index - 1);
@@ -118,7 +118,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  setIndex(int i) {
+  void setIndex(int i) {
     setState(() {
       index = i;
     });

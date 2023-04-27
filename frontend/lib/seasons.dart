@@ -34,7 +34,7 @@ class _SeasonsState extends State<Seasons> {
   Timer? timer;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     if (seasons.isEmpty) {
@@ -122,7 +122,7 @@ class _SeasonsState extends State<Seasons> {
     );
   }
 
-  onKeyDown(String key) {
+  void onKeyDown(String key) {
     switch (key) {
       case "Arrow Up":
         if (seasons[index].index > 0) setEpisodeIndex(seasons[index].index - 1);
@@ -144,21 +144,21 @@ class _SeasonsState extends State<Seasons> {
     }
   }
 
-  setEpisodeIndex(int i) {
+  void setEpisodeIndex(int i) {
     setState(() {
       seasons[index].index = i;
     });
     scrollY();
   }
 
-  setIndex(int i) {
+  void setIndex(int i) {
     setState(() {
       index = i;
     });
     scrollX();
   }
 
-  scrollX() {
+  void scrollX() {
     pillScrollController.animateTo(
       index.toDouble() * (SeasonPill.width + SeasonPill.marginX * 2),
       duration: duration,
@@ -172,7 +172,7 @@ class _SeasonsState extends State<Seasons> {
     scrollY();
   }
 
-  scrollY() {
+  void scrollY() {
     if (seasons[index].scrollController.hasClients) {
       final y =
           (Episode.height + Episode.padY * 2) * seasons[index].index.toDouble();
@@ -185,7 +185,7 @@ class _SeasonsState extends State<Seasons> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     timer?.cancel();
     pillScrollController.dispose();
     scrollController.dispose();

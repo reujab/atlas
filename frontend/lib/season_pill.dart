@@ -19,7 +19,7 @@ class _SeasonPillState extends State<SeasonPill>
   static const scale = 1.1;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

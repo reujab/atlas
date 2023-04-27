@@ -13,7 +13,7 @@ class InputListener extends StatefulWidget {
   final Function(String key) onKeyDown;
 
   @override
-  createState() => _InputListenerState();
+  State<InputListener> createState() => _InputListenerState();
 }
 
 class _InputListenerState extends State<InputListener> {
@@ -31,7 +31,7 @@ class _InputListenerState extends State<InputListener> {
     );
   }
 
-  _onKeyEvent(KeyEvent event) {
+  void _onKeyEvent(KeyEvent event) {
     if (event is KeyRepeatEvent) return;
 
     timer?.cancel();
@@ -52,7 +52,7 @@ class _InputListenerState extends State<InputListener> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     focusNode.dispose();
     timer?.cancel();
     super.dispose();

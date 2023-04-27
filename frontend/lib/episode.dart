@@ -20,7 +20,7 @@ class Episode extends StatefulWidget {
 class _EpisodeState extends State<Episode>
     with TickerProviderStateMixin, ScaleAnimation {
   @override
-  initState() {
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
