@@ -18,6 +18,7 @@ const mainPadX = 192.0;
 class Colors {
   static const transparent = Color(0x00000000);
   static const black = Color(0xFF000000);
+  static const gray = Color(0xFF888888);
   static const text = Color(0xFFEEEEEE);
 }
 

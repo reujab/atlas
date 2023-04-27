@@ -72,9 +72,22 @@ class _EpisodeState extends State<Episode>
                   ]),
             const SizedBox(width: 48),
             Expanded(
-              child: Text(
-                widget.episode.name,
-                style: const TextStyle(color: Colors.black),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text:
+                          "E${widget.episode.number.toString().padLeft(2, "0")}",
+                      style: const TextStyle(color: Colors.gray),
+                    ),
+                    const WidgetSpan(child: SizedBox(width: 20)),
+                    TextSpan(
+                      text: widget.episode.name,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ],
+                  style: DefaultTextStyle.of(context).style,
+                ),
                 overflow: TextOverflow.fade,
                 // softWrap: true,
               ),
