@@ -39,7 +39,7 @@ class _TileState extends State<Tile>
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(5)),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
           boxShadow: lightBoxShadow,
         ),
         margin: EdgeInsets.all(size / 3),
