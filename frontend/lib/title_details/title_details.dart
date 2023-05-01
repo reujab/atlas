@@ -1,6 +1,6 @@
 import "dart:convert";
 
-import "package:flutter/widgets.dart" hide Title;
+import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/button.dart";
@@ -13,12 +13,12 @@ import "package:frontend/widgets/poster.dart";
 import "package:frontend/router.dart";
 import "package:frontend/seasons/season_data.dart";
 import "package:frontend/seasons/seasons.dart";
-import "package:frontend/title.dart";
+import "package:frontend/title_data.dart";
 import "package:frontend/titles/titles_row.dart";
 import "package:intl/intl.dart";
 
 class TitleDetails extends StatefulWidget {
-  static Title? title;
+  static TitleData? title;
   static double? imgWidth;
 
   const TitleDetails({super.key});

@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'title.dart';
+part of 'title_data.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Title _$TitleFromJson(Map<String, dynamic> json) => Title(
+TitleData _$TitleDataFromJson(Map<String, dynamic> json) => TitleData(
       id: json['id'] as int,
       type: json['type'] as String,
       title: json['title'] as String,
@@ -21,7 +21,7 @@ Title _$TitleFromJson(Map<String, dynamic> json) => Title(
       poster: json['poster'] as String,
     );
 
-Map<String, dynamic> _$TitleToJson(Title instance) => <String, dynamic>{
+Map<String, dynamic> _$TitleDataToJson(TitleData instance) => <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
       'title': instance.title,

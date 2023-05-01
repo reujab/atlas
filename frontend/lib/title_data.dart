@@ -1,10 +1,10 @@
 import "package:json_annotation/json_annotation.dart";
 
-part "title.g.dart";
+part "title_data.g.dart";
 
 @JsonSerializable()
-class Title {
-  const Title({
+class TitleData {
+  const TitleData({
     required this.id,
     required this.type,
     required this.title,
@@ -26,7 +26,8 @@ class Title {
   final String? rating;
   final String poster;
 
-  factory Title.fromJson(Map<String, dynamic> json) => _$TitleFromJson(json);
+  factory TitleData.fromJson(Map<String, dynamic> json) =>
+      _$TitleDataFromJson(json);
 
-  Map<String, dynamic> toJson() => _$TitleToJson(this);
+  Map<String, dynamic> toJson() => _$TitleDataToJson(this);
 }

@@ -1,7 +1,7 @@
-import "package:flutter/widgets.dart" hide Title;
+import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 import "package:frontend/widgets/poster.dart";
-import "package:frontend/title.dart";
+import "package:frontend/title_data.dart";
 
 class TitlesRow extends StatefulWidget {
   const TitlesRow({
@@ -18,7 +18,7 @@ class TitlesRow extends StatefulWidget {
   static double imgWidth = 0;
 
   final String name;
-  final List<Title> titles;
+  final List<TitleData> titles;
   final bool active;
   final int index;
   final Function(double) onRowHeight;

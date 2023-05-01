@@ -1,11 +1,11 @@
-import "package:flutter/widgets.dart" hide Title;
+import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
-import "package:frontend/title.dart";
+import "package:frontend/title_data.dart";
 
 class Poster extends StatelessWidget {
   const Poster({super.key, required this.title, this.width});
 
-  final Title title;
+  final TitleData title;
   final double? width;
 
   @override

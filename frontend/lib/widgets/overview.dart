@@ -1,4 +1,4 @@
-import "package:flutter/widgets.dart" hide Title;
+import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 
 class Overview extends StatelessWidget {

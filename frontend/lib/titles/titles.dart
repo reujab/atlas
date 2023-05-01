@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "package:flutter/widgets.dart" hide Title;
+import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
@@ -10,7 +10,7 @@ import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
 import "package:frontend/router.dart";
 import "package:frontend/titles/row_data.dart";
-import "package:frontend/title.dart";
+import "package:frontend/title_data.dart";
 import "package:frontend/title_details/title_details.dart";
 import "package:frontend/titles/titles_row.dart";
 
@@ -52,7 +52,7 @@ class _TitlesState extends State<Titles> {
     return rows?[index];
   }
 
-  Title? get title {
+  TitleData? get title {
     return row?.titles[row!.index];
   }
 
