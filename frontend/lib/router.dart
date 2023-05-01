@@ -1,6 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/home/home.dart";
 import "package:frontend/play.dart";
+import "package:frontend/search/search.dart";
 import "package:frontend/seasons/seasons.dart";
 import "package:frontend/title_details/title_details.dart";
 import "package:frontend/titles/titles.dart";
@@ -17,6 +18,10 @@ final router = GoRouter(
       path: "/:type/titles",
       pageBuilder:
           _getPageBuilder((state) => Titles(type: state.params["type"]!)),
+    ),
+    GoRoute(
+      path: "/search",
+      pageBuilder: _getPageBuilder((_) => const Search()),
     ),
     GoRoute(
       path: "/title",

@@ -153,6 +153,9 @@ class _TitlesState extends State<Titles> {
       case "Enter":
         router.push("/title");
         break;
+      case " ":
+        router.push("/search");
+        break;
     }
 
     TitleDetails.title = title;
