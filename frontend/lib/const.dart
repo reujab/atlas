@@ -3,7 +3,8 @@ import "dart:io";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 
-const duration = Duration(milliseconds: 300);
+const scrollDuration = Duration(milliseconds: 300);
+const scaleDuration = Duration(milliseconds: 500);
 
 const mainPadX = 192.0;
 
@@ -29,7 +30,7 @@ class Colors {
   static const transparent = Color(0x00000000);
   static const black = Color(0xFF000000);
   static const gray = Color(0xFF888888);
-  static const text = Color(0xFFEEEEEE);
+  static const white = Color(0xFFEEEEEE);
 }
 
 final host = Platform.environment["SEEDBOX_HOST"]!;

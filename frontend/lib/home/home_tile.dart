@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 import "package:frontend/home/home.dart";
-import "package:frontend/scale_animation.dart";
+import "package:frontend/animation_mixin.dart";
 
 class Tile extends StatefulWidget {
   const Tile(this.tile, {super.key, required this.active});
@@ -15,7 +15,7 @@ class Tile extends StatefulWidget {
 }
 
 class _TileState extends State<Tile>
-    with TickerProviderStateMixin, ScaleAnimation {
+    with TickerProviderStateMixin, AnimationMixin {
   @override
   void initState() {
     super.initState();
@@ -38,7 +38,7 @@ class _TileState extends State<Tile>
       scale: animation,
       child: Container(
         decoration: const BoxDecoration(
-          color: Colors.text,
+          color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(5)),
           boxShadow: lightBoxShadow,
         ),

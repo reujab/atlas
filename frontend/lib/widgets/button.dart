@@ -2,7 +2,7 @@ import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
-import "package:frontend/scale_animation.dart";
+import "package:frontend/animation_mixin.dart";
 
 class Button extends StatefulWidget {
   const Button(
@@ -23,7 +23,7 @@ class Button extends StatefulWidget {
 }
 
 class _ButtonState extends State<Button>
-    with TickerProviderStateMixin, ScaleAnimation {
+    with TickerProviderStateMixin, AnimationMixin {
   @override
   void initState() {
     super.initState();
@@ -44,7 +44,7 @@ class _ButtonState extends State<Button>
       scale: animation,
       child: Container(
         decoration: const BoxDecoration(
-          color: Colors.text,
+          color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(1024)),
           boxShadow: boxShadow,
         ),

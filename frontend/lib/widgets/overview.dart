@@ -26,7 +26,7 @@ class Overview extends StatelessWidget {
                 Row(children: [
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.text),
+                      border: Border.all(color: Colors.white),
                       borderRadius: const BorderRadius.all(Radius.circular(5)),
                     ),
                     margin: const EdgeInsets.only(right: 8),

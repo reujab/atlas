@@ -13,11 +13,11 @@ class Header extends StatelessWidget {
     final searchWidgets = [
       const SizedBox(width: 32),
       const FaIcon(FontAwesomeIcons.magnifyingGlass,
-          size: 56, color: Colors.text),
+          size: 56, color: Colors.white),
     ];
 
     return Row(children: [
-      const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.text),
+      const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
       const SizedBox(width: 32),
       Expanded(
         child: Text(title, style: const TextStyle(fontSize: 96)),

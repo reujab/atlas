@@ -9,7 +9,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(
-        color: Colors.text,
+        color: Colors.white,
         fontFamily: "Cantarell",
         fontSize: 36,
         fontWeight: FontWeight.w200,

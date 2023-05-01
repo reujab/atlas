@@ -90,7 +90,7 @@ class _TitlesState extends State<Titles> {
             ...(rows == null || title == null
                 ? [
                     const Expanded(
-                      child: SpinKitRipple(color: Colors.text, size: 256),
+                      child: SpinKitRipple(color: Colors.white, size: 256),
                     ),
                   ]
                 : [
@@ -174,7 +174,7 @@ class _TitlesState extends State<Titles> {
   void scroll() {
     scrollController.animateTo(
       rowHeight * index.toDouble(),
-      duration: duration,
+      duration: scrollDuration,
       curve: Curves.ease,
     );
   }

@@ -3,7 +3,7 @@ import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
-import "package:frontend/scale_animation.dart";
+import "package:frontend/animation_mixin.dart";
 import "package:frontend/seasons/season_data.dart";
 
 class Episode extends StatefulWidget {
@@ -19,7 +19,7 @@ class Episode extends StatefulWidget {
 }
 
 class _EpisodeState extends State<Episode>
-    with TickerProviderStateMixin, ScaleAnimation {
+    with TickerProviderStateMixin, AnimationMixin {
   @override
   void initState() {
     super.initState();
@@ -45,7 +45,7 @@ class _EpisodeState extends State<Episode>
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(Episode.padY)),
           boxShadow: boxShadow,
-          color: Colors.text,
+          color: Colors.white,
           // workaround to cover white flickering gap when an episode is animating
           border: Border.all(color: const Color(0xFF333333)),
         ),

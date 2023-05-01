@@ -124,7 +124,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   void scroll() {
     scrollController.animateTo(
       widget.index * getImgWidthScaled(),
-      duration: duration,
+      duration: scrollDuration,
       curve: Curves.ease,
     );
   }

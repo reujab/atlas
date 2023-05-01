@@ -85,7 +85,7 @@ class _PlayState extends State<Play> {
           children: [
             Header(title.title),
             const Spacer(),
-            const SpinKitRipple(color: Colors.text, size: 256),
+            const SpinKitRipple(color: Colors.white, size: 256),
             const Spacer(),
           ],
         ),

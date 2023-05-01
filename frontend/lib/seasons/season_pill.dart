@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
-import "package:frontend/scale_animation.dart";
+import "package:frontend/animation_mixin.dart";
 
 class SeasonPill extends StatefulWidget {
   const SeasonPill(this.number, {super.key, required this.active});
@@ -15,7 +15,7 @@ class SeasonPill extends StatefulWidget {
 }
 
 class _SeasonPillState extends State<SeasonPill>
-    with TickerProviderStateMixin, ScaleAnimation {
+    with TickerProviderStateMixin, AnimationMixin {
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,7 @@ class _SeasonPillState extends State<SeasonPill>
         decoration: const BoxDecoration(
           boxShadow: boxShadow,
           borderRadius: BorderRadius.all(Radius.circular(1024)),
-          color: Colors.text,
+          color: Colors.white,
         ),
         width: SeasonPill.width,
         margin: const EdgeInsets.symmetric(

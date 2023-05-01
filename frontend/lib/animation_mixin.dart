@@ -1,12 +1,12 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 
-mixin ScaleAnimation<T extends StatefulWidget> on TickerProviderStateMixin<T> {
+mixin AnimationMixin<T extends StatefulWidget> on TickerProviderStateMixin<T> {
   final _curve = CurveTween(curve: Curves.ease);
 
   late final controller = AnimationController(
     vsync: this,
-    duration: duration,
+    duration: scaleDuration,
     value: 1,
   );
 

@@ -71,7 +71,7 @@ class _SeasonsState extends State<Seasons> {
           ...(seasons.isEmpty
               ? const [
                   Expanded(
-                    child: SpinKitRipple(color: Colors.text, size: 256),
+                    child: SpinKitRipple(color: Colors.white, size: 256),
                   )
                 ]
               : [
@@ -175,12 +175,12 @@ class _SeasonsState extends State<Seasons> {
   void scrollX() {
     pillScrollController.animateTo(
       index.toDouble() * (SeasonPill.width + SeasonPill.marginX * 2),
-      duration: duration,
+      duration: scrollDuration,
       curve: Curves.ease,
     );
     scrollController.animateTo(
       MediaQuery.of(context).size.width * index,
-      duration: duration,
+      duration: scrollDuration,
       curve: Curves.ease,
     );
     scrollY();
@@ -196,7 +196,7 @@ class _SeasonsState extends State<Seasons> {
         (Episode.height + Episode.padY * 2) * seasons[index].index.toDouble();
     seasons[index]
         .scrollController
-        .animateTo(y, duration: duration, curve: Curves.ease);
+        .animateTo(y, duration: scrollDuration, curve: Curves.ease);
   }
 
   Future<void> getMagnet() async {
