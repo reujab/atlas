@@ -163,8 +163,8 @@ class _TitleDetailsState extends State<TitleDetails> {
     );
   }
 
-  void onKeyDown(String key) {
-    switch (key) {
+  void onKeyDown(InputEvent e) {
+    switch (e.name) {
       case "Arrow Left":
         if (index > 0) {
           setState(() {

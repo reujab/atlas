@@ -10,7 +10,7 @@ class InputListener extends StatefulWidget {
 
   final Widget child;
 
-  final Function(String key) onKeyDown;
+  final Function(InputEvent e) onKeyDown;
 
   @override
   State<InputListener> createState() => _InputListenerState();
@@ -42,13 +42,21 @@ class _InputListenerState extends State<InputListener> {
     final key = event.logicalKey.keyLabel;
     // the repeat interval is faster than the page transition, so don't repeat
     // keys that change the route
-    if (!["Enter", "Escape"].contains(key)) {
-      timer = Timer.periodic(duration, (_) {
-        widget.onKeyDown(key);
+    if (key.startsWith("Arrow") || key == "Backspace") {
+      timer = Timer.periodic(scrollDuration, (_) {
+        widget.onKeyDown(InputEvent(
+          name: key,
+          character: event.character,
+          time: DateTime.now(),
+        ));
       });
     }
 
-    widget.onKeyDown(key);
+    widget.onKeyDown(InputEvent(
+      name: key,
+      character: event.character,
+      time: DateTime.now(),
+    ));
   }
 
   @override
@@ -57,4 +65,16 @@ class _InputListenerState extends State<InputListener> {
     timer?.cancel();
     super.dispose();
   }
+}
+
+class InputEvent {
+  const InputEvent({
+    required this.name,
+    required this.character,
+    required this.time,
+  });
+
+  final String name;
+  final String? character;
+  final DateTime time;
 }

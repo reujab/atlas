@@ -99,8 +99,8 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void onKeyDown(String key) {
-    switch (key) {
+  void onKeyDown(InputEvent e) {
+    switch (e.name) {
       case "Arrow Up":
         if (index % 2 == 1) setIndex(index - 1);
         break;

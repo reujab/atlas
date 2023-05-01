@@ -129,15 +129,15 @@ class _TitlesState extends State<Titles> {
     );
   }
 
-  void onKeyDown(String key) {
-    if (key == "Escape") {
+  void onKeyDown(InputEvent e) {
+    if (e.name == "Escape") {
       router.pop();
       return;
     }
 
     final rows = this.rows, row = this.row;
     if (rows == null || row == null) return;
-    switch (key) {
+    switch (e.name) {
       case "Arrow Up":
         setIndex(index > 0 ? index - 1 : rows.length - 1);
         break;

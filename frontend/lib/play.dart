@@ -93,8 +93,8 @@ class _PlayState extends State<Play> {
     );
   }
 
-  void onKeyDown(String key) {
-    if (key == "Escape") router.pop();
+  void onKeyDown(InputEvent e) {
+    if (e.name == "Escape") router.pop();
   }
 
   @override

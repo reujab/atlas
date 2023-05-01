@@ -128,8 +128,8 @@ class _SeasonsState extends State<Seasons> {
     );
   }
 
-  void onKeyDown(String key) {
-    switch (key) {
+  void onKeyDown(InputEvent e) {
+    switch (e.name) {
       case "Arrow Up":
         if (seasons[index].index > 0) setEpisodeIndex(seasons[index].index - 1);
         break;
