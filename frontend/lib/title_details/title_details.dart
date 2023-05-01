@@ -89,7 +89,7 @@ class _TitleDetailsState extends State<TitleDetails> {
       var res = await get(
           "$host/movie/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
       if (res.statusCode == 404) {
-        setState(() {
+        _setState(() {
           buttons[0].name = "Unavailable";
           buttons[0].icon = FontAwesomeIcons.faceSadTear;
         });
@@ -97,7 +97,7 @@ class _TitleDetailsState extends State<TitleDetails> {
       }
       json = jsonDecode(utf8.decode(res.bodyBytes));
     } catch (err) {
-      setState(() {
+      _setState(() {
         buttons[0].name = "Error";
         buttons[0].icon = FontAwesomeIcons.bug;
       });
@@ -107,6 +107,10 @@ class _TitleDetailsState extends State<TitleDetails> {
     setState(() {
       magnet = json["magnet"];
     });
+  }
+
+  _setState(Function() cb) {
+    if (mounted) setState(cb);
   }
 
   @override

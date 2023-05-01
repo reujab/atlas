@@ -200,6 +200,7 @@ class _SeasonsState extends State<Seasons> {
   }
 
   Future<void> getMagnet() async {
+    final episode = this.episode;
     if (episode.magnet != null || episode.unavailable) return;
 
     final res = await get(
