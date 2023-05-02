@@ -59,7 +59,7 @@ export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
 		expandGenres(row.titles);
 	}));
 
-	return rows.filter((g) => g.titles.length);
+	return rows.filter((g) => g.titles.length >= 20);
 }
 
 export function expandGenres(titles: any[]): void {
