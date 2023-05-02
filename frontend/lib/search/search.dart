@@ -30,7 +30,7 @@ class _SearchState extends State<Search> {
   int index = 0;
 
   int get visibleResults =>
-      query.isEmpty ? 0 : min(results.length, keyboardActive ? 2 : 4);
+      query.isEmpty ? 0 : min(results.length, keyboardActive ? 2 : 5);
 
   @override
   void initState() {

@@ -18,7 +18,7 @@ export default async function search(req: express.Request, res: express.Response
 		AND title ILIKE ${`%${query.replace(/\s/g, "%")}%`}
 		AND NOT id = ANY(${blacklist})
 		ORDER BY popularity DESC NULLS LAST
-		LIMIT 4
+		LIMIT 5
 	`;
 
 	expandGenres(titles);
