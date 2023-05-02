@@ -14,9 +14,8 @@ class Poster extends StatelessWidget {
       decoration: const BoxDecoration(boxShadow: boxShadow),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-        child: Image(
-          image: NetworkImage(
-              "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}"),
+        child: Image.network(
+          "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}",
           width: width,
         ),
       ),
