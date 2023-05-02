@@ -29,7 +29,7 @@ class _PlayState extends State<Play> {
   final TitleData title = TitleDetails.title!;
 
   Map<String, dynamic>? stream;
-  Process? mpv;
+  Process? overlay;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _PlayState extends State<Play> {
     if (widget.magnet != null) {
       initStream();
     } else if (url != null) {
-      spawnMPV(url);
+      spawnOverlay(url);
     }
   }
 
@@ -54,25 +54,20 @@ class _PlayState extends State<Play> {
       return;
     }
 
-    if (stream != null) spawnMPV("$host${stream!["video"]}?key=$key");
+    if (stream != null) spawnOverlay("$host${stream!["video"]}?key=$key");
   }
 
-  Future<void> spawnMPV(url) async {
-    final subs =
-        stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"];
-    mpv = await Process.start("mpv", [
-      "--audio-device=${Platform.environment["AUDIO_DEVICE"] ?? "alsa/plughw:CARD=PCH,DEV=3"}",
-      "--input-ipc-server=/tmp/mpv",
-      "--network-timeout=300",
-      "--hwdec=vaapi",
-      "--vo=gpu",
+  Future<void> spawnOverlay(url) async {
+    final subs = stream?["subs"] == null ? [] : ["--subs=${stream!["subs"]}"];
+    overlay = await Process.start("atlas-overlay", [
+      "--title=${title.title}",
+      "--video=$url",
       ...subs,
-      url,
     ]);
-    mpv!.stdout.transform(utf8.decoder).forEach(log.fine);
-    mpv!.stderr.transform(utf8.decoder).forEach(log.warning);
-    log.info("mpv exited with ${await mpv!.exitCode}");
-    mpv = null;
+    overlay!.stdout.transform(utf8.decoder).forEach(log.fine);
+    overlay!.stderr.transform(utf8.decoder).forEach(log.warning);
+    log.info("overlay exited with ${await overlay!.exitCode}");
+    overlay = null;
     if (router.location.startsWith("/play")) router.pop();
   }
 
@@ -100,7 +95,7 @@ class _PlayState extends State<Play> {
   @override
   void dispose() {
     _deleteStream();
-    mpv?.kill();
+    overlay?.kill();
     super.dispose();
   }
 
