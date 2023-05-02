@@ -10,6 +10,7 @@ class RowData {
   final String name;
   final List<TitleData> titles;
 
+  @JsonKey(includeFromJson: false)
   int index;
 
   factory RowData.fromJson(Map<String, dynamic> json) =>

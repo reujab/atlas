@@ -15,12 +15,14 @@ class Keyboard extends StatefulWidget {
     required this.onKey,
     required this.onSubmit,
     required this.inputEvent,
+    this.onExit,
   });
 
   final bool active;
   final Function(String key) onKey;
   final Function() onSubmit;
   final InputEvent? inputEvent;
+  final Function()? onExit;
 
   @override
   State<Keyboard> createState() => _KeyboardState();
@@ -49,13 +51,12 @@ class _KeyboardState extends State<Keyboard>
   dynamic depressed;
   Timer? depressedTimer;
 
-  void _animate() => animate(widget.active ? 0 : height);
+  void _animate() => animate(widget.active ? 0 : height + _Key.margin);
 
   @override
   void initState() {
     super.initState();
-    controller.duration = scrollDuration;
-    controller.value = 0.8;
+    controller.value = 0.7;
     _animate();
   }
 
@@ -139,6 +140,10 @@ class _KeyboardState extends State<Keyboard>
 
     switch (e.name) {
       case "Arrow Up":
+        if (y == 0 && widget.onExit != null) {
+          Timer.run(widget.onExit!);
+          return;
+        }
         setY(y > 0 ? y - 1 : rows - 1);
         break;
       case "Arrow Down":
@@ -213,7 +218,7 @@ class _KeyboardState extends State<Keyboard>
     // TODO
   }
 
-  void submit() => widget.onSubmit();
+  void submit() => Timer.run(widget.onSubmit);
 
   void swap() {
     setState(() {

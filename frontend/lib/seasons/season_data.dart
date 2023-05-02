@@ -14,6 +14,8 @@ class SeasonData {
   final int number;
   final List<EpisodeData> episodes;
   final ScrollController scrollController = ScrollController();
+
+  @JsonKey(includeFromJson: false)
   int index;
 
   factory SeasonData.fromJson(Map<String, dynamic> json) =>
@@ -39,7 +41,10 @@ class EpisodeData {
   final String? overview;
   final int? runtime;
   final String? still;
+
+  @JsonKey(includeFromJson: false)
   String? magnet;
+  @JsonKey(includeFromJson: false)
   bool unavailable = false;
 
   factory EpisodeData.fromJson(Map<String, dynamic> json) =>
