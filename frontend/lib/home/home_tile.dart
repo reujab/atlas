@@ -36,6 +36,7 @@ class _TileState extends State<Tile>
 
     return ScaleTransition(
       scale: animation,
+      filterQuality: FilterQuality.low,
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,

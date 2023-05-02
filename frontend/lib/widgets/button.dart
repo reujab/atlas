@@ -42,6 +42,7 @@ class _ButtonState extends State<Button>
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: animation,
+      filterQuality: FilterQuality.medium,
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,

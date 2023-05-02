@@ -41,6 +41,7 @@ class _EpisodeState extends State<Episode>
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: animation,
+      filterQuality: FilterQuality.medium,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(Episode.padY)),

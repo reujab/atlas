@@ -274,6 +274,7 @@ class _KeyState extends State<_Key>
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: animation,
+      filterQuality: FilterQuality.medium,
       child: Container(
         width: _Key.size,
         height: _Key.size,
