@@ -70,7 +70,7 @@ class _SearchState extends State<Search> {
                         style:
                             const TextStyle(color: Colors.black, fontSize: 72),
                       ),
-                      const Cursor(),
+                      Cursor(blinking: keyboardActive),
                     ],
                   ),
                   AnimatedContainer(

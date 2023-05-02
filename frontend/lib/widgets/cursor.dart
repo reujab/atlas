@@ -4,7 +4,9 @@ import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 
 class Cursor extends StatefulWidget {
-  const Cursor({super.key});
+  const Cursor({super.key, this.blinking = true});
+
+  final bool blinking;
 
   @override
   State<Cursor> createState() => _CursorState();
@@ -19,13 +21,24 @@ class _CursorState extends State<Cursor> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       timer = Timer.periodic(const Duration(milliseconds: 333), (timer) {
         if (!mounted || timer.tick % 3 == 0) return;
         setState(() {
-          opacity = 1 - opacity;
+          opacity = widget.blinking ? timer.tick % 3 - 1 : 0;
         });
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(Cursor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.blinking != widget.blinking) {
+      setState(() {
+        opacity = widget.blinking ? 1 : 0;
+      });
+    }
   }
 
   @override
