@@ -251,6 +251,7 @@ class _KeyState extends State<_Key>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       animate(widget.active ? 1.2 : 1);
     });
   }

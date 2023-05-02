@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
@@ -35,6 +36,7 @@ class _SearchState extends State<Search> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
         keyboardActive = true;
       });
@@ -131,13 +133,17 @@ class _SearchState extends State<Search> {
         }
         break;
       case "Arrow Down":
-        setState(() {
-          if (index < visibleResults - 1) {
+        if (index < visibleResults - 1) {
+          setState(() {
             index++;
-          } else {
-            keyboardActive = true;
-          }
-        });
+          });
+        } else {
+          Timer(const Duration(milliseconds: 20), () {
+            setState(() {
+              keyboardActive = true;
+            });
+          });
+        }
         break;
       case "Enter":
         TitleDetails.title = results[index];
