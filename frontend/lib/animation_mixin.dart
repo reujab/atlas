@@ -13,12 +13,12 @@ mixin AnimationMixin<T extends StatefulWidget> on TickerProviderStateMixin<T> {
   late var animation = controller.drive(_curve);
 
   void animate(double end) {
-    final value = animation.value;
+    final begin = animation.value;
     setState(() {
       animation =
-          controller.drive(_curve).drive(Tween<double>(begin: value, end: end));
+          controller.drive(_curve).drive(Tween<double>(begin: begin, end: end));
     });
-    controller.value = 1 - value;
+    controller.value = 0;
     controller.animateTo(1);
   }
 
