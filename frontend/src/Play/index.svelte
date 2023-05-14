@@ -35,9 +35,10 @@
 		if (cancelled) return;
 
 		const { video, subs } = streamInfo;
-		const start = $progress[type][progressID]
-			? [`--start=${$progress[type][progressID][1]}`]
-			: [];
+		const start =
+			$progress[type][progressID]?.[0] < 0.9
+				? [`--start=${$progress[type][progressID][1]}`]
+				: [];
 		const subFile = subs ? [`--sub-file=${subs}`] : [];
 		mpv = childProcess.spawn(
 			"mpv",
