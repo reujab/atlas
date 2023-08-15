@@ -56,8 +56,11 @@ class _KeyboardState extends State<Keyboard>
   @override
   void initState() {
     super.initState();
-    controller.value = 0.7;
-    _animate();
+    animate(widget.active ? 128 : height + _Key.margin,
+        duration: Duration.zero);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animate();
+    });
   }
 
   @override

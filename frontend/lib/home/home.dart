@@ -46,6 +46,9 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     precacheRows();
+    router.addListener(() {
+      if (router.location == "/home") precacheRows();
+    });
   }
 
   Future<void> precacheRows() async {

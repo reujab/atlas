@@ -23,7 +23,7 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   String query = "";
-  bool keyboardActive = false;
+  bool keyboardActive = true;
   InputEvent? inputEvent;
   Map<String, List<TitleData>> cache = {};
   List<TitleData> results = [];
@@ -37,9 +37,6 @@ class _SearchState extends State<Search> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {
-        keyboardActive = true;
-      });
     });
   }
 

@@ -104,7 +104,7 @@ class _TitleDetailsState extends State<TitleDetails> {
       return;
     }
 
-    setState(() {
+    _setState(() {
       magnet = json["magnet"];
     });
   }

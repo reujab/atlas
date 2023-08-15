@@ -1,7 +1,7 @@
 set -ex
 
 # install dependencies
-apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest
+apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest mpv yt-dlp fonts-cantarell fonts-noto fonts-noto-extra fonts-noto-cjk
 systemctl start systemd-timesyncd
 snap install ubuntu-frame
 cp update/update.sh /usr/local/bin
