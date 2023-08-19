@@ -206,7 +206,7 @@ parts:
       find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/${CRAFT_ARCH_TRIPLET}/{} \;
       rm -fr "$CRAFT_PRIME/usr/lib/${CRAFT_ARCH_TRIPLET}/dri"
       cd "$CRAFT_PRIME/usr/share/"
-      rm -rf bug drirc.d glvnd libdrm lintian man alsa bash-completion dbus-1 help kconf_update kservices5 libinput locale openal pkgconfig applications doc kf5 kservicetypes5 libthai metainfo perl qlogging-categories5 thumbnailers xml apport config.kcfg doc-base GConf gnupg info knotifications5 kxmlgui5 libwacom themes sounds
+      rm -rf bug drirc.d glvnd libdrm lintian man bash-completion dbus-1 help kconf_update kservices5 libinput locale openal pkgconfig applications doc kf5 kservicetypes5 libthai metainfo perl qlogging-categories5 thumbnailers xml apport config.kcfg doc-base GConf gnupg info knotifications5 kxmlgui5 libwacom themes sounds
       cd $CRAFT_PRIME/usr/lib/$CRAFT_ARCH_TRIPLET
       rm -rf libLLVM* libGLX_mesa* libpulse-simple* libjacket* libtheora* libvulkan* libwayland-server* libdconf*
       echo $SNAPCRAFT_PROJECT_VERSION > $CRAFT_PRIME/VERSION
