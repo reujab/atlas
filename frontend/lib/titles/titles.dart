@@ -130,6 +130,11 @@ class _TitlesState extends State<Titles> {
   }
 
   void onKeyDown(InputEvent e) {
+    if (e.name == "Browser Home") {
+      router.go("/");
+      return;
+    }
+
     if (e.name == "Escape") {
       router.pop();
       return;

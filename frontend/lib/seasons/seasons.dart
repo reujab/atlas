@@ -150,6 +150,9 @@ class _SeasonsState extends State<Seasons> {
               "/play?magnet=${Uri.encodeComponent(episode.magnet!)}&s=${season.number}&e=${episode.number}");
         }
         break;
+      case "Browser Home":
+        router.go("/");
+        break;
       case "Escape":
         router.pop();
         break;

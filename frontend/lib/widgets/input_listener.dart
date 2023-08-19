@@ -53,7 +53,7 @@ class _InputListenerState extends State<InputListener> {
     }
 
     widget.onKeyDown(InputEvent(
-      name: key,
+      name: key == "Browser Back" ? "Escape" : key,
       character: event.character,
       time: DateTime.now(),
     ));

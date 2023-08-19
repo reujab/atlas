@@ -108,6 +108,11 @@ class _SearchState extends State<Search> {
       inputEvent = e;
     });
 
+    if (e.name == "Browser Home") {
+      router.go("/");
+      return;
+    }
+
     if (e.name == "Escape") {
       if (keyboardActive) {
         router.pop();
