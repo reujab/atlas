@@ -296,7 +296,7 @@ impl SimpleComponent for App {
         let sender_clone = sender.clone();
         let kbd_controller = EventControllerKey::new();
         input_worker::handle_keyboard(sender_clone, stream, &kbd_controller);
-        root.add_controller(&kbd_controller);
+        root.add_controller(kbd_controller);
 
         ComponentParts { model, widgets }
     }
