@@ -16,6 +16,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  static final localIP =
+      Process.runSync("hostname", ["-I"]).stdout.toString().split(" ")[0];
+
+  static final version = File("${const String.fromEnvironment("SNAP")}/VERSION")
+      .readAsStringSync()
+      .trim();
+
   static final tiles = [
     TileData(
       name: "Movies",
@@ -80,24 +87,43 @@ class _HomeState extends State<Home> {
 
     return InputListener(
       onKeyDown: onKeyDown,
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: img,
-            fit: BoxFit.cover,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: img,
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Padding(
+              padding:
+                  EdgeInsets.all(MediaQuery.of(context).size.height / 12 - 0.1),
+              child: Wrap(
+                direction: Axis.vertical,
+                children: [
+                  for (int i = 0; i < tiles.length; i++)
+                    Tile(tiles[i], active: i == index)
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Padding(
-          padding:
-              EdgeInsets.all(MediaQuery.of(context).size.height / 12 - 0.1),
-          child: Wrap(
-            direction: Axis.vertical,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              for (int i = 0; i < tiles.length; i++)
-                Tile(tiles[i], active: i == index)
+              Text(
+                localIP,
+                style: const TextStyle(fontSize: 24),
+              ),
+              const Spacer(),
+              Text(
+                "Atlas v$version",
+                style: const TextStyle(fontSize: 24),
+              ),
             ],
-          ),
-        ),
+          )
+        ],
       ),
     );
   }
