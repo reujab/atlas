@@ -89,7 +89,7 @@ class _PlayState extends State<Play> {
   }
 
   void onKeyDown(InputEvent e) {
-    if (e.name == "Browser Home") router.go("/");
+    if (e.name == "Browser Home") router.go("/home");
     if (e.name == "Escape") router.pop();
   }
 

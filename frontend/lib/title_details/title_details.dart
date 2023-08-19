@@ -187,7 +187,7 @@ class _TitleDetailsState extends State<TitleDetails> {
         buttons[index].onClick();
         break;
       case "Browser Home":
-        router.go("/");
+        router.go("/home");
         break;
       case "Escape":
         router.pop();

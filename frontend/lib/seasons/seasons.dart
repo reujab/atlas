@@ -151,7 +151,7 @@ class _SeasonsState extends State<Seasons> {
         }
         break;
       case "Browser Home":
-        router.go("/");
+        router.go("/home");
         break;
       case "Escape":
         router.pop();

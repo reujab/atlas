@@ -109,7 +109,7 @@ class _SearchState extends State<Search> {
     });
 
     if (e.name == "Browser Home") {
-      router.go("/");
+      router.go("/home");
       return;
     }
 
