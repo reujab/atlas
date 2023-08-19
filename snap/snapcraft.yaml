@@ -68,7 +68,6 @@ parts:
       - XDG_DATA_DIRS: /snap/flutter/current/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
     override-build: |
       set -eux
-      env
       mkdir -p $CRAFT_PART_INSTALL/bin/lib
       flutter channel stable
       flutter upgrade
