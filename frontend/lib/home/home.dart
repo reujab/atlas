@@ -16,12 +16,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static final localIP =
-      Process.runSync("hostname", ["-I"]).stdout.toString().split(" ")[0];
-
-  static final version = File("${const String.fromEnvironment("SNAP")}/VERSION")
-      .readAsStringSync()
-      .trim();
+  static const version = String.fromEnvironment("ATLAS_VERSION");
 
   static final tiles = [
     TileData(
@@ -49,12 +44,19 @@ class _HomeState extends State<Home> {
 
   int index = 0;
 
+  String? localIP;
+
   @override
   void initState() {
     super.initState();
     precacheRows();
     router.addListener(() {
       if (router.location == "/home") precacheRows();
+    });
+    NetworkInterface.list().then((interfaces) {
+      setState(() {
+        localIP = interfaces.asMap()[0]?.addresses.asMap()[0]?.address;
+      });
     });
   }
 
@@ -113,13 +115,13 @@ class _HomeState extends State<Home> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                localIP,
+                localIP ?? "",
                 style: const TextStyle(fontSize: 24),
               ),
               const Spacer(),
-              Text(
+              const Text(
                 "Atlas v$version",
-                style: const TextStyle(fontSize: 24),
+                style: TextStyle(fontSize: 24),
               ),
             ],
           )
