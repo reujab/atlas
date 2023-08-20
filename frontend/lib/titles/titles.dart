@@ -155,6 +155,9 @@ class _TitlesState extends State<Titles> {
       case "Arrow Right":
         setRowIndex(row.index < row.titles.length - 1 ? row.index + 1 : 0);
         break;
+      case "Browser Search":
+        router.push("/search");
+        break;
       case "Enter":
         router.push("/title");
         break;

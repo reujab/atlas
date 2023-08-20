@@ -146,6 +146,10 @@ class _HomeState extends State<Home> {
         break;
       case "Enter":
         tiles[index].onClick();
+        break;
+      case "Browser Search":
+        router.push("/search");
+        break;
     }
   }
 
