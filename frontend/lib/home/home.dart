@@ -2,6 +2,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
+import "package:frontend/home/home_info.dart";
 import "package:frontend/home/home_tile.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/router.dart";
@@ -111,6 +112,7 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
+          const HomeInfo(),
           Container(
             alignment: Alignment.bottomCenter,
             margin: const EdgeInsets.all(4),
