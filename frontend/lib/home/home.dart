@@ -111,20 +111,23 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                localIP ?? "",
-                style: const TextStyle(fontSize: 24),
-              ),
-              const Spacer(),
-              const Text(
-                "Atlas v$version",
-                style: TextStyle(fontSize: 24),
-              ),
-            ],
-          )
+          Container(
+            alignment: Alignment.bottomCenter,
+            margin: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                Text(
+                  localIP ?? "",
+                  style: const TextStyle(fontSize: 24),
+                ),
+                const Spacer(),
+                const Text(
+                  "Atlas v$version",
+                  style: TextStyle(fontSize: 24),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
