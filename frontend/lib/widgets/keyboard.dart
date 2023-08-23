@@ -50,6 +50,7 @@ class _KeyboardState extends State<Keyboard>
   int y = 0;
   dynamic depressed;
   Timer? depressedTimer;
+  bool caps = false;
 
   void _animate() => animate(widget.active ? 0 : height + _Key.margin);
 
@@ -92,6 +93,7 @@ class _KeyboardState extends State<Keyboard>
                   _Key(
                     active: i == y && j == x,
                     depressed: depressed == keyboard[page][i][j],
+                    border: caps && keyboard[page][i][j] == shift,
                     child: getKeyWidget(keyboard[page][i][j]),
                   ),
               ],
@@ -173,7 +175,7 @@ class _KeyboardState extends State<Keyboard>
   void setDepressed(dynamic key) {
     if (key is String) {
       Timer.run(() {
-        widget.onKey(key.toLowerCase());
+        widget.onKey(caps ? key : key.toLowerCase());
       });
     } else if (key is Function()) {
       key();
@@ -218,7 +220,9 @@ class _KeyboardState extends State<Keyboard>
   }
 
   void shift() {
-    // TODO
+    setState(() {
+      caps = !caps;
+    });
   }
 
   void submit() => Timer.run(widget.onSubmit);
@@ -234,6 +238,7 @@ class _Key extends StatefulWidget {
   const _Key({
     required this.active,
     required this.depressed,
+    required this.border,
     required this.child,
   });
 
@@ -242,6 +247,7 @@ class _Key extends StatefulWidget {
 
   final bool active;
   final bool depressed;
+  final bool border;
   final Widget child;
 
   @override
@@ -279,15 +285,19 @@ class _KeyState extends State<_Key>
     return ScaleTransition(
       scale: animation,
       filterQuality: FilterQuality.medium,
-      child: Container(
+      child: AnimatedContainer(
         width: _Key.size,
         height: _Key.size,
         alignment: Alignment.center,
         margin: const EdgeInsets.all(_Key.margin),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(24)),
+        duration: scaleDuration,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(24)),
           boxShadow: boxShadow,
           color: Colors.white,
+          border: widget.border
+              ? Border.all(color: const Color(0xFF93c5fd), width: 5)
+              : null,
         ),
         child: widget.child,
       ),
