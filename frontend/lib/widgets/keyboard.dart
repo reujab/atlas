@@ -113,16 +113,14 @@ class _KeyboardState extends State<Keyboard>
       }
       return Text(
         key,
-        style: const TextStyle(
-            fontSize: 64, color: Colors.black, fontWeight: FontWeight.normal),
+        style: const TextStyle(fontSize: 64, color: Colors.black),
       );
     }
 
     if (key == swap) {
       return Text(
         page == 0 ? "123" : "ABC",
-        style: const TextStyle(
-            fontSize: 48, color: Colors.black, fontWeight: FontWeight.normal),
+        style: const TextStyle(fontSize: 48, color: Colors.black),
       );
     }
 

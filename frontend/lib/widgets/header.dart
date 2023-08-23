@@ -20,7 +20,10 @@ class Header extends StatelessWidget {
       const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
       const SizedBox(width: 32),
       Expanded(
-        child: Text(title, style: const TextStyle(fontSize: 96)),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w200),
+        ),
       ),
       ...(search ? searchWidgets : []),
     ]);

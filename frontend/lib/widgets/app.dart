@@ -12,7 +12,6 @@ class App extends StatelessWidget {
         color: Colors.white,
         fontFamily: "Cantarell",
         fontSize: 36,
-        fontWeight: FontWeight.w200,
       ),
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),

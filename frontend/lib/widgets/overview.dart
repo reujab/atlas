@@ -39,15 +39,13 @@ class Overview extends StatelessWidget {
                   ),
                   Text(
                     genres!.join(" • "),
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.w400),
+                    style: const TextStyle(fontSize: 24),
                   ),
                 ]),
               ]),
         const SizedBox(height: 8),
         Text(
           "$overview${maxLines == null ? "" : "\n\n"}",
-          style: const TextStyle(fontWeight: FontWeight.w400),
           maxLines: maxLines,
           overflow:
               maxLines == null ? TextOverflow.visible : TextOverflow.ellipsis,

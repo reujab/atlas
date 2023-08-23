@@ -48,11 +48,7 @@ class _ResultState extends State<Result> {
         ),
         Text(
           widget.title.released?.year.toString() ?? "",
-          style: const TextStyle(
-            fontSize: 48,
-            color: Colors.gray,
-            fontWeight: FontWeight.normal,
-          ),
+          style: const TextStyle(fontSize: 48, color: Colors.gray),
         ),
       ]),
     );

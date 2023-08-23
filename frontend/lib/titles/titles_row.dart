@@ -106,7 +106,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
         alignment: Alignment.topLeft,
         child: Text(
           widget.name,
-          style: const TextStyle(fontSize: 72),
+          style: const TextStyle(fontSize: 72, fontWeight: FontWeight.w200),
           textAlign: TextAlign.start,
         ),
       ),
