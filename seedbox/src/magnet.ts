@@ -1,8 +1,13 @@
 import cheerio from "cheerio";
+import express from "express";
 import http from "http";
 import parseName from "./parse";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { get } from ".";
+
+const aliases: { [key: string]: string } = {
+	"Special Victims Unit": "SVU",
+};
 
 export interface Source {
 	name: string;
@@ -18,7 +23,68 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export default async function searchMagnets(query: string, type: string): Promise<Source[]> {
+export default async function search(req: express.Request, res: express.Response): Promise<void> {
+	const type = req.params.type;
+	const query = req.query.q as string;
+	const season = Number(req.query.s);
+	const episode = Number(req.query.e);
+
+	if (!query || (type === "tv" && (!season || !episode))) {
+		res.status(400).end();
+		return;
+	}
+
+	const queries = [query];
+	for (const key of Object.keys(aliases)) {
+		if (query.toLowerCase().includes(key.toLowerCase())) {
+			queries.push(query.toLowerCase().replace(key.toLowerCase(), aliases[key]));
+		}
+	}
+
+	const searches = [];
+	for (const q of queries) {
+		if (type === "movie") {
+			searches.push(q);
+		} else {
+			searches.push(
+				`${q} Season ${season}`,
+				`${q} S${String(season).padStart(
+					2,
+					"0"
+				)}`,
+				`${q} S${String(season).padStart(
+					2,
+					"0"
+				)}E${String(episode).padStart(2, "0")}`,
+			);
+		}
+	}
+	const sources = (await Promise.all(searches.map((q) => searchMagnets(q, type)))).flat()
+		.filter(
+			(source) =>
+				type === "movie" || source.seasons?.includes(season) &&
+				[episode, null].includes(source.episode)
+		)
+		.sort((a, b) => b.score - a.score);
+
+	if (!sources.length) {
+		res.status(404).end();
+		return;
+	}
+
+	const source = sources[0];
+	const magnet = await source.getMagnet();
+	const seasons = source.episode === null ? source.seasons : null;
+
+	// cache for a week
+	res.set("Cache-Control", "public, max-age=604800");
+	res.json({
+		magnet,
+		seasons,
+	});
+}
+
+async function searchMagnets(query: string, type: string): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
 	let sources = (await Promise.allSettled([searchPB(query, type), search1337x(query, type)])).filter((p) => {
 		if (p.status === "fulfilled") {

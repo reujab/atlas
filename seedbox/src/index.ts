@@ -3,7 +3,7 @@ import express from "express";
 import getRows from "./rows";
 import getSeasons from "./seasons";
 import morgan from "morgan";
-import search from "./search";
+import searchTitles from "./search";
 import searchMagnets from "./magnet";
 
 const app = express();
@@ -20,67 +20,9 @@ app.get("/seasons/:id(\\d+)", async (req, res) => {
 	res.json(await getSeasons(req.params.id));
 });
 
-app.get("/search", search);
+app.get("/search", searchTitles);
 
-app.get("/:type(movie|tv)/magnet", async (req, res) => {
-	const type = req.params.type;
-	const query = req.query.q;
-	const season = Number(req.query.s);
-	const episode = Number(req.query.e);
-
-	if (!query || (type === "tv" && (!season || !episode))) {
-		res.status(400).end();
-		return;
-	}
-
-	let sources;
-	if (type === "movie") {
-		sources = await searchMagnets(query as string, type);
-	} else {
-		sources = (
-			await Promise.all([
-				searchMagnets(`${query} Season ${season}`, type),
-				searchMagnets(
-					`${query} S${String(season).padStart(
-						2,
-						"0"
-					)}`,
-					type,
-				),
-				searchMagnets(
-					`${query} S${String(season).padStart(
-						2,
-						"0"
-					)}E${String(episode).padStart(2, "0")}`,
-					type,
-				),
-			])
-		)
-			.flat()
-			.filter(
-				(source) =>
-					source.seasons?.includes(season) &&
-					[episode, null].includes(source.episode)
-			)
-			.sort((a, b) => b.score - a.score);
-	}
-
-	if (!sources.length) {
-		res.status(404).end();
-		return;
-	}
-
-	const source = sources[0];
-	const magnet = await source.getMagnet();
-	const seasons = source.episode === null ? source.seasons : null;
-
-	// cache for a week
-	res.set("Cache-Control", "public, max-age=604800");
-	res.json({
-		magnet,
-		seasons,
-	});
-});
+app.get("/:type(movie|tv)/magnet", searchMagnets);
 
 app.get("/init", stream.init);
 
