@@ -59,13 +59,15 @@ class _PlayState extends State<Play> {
 
   Future<void> spawnOverlay(url) async {
     final subs = stream?["subs"] == null ? [] : ["--subs=${stream!["subs"]}"];
-    overlay = await Process.start("atlas-overlay", [
-      "--title=${title.title}",
-      "--video=$url",
-      ...subs,
-    ]);
-    overlay!.stdout.transform(utf8.decoder).forEach(log.fine);
-    overlay!.stderr.transform(utf8.decoder).forEach(log.warning);
+    overlay = await Process.start(
+      "atlas-overlay",
+      [
+        "--title=${title.title}",
+        "--video=$url",
+        ...subs,
+      ],
+      mode: ProcessStartMode.inheritStdio,
+    );
     log.info("overlay exited with ${await overlay!.exitCode}");
     overlay = null;
     if (router.location.startsWith("/play")) router.pop();
