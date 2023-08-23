@@ -160,6 +160,9 @@ class _KeyboardState extends State<Keyboard>
       case "Arrow Right":
         setX(x < keyboard[page][y].length - 1 ? x + 1 : 0);
         break;
+      case "Caps Lock":
+        shift();
+        break;
       case "Backspace":
         setDepressed(backspace);
         break;
