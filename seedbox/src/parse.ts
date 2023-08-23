@@ -1,4 +1,4 @@
-export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?/i;
+export const episodeRegex = /\b(?:seasons?|s)[ .]*([\d s.,&-]+).*?(?:(?:episode|ep?)[ .]*(\d+))?|^(\d)(\d{2})\b/i;
 
 export interface ParsedName {
 	seasons: number[];
@@ -8,6 +8,10 @@ export interface ParsedName {
 export default function parseName(name: string): ParsedName {
 	const match = name.match(episodeRegex);
 	if (!match) return { seasons: [], episode: null };
+
+	if (match[3] && match[4]) {
+		return { seasons: [Number(match[3])], episode: Number(match[4]) };
+	}
 
 	const seasons = match[1]
 		.replace(/[ .,&s-]+/gi, " ")
