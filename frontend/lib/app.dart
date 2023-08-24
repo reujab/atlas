@@ -1,6 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 import "package:frontend/router.dart";
+import "package:frontend/widgets/error_banner.dart";
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -15,10 +16,18 @@ class App extends StatelessWidget {
       ),
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: WidgetsApp.router(
-          title: "Atlas",
-          color: Colors.transparent,
-          routerConfig: router,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: [
+              WidgetsApp.router(
+                title: "Atlas",
+                color: Colors.transparent,
+                routerConfig: router,
+              ),
+              const ErrorBanner(),
+            ],
+          ),
         ),
       ),
     );

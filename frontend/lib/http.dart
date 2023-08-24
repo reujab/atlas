@@ -25,7 +25,7 @@ Future<http.Response> get(String url) async {
         "Got reply in ${DateTime.now().difference(then).inMilliseconds}ms");
 
     if (res.statusCode != 200) {
-      final err = "$url responded with ${res.statusCode}";
+      final err = "Error ${res.statusCode}: $url";
       log.severe(err);
       if (res.statusCode == 404) return res;
       if (i == maxTries || res.statusCode < 500) throw err;

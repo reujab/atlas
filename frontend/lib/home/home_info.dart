@@ -66,15 +66,16 @@ class _HomeInfoState extends State<HomeInfo> {
   }
 
   Future<void> updateWeather() async {
+    if (!mounted) return;
+
     final coords = await getCoords();
     final Map<String, dynamic> meta, json;
     try {
       meta = await getJson("https://api.weather.gov/points/$coords");
       json = await getJson(meta["properties"]["forecast"]);
     } catch (err) {
-      log.shout("Failed to get forecast: $err");
-      if (mounted) Timer(const Duration(seconds: 1), updateWeather);
-      return;
+      Timer(const Duration(seconds: 1), updateWeather);
+      throw "Failed to get forecast: $err";
     }
     if (!mounted) return;
     final forecast = json["properties"]["periods"][0];
@@ -146,7 +147,10 @@ class _HomeInfoState extends State<HomeInfo> {
                             decoration:
                                 const BoxDecoration(shape: BoxShape.circle),
                             clipBehavior: Clip.antiAlias,
-                            margin: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 16,
+                            ),
                             child: CachedNetworkImage(imageUrl: weather!.icon),
                           ),
                           Text(
