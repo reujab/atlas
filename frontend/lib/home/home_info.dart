@@ -73,8 +73,7 @@ class _HomeInfoState extends State<HomeInfo> {
       json = await getJson(meta["properties"]["forecast"]);
     } catch (err) {
       log.shout("Failed to get forecast: $err");
-      if (!mounted) return;
-      Timer(const Duration(seconds: 1), updateWeather);
+      if (mounted) Timer(const Duration(seconds: 1), updateWeather);
       return;
     }
     if (!mounted) return;
@@ -95,80 +94,76 @@ class _HomeInfoState extends State<HomeInfo> {
   Widget build(BuildContext context) {
     final time = DateFormat.jms("en_US").format(date);
 
-    return Align(
+    return UnconstrainedBox(
       alignment: Alignment.centerRight,
-      child: FittedBox(
-        child: Container(
-          margin: const EdgeInsets.only(right: 64),
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            color: Color(0xB34B5563),
-          ),
-          child: IntrinsicWidth(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  DateFormat("EEEE").format(date),
-                  style: const TextStyle(fontSize: 32),
-                ),
-                Text(
-                  DateFormat.yMMMd("en_US").format(date),
-                  style: const TextStyle(fontSize: 48),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: time.characters
-                      .map(
-                        (char) => Container(
-                          width: int.tryParse(char) == null ? null : 38,
-                          alignment: Alignment.center,
-                          child:
-                              Text(char, style: const TextStyle(fontSize: 64)),
+      child: Container(
+        margin: const EdgeInsets.only(right: 64),
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          color: Color(0xB34B5563),
+        ),
+        child: IntrinsicWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                DateFormat("EEEE").format(date),
+                style: const TextStyle(fontSize: 32),
+              ),
+              Text(
+                DateFormat.yMMMd("en_US").format(date),
+                style: const TextStyle(fontSize: 48),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: time.characters
+                    .map(
+                      (char) => Container(
+                        width: int.tryParse(char) == null ? null : 38,
+                        alignment: Alignment.center,
+                        child: Text(char, style: const TextStyle(fontSize: 64)),
+                      ),
+                    )
+                    .toList(),
+              ),
+              ...(weather == null
+                  ? []
+                  : [
+                      Container(
+                        color: Colors.white,
+                        height: 1,
+                        margin: const EdgeInsets.all(16),
+                      ),
+                      Text(
+                        weather!.city,
+                        style: const TextStyle(fontSize: 32),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            decoration:
+                                const BoxDecoration(shape: BoxShape.circle),
+                            clipBehavior: Clip.antiAlias,
+                            margin: const EdgeInsets.all(16),
+                            child: CachedNetworkImage(imageUrl: weather!.icon),
+                          ),
+                          Text(
+                            weather!.temp,
+                            style: const TextStyle(fontSize: 64),
+                          ),
+                        ],
+                      ),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        child: Text(
+                          weather!.forecast,
+                          style: const TextStyle(fontSize: 38),
                         ),
                       )
-                      .toList(),
-                ),
-                ...(weather == null
-                    ? []
-                    : [
-                        Container(
-                          color: Colors.white,
-                          height: 1,
-                          margin: const EdgeInsets.all(16),
-                        ),
-                        Text(
-                          weather!.city,
-                          style: const TextStyle(fontSize: 32),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              decoration:
-                                  const BoxDecoration(shape: BoxShape.circle),
-                              clipBehavior: Clip.antiAlias,
-                              margin: const EdgeInsets.all(16),
-                              child:
-                                  CachedNetworkImage(imageUrl: weather!.icon),
-                            ),
-                            Text(
-                              weather!.temp,
-                              style: const TextStyle(fontSize: 64),
-                            ),
-                          ],
-                        ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 360),
-                          child: Text(
-                            weather!.forecast,
-                            style: const TextStyle(fontSize: 38),
-                          ),
-                        )
-                      ]),
-              ],
-            ),
+                    ]),
+            ],
           ),
         ),
       ),
