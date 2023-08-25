@@ -6,13 +6,13 @@ import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/http.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
-import "package:frontend/seasons/episode.dart";
+import "package:frontend/screens/seasons/episode.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
-import "package:frontend/seasons/season_data.dart";
-import "package:frontend/seasons/season_pill.dart";
-import "package:frontend/title_details/title_details.dart";
+import "package:frontend/screens/seasons/season_data.dart";
+import "package:frontend/screens/seasons/season_pill.dart";
+import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/router.dart";
 
 class Seasons extends StatefulWidget {

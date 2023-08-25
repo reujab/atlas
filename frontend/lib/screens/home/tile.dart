@@ -1,13 +1,12 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
-import "package:frontend/home/home.dart";
+import "package:frontend/screens/home/home.dart";
 import "package:frontend/animation_mixin.dart";
 
 class Tile extends StatefulWidget {
   const Tile(this.tile, {super.key, required this.active});
 
   final TileData tile;
-
   final bool active;
 
   @override

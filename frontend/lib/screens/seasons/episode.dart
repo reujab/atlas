@@ -4,7 +4,7 @@ import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 import "package:frontend/animation_mixin.dart";
-import "package:frontend/seasons/season_data.dart";
+import "package:frontend/screens/seasons/season_data.dart";
 
 class Episode extends StatefulWidget {
   const Episode(this.episode, {super.key, required this.active});

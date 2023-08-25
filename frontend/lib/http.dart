@@ -3,41 +3,39 @@ import "dart:convert";
 import "package:frontend/const.dart";
 import "package:http/http.dart" as http;
 
-Future<http.Response> get(String url) async {
-  const maxTries = 5;
+const maxTries = 4;
 
+Future<http.Response> get(String url) async {
   log.info("Getting $url");
 
-  final then = DateTime.now();
+  final start = DateTime.now();
 
   http.Response res;
-  for (int i = 1; i <= maxTries; i++) {
+  Object? error;
+  for (int i = 0; i < maxTries; i++) {
     try {
       res = await http.get(Uri.parse(url));
     } catch (err) {
+      error = err;
       log.shout("Unable to connect to $url: $err");
-      if (i == maxTries) rethrow;
-      await Future.delayed(const Duration(milliseconds: 250));
+      await Future.delayed(const Duration(milliseconds: 500));
       continue;
     }
 
-    log.info(
-        "Got reply in ${DateTime.now().difference(then).inMilliseconds}ms");
+    final replyMs = DateTime.now().difference(start).inMilliseconds;
+    log.info("Got reply in ${replyMs}ms");
 
-    if (res.statusCode != 200) {
-      final err = "Error ${res.statusCode}: $url";
-      log.severe(err);
-      if (res.statusCode == 404) return res;
-      if (i == maxTries || res.statusCode < 500) throw err;
-      continue;
-    }
+    if ([200, 404].contains(res.statusCode)) return res;
 
-    return res;
+    error = "Error ${res.statusCode}: $url";
+    if (res.statusCode < 500) throw error;
   }
 
-  throw UnimplementedError();
+  throw error!;
 }
 
 Future<T> getJson<T>(String url) async {
-  return jsonDecode(utf8.decode((await get(url)).bodyBytes));
+  final res = await get(url);
+  if (res.statusCode != 200) throw "Error ${res.statusCode}: $url";
+  return jsonDecode(utf8.decode(res.bodyBytes));
 }

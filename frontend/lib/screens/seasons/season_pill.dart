@@ -20,8 +20,7 @@ class _SeasonPillState extends State<SeasonPill>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      animate(widget.active ? scale : 1);
+      if (mounted) animate(widget.active ? scale : 1);
     });
   }
 

@@ -2,19 +2,19 @@ import "dart:convert";
 
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:frontend/const.dart";
+import "package:frontend/http.dart";
+import "package:frontend/router.dart";
+import "package:frontend/screens/seasons/season_data.dart";
+import "package:frontend/screens/seasons/seasons.dart";
+import "package:frontend/screens/titles/titles_row.dart";
+import "package:frontend/title_data.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/button.dart";
-import "package:frontend/const.dart";
 import "package:frontend/widgets/header.dart";
-import "package:frontend/http.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
 import "package:frontend/widgets/poster.dart";
-import "package:frontend/router.dart";
-import "package:frontend/seasons/season_data.dart";
-import "package:frontend/seasons/seasons.dart";
-import "package:frontend/title_data.dart";
-import "package:frontend/titles/titles_row.dart";
 import "package:intl/intl.dart";
 
 class TitleDetails extends StatefulWidget {
@@ -73,12 +73,8 @@ class _TitleDetailsState extends State<TitleDetails> {
   Future<void> getSeasons() async {
     Seasons.seasons = null;
 
-    List<dynamic> json;
-    try {
-      json = await getJson("$host/seasons/${title.id}?key=$key");
-    } catch (err) {
-      return;
-    }
+    final List<dynamic> json =
+        await getJson("$host/seasons/${title.id}?key=$key");
 
     Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
@@ -101,7 +97,7 @@ class _TitleDetailsState extends State<TitleDetails> {
         buttons[0].name = "Error";
         buttons[0].icon = FontAwesomeIcons.bug;
       });
-      return;
+      rethrow;
     }
 
     _setState(() {

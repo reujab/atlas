@@ -5,9 +5,9 @@ import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 import "package:frontend/http.dart";
 import "package:frontend/router.dart";
-import "package:frontend/search/result.dart";
+import "package:frontend/screens/search/result.dart";
 import "package:frontend/title_data.dart";
-import "package:frontend/title_details/title_details.dart";
+import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/cursor.dart";
 import "package:frontend/widgets/header.dart";
@@ -31,14 +31,6 @@ class _SearchState extends State<Search> {
 
   int get visibleResults =>
       query.isEmpty ? 0 : min(results.length, keyboardActive ? 2 : 5);
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,14 +96,14 @@ class _SearchState extends State<Search> {
   }
 
   void onKeyDown(InputEvent e) {
-    setState(() {
-      inputEvent = e;
-    });
-
     if (e.name == "Browser Home") {
       router.go("/home");
       return;
     }
+
+    setState(() {
+      inputEvent = e;
+    });
 
     if (e.name == "Escape") {
       if (keyboardActive) {
@@ -167,9 +159,7 @@ class _SearchState extends State<Search> {
 
       query += char;
 
-      if (wasEmpty) {
-        results = [];
-      }
+      if (wasEmpty) results = [];
     });
     search();
   }

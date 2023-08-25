@@ -9,7 +9,7 @@ import "package:frontend/http.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/router.dart";
 import "package:frontend/title_data.dart";
-import "package:frontend/title_details/title_details.dart";
+import "package:frontend/screens/title_details/title_details.dart";
 import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
@@ -27,18 +27,17 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   final TitleData title = TitleDetails.title!;
 
-  Map<String, dynamic>? stream;
+  Map<String, String>? stream;
   Process? overlay;
 
   @override
   void initState() {
     super.initState();
 
-    final url = widget.url;
     if (widget.magnet != null) {
       initStream();
-    } else if (url != null) {
-      spawnOverlay(url);
+    } else if (widget.url != null) {
+      spawnOverlay(widget.url);
     }
   }
 
@@ -46,30 +45,34 @@ class _PlayState extends State<Play> {
     try {
       stream = await getJson(
           "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}&key=$key");
-      if (!mounted) _deleteStream();
+      if (!mounted) {
+        _deleteStream();
+        return;
+      }
     } catch (err) {
-      log.severe(err);
-      router.pop();
-      return;
+      pop();
+      rethrow;
     }
 
-    if (stream != null) spawnOverlay("$host${stream!["video"]}?key=$key");
+    spawnOverlay("$host${stream!["video"]}?key=$key");
   }
 
   Future<void> spawnOverlay(url) async {
-    final subs = stream?["subs"] == null ? [] : ["--subs=${stream!["subs"]}"];
+    final List<String> opts = [
+      "--title=${title.title}",
+      "--video=$url",
+      ...(stream?["subs"] == null ? [] : ["--subs=${stream!["subs"]}"]),
+    ];
+    log.info("atlas-overlay ${opts.map((a) => "'$a'").join(" ")}");
     overlay = await Process.start(
       "atlas-overlay",
-      [
-        "--title=${title.title}",
-        "--video=$url",
-        ...subs,
-      ],
+      opts,
       mode: ProcessStartMode.inheritStdio,
     );
-    log.info("overlay exited with ${await overlay!.exitCode}");
+    final exitCode = await overlay!.exitCode;
     overlay = null;
-    if (router.location.startsWith("/play")) router.pop();
+    pop();
+    if (exitCode != 0) throw "Overlay exit code: $exitCode";
   }
 
   @override
@@ -80,9 +83,9 @@ class _PlayState extends State<Play> {
         child: Column(
           children: [
             Header(title.title),
-            const Spacer(),
-            const SpinKitRipple(color: Colors.white, size: 256),
-            const Spacer(),
+            const Expanded(
+              child: SpinKitRipple(color: Colors.white, size: 256),
+            ),
           ],
         ),
       ),
@@ -92,6 +95,10 @@ class _PlayState extends State<Play> {
   void onKeyDown(InputEvent e) {
     if (e.name == "Browser Home") router.go("/home");
     if (e.name == "Escape") router.pop();
+  }
+
+  void pop() {
+    if (router.location.startsWith("/play")) router.pop();
   }
 
   @override
@@ -106,14 +113,10 @@ class _PlayState extends State<Play> {
   }
 
   static void deleteStream(String deleteUri) async {
-    try {
-      var uri = Uri.parse(deleteUri);
-      var res = await http.delete(uri);
-      if (res.statusCode != 200) {
-        log.severe("deleting $deleteUri failed with ${res.statusCode}");
-      }
-    } catch (err) {
-      log.severe(err);
+    var uri = Uri.parse(deleteUri);
+    var res = await http.delete(uri);
+    if (res.statusCode != 200) {
+      throw "Failed to delete stream: ${res.statusCode}";
     }
   }
 }

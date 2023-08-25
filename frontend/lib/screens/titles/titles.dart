@@ -2,17 +2,17 @@ import "dart:async";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
-import "package:frontend/widgets/header.dart";
 import "package:frontend/http.dart";
+import "package:frontend/router.dart";
+import "package:frontend/screens/title_details/title_details.dart";
+import "package:frontend/screens/titles/row_data.dart";
+import "package:frontend/screens/titles/titles_row.dart";
+import "package:frontend/title_data.dart";
+import "package:frontend/widgets/background.dart";
+import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
-import "package:frontend/router.dart";
-import "package:frontend/titles/row_data.dart";
-import "package:frontend/title_data.dart";
-import "package:frontend/title_details/title_details.dart";
-import "package:frontend/titles/titles_row.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
@@ -23,12 +23,8 @@ class Titles extends StatefulWidget {
   final String type;
 
   static Future<void> initRows(String type) async {
-    try {
-      List<dynamic> json = await getJson("$host/$type/rows?key=$key");
-      rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
-    } catch (err) {
-      // TODO: handle err;
-    }
+    List<dynamic> json = await getJson("$host/$type/rows?key=$key");
+    rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
   }
 
   @override
@@ -39,13 +35,9 @@ class _TitlesState extends State<Titles> {
   final scrollController = ScrollController();
 
   Timer? timer;
-
   List<RowData>? rows;
-
   int index = 0;
-
   bool alreadyScrolled = false;
-
   double rowHeight = 0;
 
   RowData? get row {

@@ -2,12 +2,12 @@ import "dart:io";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
-import "package:frontend/home/home_info.dart";
-import "package:frontend/home/home_tile.dart";
-import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/router.dart";
-import "package:frontend/titles/titles.dart";
-import "package:frontend/titles/titles_row.dart";
+import "package:frontend/screens/home/tile.dart";
+import "package:frontend/screens/home/info.dart";
+import "package:frontend/screens/titles/titles.dart";
+import "package:frontend/screens/titles/titles_row.dart";
+import "package:frontend/widgets/input_listener.dart";
 
 class Home extends StatefulWidget {
   const Home({super.key});
