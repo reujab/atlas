@@ -184,7 +184,7 @@ class _SearchState extends State<Search> {
     }
 
     final List<dynamic> json = await getJson(
-        "$host/search?q=${Uri.encodeComponent(query)}&blacklist=${blacklist.join(",")}&key=$key");
+        "$host/search?q=${Uri.encodeComponent(query)}&blacklist=${blacklist.join(",")}");
     cache[query] = json.map((j) => TitleData.fromJson(j)).toList();
     setState(() {
       results = cache[query]!;

@@ -44,7 +44,7 @@ class _PlayState extends State<Play> {
   Future<void> initStream() async {
     try {
       stream = await getJson(
-          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}&key=$key");
+          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}");
       if (!mounted) {
         _deleteStream();
         return;
@@ -54,7 +54,7 @@ class _PlayState extends State<Play> {
       rethrow;
     }
 
-    spawnOverlay("$host${stream!["video"]}?key=$key");
+    spawnOverlay("$host${stream!["video"]}");
   }
 
   Future<void> spawnOverlay(url) async {
@@ -109,7 +109,7 @@ class _PlayState extends State<Play> {
   }
 
   void _deleteStream() {
-    if (stream != null) deleteStream("$host${stream!["delete"]!}?key=$key");
+    if (stream != null) deleteStream("$host${stream!["delete"]!}");
   }
 
   static void deleteStream(String deleteUri) async {

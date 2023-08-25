@@ -1,6 +1,6 @@
 #! /bin/sh
 
 . $SNAP/.env
-export SEEDBOX_HOST SEEDBOX_KEY AUDIO_DEVICE
+export SEEDBOX_HOST AUDIO_DEVICE
 
 exec frontend

@@ -1,12 +1,11 @@
 #!/bin/bash -e
 . /snap/atlas/current/.env
 export IP="$SEEDBOX_HOST"
-export KEY="$SEEDBOX_KEY"
 
 version=$(</snap/atlas/current/VERSION)
 echo Current version: "$version"
 
-new_version=$(curl -s "$IP/update/version?key=$KEY")
+new_version=$(curl -s "$IP/update/version")
 echo Latest version: "$new_version"
 
 if [[ $version = $new_version ]]; then
@@ -15,4 +14,4 @@ if [[ $version = $new_version ]]; then
 fi
 
 echo Updating
-curl -s "$IP/update/update.sh?key=$KEY" | bash -ex && echo Success
+curl -s "$IP/update/update.sh" | bash -ex && echo Success

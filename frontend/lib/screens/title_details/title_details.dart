@@ -73,8 +73,7 @@ class _TitleDetailsState extends State<TitleDetails> {
   Future<void> getSeasons() async {
     Seasons.seasons = null;
 
-    final List<dynamic> json =
-        await getJson("$host/seasons/${title.id}?key=$key");
+    final List<dynamic> json = await getJson("$host/seasons/${title.id}");
 
     Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
@@ -83,7 +82,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     Map<String, dynamic> json;
     try {
       var res = await get(
-          "$host/movie/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}&key=$key");
+          "$host/movie/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}");
       if (res.statusCode == 404) {
         _setState(() {
           buttons[0].name = "Unavailable";

@@ -34,6 +34,5 @@ class Colors {
 }
 
 final host = Platform.environment["SEEDBOX_HOST"]!;
-final key = Platform.environment["SEEDBOX_KEY"]!;
 
 final log = Logger("atlas");

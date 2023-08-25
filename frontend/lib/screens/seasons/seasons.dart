@@ -210,7 +210,7 @@ class _SeasonsState extends State<Seasons> {
     if (episode.magnet != null || episode.unavailable) return;
 
     final res = await get(
-        "$host/tv/magnet?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}&key=$key");
+        "$host/tv/magnet?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}");
     if (!mounted) return;
     if (res.statusCode == 404) {
       setState(() {

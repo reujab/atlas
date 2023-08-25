@@ -23,7 +23,7 @@ class Titles extends StatefulWidget {
   final String type;
 
   static Future<void> initRows(String type) async {
-    List<dynamic> json = await getJson("$host/$type/rows?key=$key");
+    List<dynamic> json = await getJson("$host/$type/rows");
     rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
   }
 
