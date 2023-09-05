@@ -16,16 +16,25 @@ class Header extends StatelessWidget {
           size: 56, color: Colors.white),
     ];
 
-    return Row(children: [
-      const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
-      const SizedBox(width: 32),
-      Expanded(
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w200),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
+        const SizedBox(width: 32),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: title.length >= 28 ? 72 : 96,
+              fontWeight: FontWeight.w200,
+            ),
+          ),
         ),
-      ),
-      ...(search ? searchWidgets : []),
-    ]);
+        const Text("", style: TextStyle(fontSize: 96)),
+        ...(search ? searchWidgets : []),
+      ],
+    );
   }
 }

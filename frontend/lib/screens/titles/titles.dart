@@ -78,7 +78,10 @@ class _TitlesState extends State<Titles> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Header(widget.type == "movie" ? "Movies" : "TV", search: true),
+            Header(
+              title?.title ?? (widget.type == "movie" ? "Movies" : "TV"),
+              search: true,
+            ),
             ...(rows == null || title == null
                 ? [
                     const Expanded(
