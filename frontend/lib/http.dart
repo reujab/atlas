@@ -36,6 +36,8 @@ Future<http.Response> get(String url) async {
 
 Future<T> getJson<T>(String url) async {
   final res = await get(url);
-  if (res.statusCode != 200) throw "Error ${res.statusCode}: $url";
+  if (res.statusCode != 200) {
+    throw "Error ${res.statusCode}: ${res.reasonPhrase}";
+  }
   return jsonDecode(utf8.decode(res.bodyBytes));
 }
