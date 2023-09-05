@@ -11,11 +11,9 @@ RowData _$RowDataFromJson(Map<String, dynamic> json) => RowData(
       titles: (json['titles'] as List<dynamic>)
           .map((e) => TitleData.fromJson(e as Map<String, dynamic>))
           .toList(),
-      index: json['index'] as int? ?? 0,
     );
 
 Map<String, dynamic> _$RowDataToJson(RowData instance) => <String, dynamic>{
       'name': instance.name,
       'titles': instance.titles,
-      'index': instance.index,
     };
