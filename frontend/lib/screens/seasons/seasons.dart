@@ -33,7 +33,8 @@ class _SeasonsState extends State<Seasons> {
   int index = 0;
   List<SeasonData> seasons = Seasons.seasons ?? [];
 
-  Timer? timer;
+  Timer? initTimer;
+  Timer? magnetTimer;
 
   SeasonData get season => seasons[index];
 
@@ -44,7 +45,7 @@ class _SeasonsState extends State<Seasons> {
     super.initState();
 
     if (seasons.isEmpty) {
-      timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      initTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
         if (Seasons.seasons == null) return;
         timer.cancel();
         setState(() {
@@ -205,7 +206,12 @@ class _SeasonsState extends State<Seasons> {
         .animateTo(y, duration: scrollDuration, curve: Curves.ease);
   }
 
-  Future<void> getMagnet() async {
+  void getMagnet() {
+    magnetTimer?.cancel();
+    magnetTimer = Timer(const Duration(seconds: 1), _getMagnet);
+  }
+
+  Future<void> _getMagnet() async {
     final episode = this.episode;
     if (episode.magnet != null || episode.unavailable) return;
 
@@ -233,7 +239,8 @@ class _SeasonsState extends State<Seasons> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    initTimer?.cancel();
+    magnetTimer?.cancel();
     pillScrollController.dispose();
     scrollController.dispose();
     super.dispose();
