@@ -121,23 +121,27 @@ class _TitleDetailsState extends State<TitleDetails> {
           children: [
             Header(title.title),
             const Spacer(),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(children: [
-                  Poster(title: title, width: TitlesRow.imgWidth),
-                  const SizedBox(height: 32),
-                  ...released,
-                ]),
-                const SizedBox(width: 32),
-                Expanded(
-                  child: Overview(
-                    rating: title.rating,
-                    genres: title.genres,
-                    overview: title.overview,
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Poster(title: title, width: TitlesRow.imgWidth),
+                      const SizedBox(height: 32),
+                      ...released,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(width: 32),
+                  Expanded(
+                    child: Overview(
+                      rating: title.rating,
+                      genres: title.genres,
+                      overview: title.overview,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const Spacer(),
             Row(
