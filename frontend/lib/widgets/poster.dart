@@ -1,3 +1,4 @@
+import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 import "package:frontend/title_data.dart";
@@ -14,8 +15,9 @@ class Poster extends StatelessWidget {
       decoration: const BoxDecoration(boxShadow: boxShadow),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-        child: Image.network(
-          "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}",
+        child: CachedNetworkImage(
+          imageUrl:
+              "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}",
           width: width,
         ),
       ),
