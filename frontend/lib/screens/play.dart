@@ -27,7 +27,7 @@ class Play extends StatefulWidget {
 class _PlayState extends State<Play> {
   final TitleData title = TitleDetails.title!;
 
-  Map<String, String>? stream;
+  Map<String, dynamic>? stream;
   Process? overlay;
 
   @override
