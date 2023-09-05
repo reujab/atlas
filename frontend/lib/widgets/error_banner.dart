@@ -47,7 +47,7 @@ class _ErrorBannerState extends State<ErrorBanner> {
       active = true;
     });
     activeTimer?.cancel();
-    activeTimer = Timer(const Duration(seconds: 5), () {
+    activeTimer = Timer(const Duration(seconds: 10), () {
       setState(() {
         active = false;
       });
