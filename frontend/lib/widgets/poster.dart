@@ -1,5 +1,6 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 import "package:frontend/title_data.dart";
 
@@ -19,6 +20,20 @@ class Poster extends StatelessWidget {
           imageUrl:
               "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}",
           width: width,
+          errorWidget: (context, url, error) {
+            log.shout("Error loading $url: $error");
+            return const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.circleExclamation,
+                  size: 64,
+                  color: Colors.white,
+                ),
+                Text("Error"),
+              ],
+            );
+          },
         ),
       ),
     );
