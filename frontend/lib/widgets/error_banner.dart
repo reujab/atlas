@@ -59,13 +59,13 @@ class _ErrorBannerState extends State<ErrorBanner> {
     return AnimatedPositioned(
       duration: scaleDuration,
       curve: Curves.ease,
-      top: active ? 16 : -128,
+      top: active ? 16 : -192,
       left: 128,
       right: 128,
       child: Align(
         alignment: Alignment.topCenter,
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
             color: Color(0xE6F87171),
             borderRadius: BorderRadius.all(Radius.circular(256)),
@@ -73,8 +73,17 @@ class _ErrorBannerState extends State<ErrorBanner> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title.isEmpty ? "Error" : title),
-              Text(description, style: const TextStyle(fontSize: 24)),
+              Text(
+                title.isEmpty ? "Error" : title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 24),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),
