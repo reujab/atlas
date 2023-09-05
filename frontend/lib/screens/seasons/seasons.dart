@@ -147,7 +147,7 @@ class _SeasonsState extends State<Seasons> {
       case "Enter":
         if (episode.magnet != null) {
           router.push(
-              "/play?magnet=${Uri.encodeComponent(episode.magnet!)}&s=${season.number}&e=${episode.number}");
+              "/play?magnet=${Uri.encodeComponent(episode.magnet!)}&s=${season.number}&e=${episode.number}&title=${episode.name}");
         }
         break;
       case "Browser Search":

@@ -13,12 +13,20 @@ import "package:frontend/screens/title_details/title_details.dart";
 import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
-  const Play({super.key, this.magnet, this.url, this.season, this.episode});
+  const Play({
+    super.key,
+    this.magnet,
+    this.url,
+    this.season,
+    this.episode,
+    this.title,
+  });
 
   final String? magnet;
   final String? url;
   final String? season;
   final String? episode;
+  final String? title;
 
   @override
   State<Play> createState() => _PlayState();
@@ -58,10 +66,13 @@ class _PlayState extends State<Play> {
   }
 
   Future<void> spawnOverlay(url) async {
+    final episode = widget.season == null
+        ? ""
+        : " S${widget.season.toString().padLeft(2, "0")}E${widget.episode.toString().padLeft(2, "0")} ${widget.title}";
     final List<String> opts = [
-      "--title=${title.title}",
+      "--title=${title.title}$episode",
       "--video=$url",
-      ...(stream?["subs"] == null ? [] : ["--subs=${stream!["subs"]}"]),
+      ...(stream?["subs"] == null ? [] : ["--subs=$host${stream!["subs"]}"]),
     ];
     log.info("atlas-overlay ${opts.map((a) => "'$a'").join(" ")}");
     overlay = await Process.start(

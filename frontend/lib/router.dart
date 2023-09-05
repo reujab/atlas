@@ -39,6 +39,7 @@ final router = GoRouter(
           url: state.queryParams["url"],
           season: state.queryParams["s"],
           episode: state.queryParams["e"],
+          title: state.queryParams["title"],
         ),
       ),
     ),
