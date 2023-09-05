@@ -15,7 +15,7 @@ class TitlesRow extends StatefulWidget {
 
   static const visibleTitles = 6;
 
-  static double imgWidth = 0;
+  static double imgWidth = 256;
 
   final String name;
   final List<TitleData> titles;
