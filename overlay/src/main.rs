@@ -358,7 +358,7 @@ fn main() {
         "--vo=gpu",
     ]);
     if let Some(subs) = args.subs {
-        mpv_cmd.arg("--subs").arg(subs);
+        mpv_cmd.arg(format!("--sub-file={subs}"));
     }
     mpv_cmd.arg(args.video);
     let mut mpv = mpv_cmd
