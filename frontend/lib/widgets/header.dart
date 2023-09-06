@@ -21,18 +21,22 @@ class Header extends StatelessWidget {
       children: [
         const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
         const SizedBox(width: 32),
+        const Text("", style: TextStyle(height: 1.35, fontSize: 96)),
         Expanded(
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: title.length >= 28 ? 72 : 96,
-              fontWeight: FontWeight.w200,
+          child: FractionalTranslation(
+            translation: const Offset(0, -0.08),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                height: 1.35,
+                fontSize: title.length >= 28 ? 72 : 96,
+                fontWeight: FontWeight.w200,
+              ),
             ),
           ),
         ),
-        const Text("", style: TextStyle(fontSize: 96)),
         ...(search ? searchWidgets : []),
       ],
     );
