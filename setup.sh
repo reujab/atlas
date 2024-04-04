@@ -1,7 +1,8 @@
 set -ex
 
 # install dependencies
-apt-get install -y unattended-upgrades systemd-timesyncd plymouth resolvconf snapd network-manager curl evtest
+# fontconfig is required by plymouth
+apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest
 systemctl start systemd-timesyncd
 snap install ubuntu-frame
 cp update/update.sh /usr/local/bin
