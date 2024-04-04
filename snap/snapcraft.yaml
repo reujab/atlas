@@ -1,7 +1,7 @@
-name: atlas-flutter
+name: atlas
 version: 0.0.0
-summary: Atlas
-description: Atlas
+summary: Atlas client
+description: Atlas client
 confinement: strict
 compression: lzo
 grade: stable
@@ -13,23 +13,25 @@ apps:
     restart-condition: always
     restart-delay: 1s
     command-chain:
+      - bin/graphics-core22-wrapper
       - bin/wayland-launch
-    command: usr/bin/wrapper
+    command: bin/wrapper
     plugs:
+      - opengl
+      - wayland
+      # additional plugs
       - alsa
       - network
       - network-bind
       - network-manager
-      - opengl
       - process-control
       - raw-input
-      - wayland
 
 plugs:
-  graphics-core20:
+  graphics-core22:
     interface: content
     target: $SNAP/graphics
-    default-provider: mesa-core20
+    default-provider: mesa-core22
   gnome-42-2204:
     interface: content
     target: $SNAP/gnome-platform
@@ -46,7 +48,7 @@ environment:
   XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
   XDG_CONFIG_DIRS: $SNAP/etc/xdg
   XDG_DATA_HOME: $SNAP_USER_DATA
-  XDG_DATA_DIRS: $SNAP/usr/share
+  XDG_DATA_DIRS: $SNAP/usr/local/share:$SNAP/usr/share
   # GTK
   GDK_GL: gles
   GTK_A11Y: none
@@ -63,23 +65,25 @@ parts:
       - flutter/latest/stable
     build-environment:
       - C_INCLUDE_PATH: /snap/flutter/current/usr/include
-      - LD_LIBRARY_PATH: /snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-      - PKG_CONFIG_PATH: /snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:$PKG_CONFIG_PATH
+      - LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET
+      - PKG_CONFIG_PATH: ${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig
       - XDG_DATA_DIRS: /snap/flutter/current/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
     override-build: |
       set -eux
       mkdir -p $CRAFT_PART_INSTALL/bin/lib
       flutter channel stable
       flutter upgrade
+      pushd ~/snap/flutter/common/flutter
+      git checkout 3.13.9
+      popd
       flutter config --enable-linux-desktop
       flutter doctor
       flutter pub get
       flutter build linux --dart-define=ATLAS_VERSION=$SNAPCRAFT_PROJECT_VERSION --release -v
-      cp -r build/linux/*/release/bundle/* $CRAFT_PART_INSTALL/bin
+      cp -r build/linux/*/release/bundle/* $CRAFT_PART_INSTALL/bin/
     stage-packages:
-      - libasound2
-      - libgl1
       - libgtk-3-0
+      - libgl1
 
   overlay:
     plugin: rust
@@ -112,10 +116,11 @@ parts:
   deps:
     plugin: nil
     stage-packages:
+      - libasound2
       - mpv
       - network-manager
-      - yt-dlp
       - ubuntu-restricted-extras
+      - yt-dlp
 
   fonts:
     plugin: nil
@@ -141,22 +146,32 @@ parts:
     plugin: dump
     source: wrapper
     organize:
-      wrapper.sh: usr/bin/wrapper
+      wrapper.sh: bin/wrapper
 
-  gsettings+pixbuf:
+  version:
+    plugin: nil
+    override-prime: echo $SNAPCRAFT_PROJECT_VERSION > $CRAFT_PRIME/VERSION
+
+  gsettings+pixbuf+immodules:
     plugin: nil
     build-packages:
       - libgdk-pixbuf2.0-0
       - librsvg2-common
       - shared-mime-info
+      - libgtk-3-0
     override-build: |
+      craftctl default
+      # Update mime database
       update-mime-database ${CRAFT_PART_INSTALL}/usr/share/mime
+      # build immodules cache
+      mkdir -p ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/
+      /usr/lib/${CRAFT_ARCH_TRIPLET}/libgtk-3-0/gtk-query-immodules-3.0 > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
     stage-packages:
+      - librsvg2-common
       - gsettings-desktop-schemas
       - libglib2.0-bin
-      - librsvg2-common
     override-prime: |
-      snapcraftctl prime
+      craftctl default
       # Compile the gsettings schemas
       /usr/lib/${CRAFT_ARCH_TRIPLET}/glib-2.0/glib-compile-schemas "$CRAFT_PRIME/usr/share/glib-2.0/schemas"
       # Index the pixbuf loaders
@@ -165,60 +180,44 @@ parts:
       GDK_PIXBUF_MODULEDIR=${LOADERS_PATH} ${QUERY_LOADERS} > ${LOADERS_PATH}/../loaders.cache
       sed s!$CRAFT_PRIME!!g --in-place ${LOADERS_PATH}/../loaders.cache
 
-  immodules:
-    plugin: nil
-    build-packages:
-      - libgtk-3-0
-    override-build: |
-      snapcraftctl build
-      mkdir -p ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/
-      /usr/lib/${CRAFT_ARCH_TRIPLET}/libgtk-3-0/gtk-query-immodules-3.0 > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
-
-  # Some utility scripts for setting up the Wayland environment
-  wayland-launch:
+  setup:
     plugin: dump
     source: wayland-launch
     override-build: |
       # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
       # You may add further plugs here if you want these options
-      PLUGS="opengl wayland graphics-core20"
+      PLUGS="opengl wayland graphics-core22"
       sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/wayland-launch
       sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/setup.sh
-      snapcraftctl build
+      craftctl default
     stage-packages:
       - inotify-tools
 
-  # This is one of four snippets that relate to providing the userspace graphics needed by your application.
-  # This ensures that your snap doesn't contain its own copy of the userspace drivers
-  cleanup:
-    plugin: nil
+  graphics-core22:
     after:
       - frontend
-      - gsettings+pixbuf
-      - immodules
       - overlay
-      - wayland-launch
-      - wrapper
-    build-snaps: [ mesa-core20 ]
+      - gsettings+pixbuf+immodules
+      - setup
+    source: https://github.com/MirServer/graphics-core22.git
+    plugin: dump
     override-prime: |
-      set -eux
-      cd /snap/mesa-core20/current/egl/lib
-      find . -type f,l -exec rm -f $CRAFT_PRIME/usr/lib/${CRAFT_ARCH_TRIPLET}/{} \;
-      rm -fr "$CRAFT_PRIME/usr/lib/${CRAFT_ARCH_TRIPLET}/dri"
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
       cd "$CRAFT_PRIME/usr/share/"
-      rm -rf bug drirc.d glvnd libdrm lintian man bash-completion dbus-1 help kconf_update kservices5 libinput locale openal pkgconfig applications doc kf5 kservicetypes5 libthai metainfo perl qlogging-categories5 thumbnailers xml apport config.kcfg doc-base GConf gnupg info knotifications5 kxmlgui5 libwacom themes sounds
-      cd $CRAFT_PRIME/usr/lib/$CRAFT_ARCH_TRIPLET
-      rm -rf libLLVM* libGLX_mesa* libpulse-simple* libjacket* libtheora* libvulkan* libwayland-server* libdconf*
-      echo $SNAPCRAFT_PROJECT_VERSION > $CRAFT_PRIME/VERSION
+      rm -rf bug drirc.d glvnd libdrm lintian man
+      rm -rf applications apport bash-completion dbus-1 doc-base doc gtk-doc\
+             help pkgconfig libthai metainfo themes thumbnailers xml
+    prime:
+      - bin/graphics-core22-wrapper
+
 
 layout:
-  /usr/share/libdrm:  # Needed by mesa-core20 on AMD GPUs
+  /usr/share/libdrm:
     bind: $SNAP/graphics/libdrm
-  /usr/share/drirc.d:  # Used by mesa-core20 for app specific workarounds
-    bind: $SNAP/graphics/drirc.d
+  /usr/share/drirc.d:
+    symlink: $SNAP/graphics/drirc.d
   /usr/share/fonts:
-    bind: $SNAP/usr/share/fonts
-  /usr/local/share/fonts:
     bind: $SNAP/usr/share/fonts
   /usr/share/icons:
     bind: $SNAP/usr/share/icons

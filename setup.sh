@@ -1,7 +1,7 @@
 set -ex
 
 # install dependencies
-apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest mpv yt-dlp fonts-cantarell fonts-noto fonts-noto-extra fonts-noto-cjk
+apt-get install -y unattended-upgrades systemd-timesyncd plymouth resolvconf snapd network-manager curl evtest
 systemctl start systemd-timesyncd
 snap install ubuntu-frame
 cp update/update.sh /usr/local/bin
@@ -44,5 +44,4 @@ snap set ubuntu-frame daemon=true
 # disable tty1
 systemctl disable getty@tty1
 
-rm -rf *.snap update
 echo Success
