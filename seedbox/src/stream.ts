@@ -205,16 +205,18 @@ function serveInfo(res: express.Response, stream: Stream, season?: string, episo
 }
 
 function findFile(torrent: WebTorrent.Torrent, season?: string, episode?: string): number {
-	const index = season
-		? torrent.files.findIndex((file) => {
-			const parsed = parseName(file.name);
+	// Sort the files by length, preserving the original index.
+	// This prevents "sample" files from playing instead of the actual video.
+	const files = torrent.files
+		.map((file, originalIndex) => ({ file, originalIndex }))
+		.sort((a, b) => b.file.length - a.file.length);
+	const file = season
+		? files.find((f) => {
+			const parsed = parseName(f.file.name);
 			return parsed.seasons.includes(Number(season)) && parsed.episode === Number(episode);
 		})
-		: torrent.files
-			.map((file, originalIndex) => ({ file, originalIndex }))
-			.sort((a, b) => b.file.length - a.file.length)
-			.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name))?.originalIndex;
-	if (index === undefined) return -1;
+		: files.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.file.name));
+	const index = file?.originalIndex ?? -1;
 	return index;
 }
 
