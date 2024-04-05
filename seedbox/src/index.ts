@@ -1,12 +1,18 @@
-import * as stream from "./stream";
 import express from "express";
-import getRows from "./rows";
-import getSeasons from "./seasons";
 import morgan from "morgan";
-import searchTitles from "./search";
 import getUUID from "./magnet";
+import getRows from "./rows";
+import searchTitles from "./search";
+import getSeasons from "./seasons";
+import * as stream from "./stream";
+
+if (!process.env.DATABASE_URL || !process.env.TMDB_KEY) {
+	console.error("Error: both $DATABASE_URL and $TMDB_KEY must be set.");
+	process.exit(1);
+}
 
 const app = express();
+const port = Number(process.env.PORT || 8000);
 
 app.disable("x-powered-by");
 
@@ -32,8 +38,8 @@ app.use("/stream/:uuid/", stream.proxy);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 
-app.listen(Number(process.env.PORT), () => {
-	console.log("Listening to port", process.env.PORT);
+app.listen(port, () => {
+	console.log("Listening to port", port);
 });
 
 export async function get(...args: Parameters<typeof fetch>): Promise<Response> {
