@@ -32,19 +32,15 @@ plugs:
     interface: content
     target: $SNAP/graphics
     default-provider: mesa-core22
-  gnome-42-2204:
-    interface: content
-    target: $SNAP/gnome-platform
-    default-provider: gnome-42-2204
 
 environment:
   # graphics
-  LD_LIBRARY_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/graphics/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/samba:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  LD_LIBRARY_PATH: $SNAP/graphics/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/samba:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
   LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
   LIBVA_DRIVERS_PATH: $SNAP/graphics/dri
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
   # XDG
-  XDG_CACHE_HOME:  $SNAP_USER_COMMON/.cache
+  XDG_CACHE_HOME: $SNAP_USER_COMMON/.cache
   XDG_CONFIG_HOME: $SNAP_USER_DATA/.config
   XDG_CONFIG_DIRS: $SNAP/etc/xdg
   XDG_DATA_HOME: $SNAP_USER_DATA
@@ -71,8 +67,10 @@ parts:
     override-build: |
       set -eux
       mkdir -p $CRAFT_PART_INSTALL/bin/lib
-      flutter channel stable
-      flutter upgrade
+      if [[ ! -d ~/snap/flutter/common/flutter ]]; then
+        flutter channel stable
+        flutter upgrade
+      fi
       pushd ~/snap/flutter/common/flutter
       git checkout 3.13.9
       popd
@@ -93,30 +91,18 @@ parts:
       - libudev-dev
       - pkg-config
       - rustc
-    build-environment:
-      - ACLOCAL_PATH: /snap/gnome-42-2204-sdk/current/usr/share/aclocal${ACLOCAL_PATH:+:$ACLOCAL_PATH}
-      - GDK_PIXBUF_MODULE_FILE: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-current/loaders.cache
-      - GETTEXTDATADIRS: /snap/gnome-42-2204-sdk/current/usr/share/gettext-current${GETTEXTDATADIRS:+:$GETTEXTDATADIRS}
-      - LD_LIBRARY_PATH: /snap/gnome-42-2204-sdk/current/lib/$CRAFT_ARCH_TRIPLET:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET:/snap/gnome-42-2204-sdk/current/usr/lib:/snap/gnome-42-2204-sdk/current/usr/lib/vala-current:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-      - PATH: /snap/gnome-42-2204-sdk/current/usr/bin${PATH:+:$PATH}
-      - PKG_CONFIG_PATH: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:/snap/gnome-42-2204-sdk/current/usr/lib/pkgconfig:/snap/gnome-42-2204-sdk/current/usr/share/pkgconfig:/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-      - PYTHONPATH: /snap/gnome-42-2204-sdk/current/usr/lib/python3.10:/snap/gnome-42-2204-sdk/current/usr/lib/python3/dist-packages:/snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gobject-introspection${PYTHONPATH:+:$PYTHONPATH}
-      - XDG_DATA_DIRS: $CRAFT_STAGE/usr/share:/snap/gnome-42-2204-sdk/current/usr/share:/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
+      - libgtk-4-dev
     stage-packages:
       - psmisc
-    build-snaps:
-      - gnome-42-2204-sdk
-    stage-snaps:
-      - gnome-42-2204
     stage:
       - bin/atlas-overlay
       - usr/bin/killall
-      - usr/share/mime
 
   deps:
     plugin: nil
     stage-packages:
       - libasound2
+      - libgtk-4-1
       - mpv
       - network-manager
       - ubuntu-restricted-extras
@@ -137,8 +123,6 @@ parts:
   dotenv:
     plugin: dump
     source: .
-    organize:
-      client.env: .env
     stage:
       - .env
 
@@ -210,7 +194,6 @@ parts:
              help pkgconfig libthai metainfo themes thumbnailers xml
     prime:
       - bin/graphics-core22-wrapper
-
 
 layout:
   /usr/share/libdrm:
