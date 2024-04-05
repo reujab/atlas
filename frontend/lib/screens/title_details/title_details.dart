@@ -30,7 +30,7 @@ class TitleDetails extends StatefulWidget {
 class _TitleDetailsState extends State<TitleDetails> {
   int index = 0;
 
-  String? magnet;
+  String? uuid;
 
   final title = TitleDetails.title!;
 
@@ -41,8 +41,8 @@ class _TitleDetailsState extends State<TitleDetails> {
       onClick: () {
         if (title.type == "tv") {
           router.push("/seasons");
-        } else if (magnet != null) {
-          router.push("/play?magnet=${Uri.encodeComponent(magnet!)}");
+        } else if (uuid != null) {
+          router.push("/play?uuid=$uuid");
         }
       },
     ),
@@ -66,7 +66,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     if (title.type == "tv") {
       getSeasons();
     } else {
-      getMagnet();
+      getUUID();
     }
   }
 
@@ -78,11 +78,11 @@ class _TitleDetailsState extends State<TitleDetails> {
     Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
 
-  Future<void> getMagnet() async {
+  Future<void> getUUID() async {
     Map<String, dynamic> json;
     try {
       var res = await get(
-          "$host/movie/magnet?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}");
+          "$host/movie/uuid?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}");
       if (res.statusCode == 404) {
         _setState(() {
           buttons[0].name = "Unavailable";
@@ -100,7 +100,7 @@ class _TitleDetailsState extends State<TitleDetails> {
     }
 
     _setState(() {
-      magnet = json["magnet"];
+      uuid = json["uuid"];
     });
   }
 
@@ -154,7 +154,7 @@ class _TitleDetailsState extends State<TitleDetails> {
                     active: i == index,
                     loading: title.type == "movie" &&
                         i == 0 &&
-                        magnet == null &&
+                        uuid == null &&
                         buttons[i].icon == FontAwesomeIcons.play,
                   ),
               ],

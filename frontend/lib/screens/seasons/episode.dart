@@ -96,7 +96,7 @@ class _EpisodeState extends State<Episode>
             ),
             ...(widget.active
                 ? [
-                    widget.episode.magnet == null &&
+                    widget.episode.uuid == null &&
                             widget.episode.unavailable == false
                         ? const SpinKitRipple(
                             color: Colors.black,

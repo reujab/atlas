@@ -4,7 +4,7 @@ import getRows from "./rows";
 import getSeasons from "./seasons";
 import morgan from "morgan";
 import searchTitles from "./search";
-import searchMagnets from "./magnet";
+import getUUID from "./magnet";
 
 const app = express();
 
@@ -22,13 +22,13 @@ app.get("/seasons/:id(\\d+)", async (req, res) => {
 
 app.get("/search", searchTitles);
 
-app.get("/:type(movie|tv)/magnet", searchMagnets);
+app.get("/:type(movie|tv)/uuid", getUUID);
 
 app.get("/init", stream.init);
 
-app.delete("/stream/:magnetBase64", stream.deleteStream);
+app.delete("/stream/:uuid", stream.deleteStream);
 
-app.use("/stream/:magnetBase64/", stream.proxy);
+app.use("/stream/:uuid/", stream.proxy);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 

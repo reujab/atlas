@@ -15,14 +15,14 @@ import "package:http/http.dart" as http;
 class Play extends StatefulWidget {
   const Play({
     super.key,
-    this.magnet,
+    this.uuid,
     this.url,
     this.season,
     this.episode,
     this.title,
   });
 
-  final String? magnet;
+  final String? uuid;
   final String? url;
   final String? season;
   final String? episode;
@@ -42,7 +42,7 @@ class _PlayState extends State<Play> {
   void initState() {
     super.initState();
 
-    if (widget.magnet != null) {
+    if (widget.uuid != null) {
       initStream();
     } else if (widget.url != null) {
       spawnOverlay(widget.url);
@@ -52,7 +52,7 @@ class _PlayState extends State<Play> {
   Future<void> initStream() async {
     try {
       stream = await getJson(
-          "$host/init?magnet=${Uri.encodeComponent(widget.magnet!)}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}");
+          "$host/init?uuid=${widget.uuid}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}");
       if (!mounted) {
         _deleteStream();
         return;

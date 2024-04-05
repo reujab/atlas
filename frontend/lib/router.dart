@@ -35,7 +35,7 @@ final router = GoRouter(
       path: "/play",
       pageBuilder: _getPageBuilder(
         (state) => Play(
-          magnet: state.queryParams["magnet"],
+          uuid: state.queryParams["uuid"],
           url: state.queryParams["url"],
           season: state.queryParams["s"],
           episode: state.queryParams["e"],

@@ -1,8 +1,9 @@
-import WebTorrent from "webtorrent";
+import EventEmitter from "events";
 import express from "express";
 import http from "http";
+import WebTorrent from "webtorrent";
 import parseName from "./parse";
-import EventEmitter from "events";
+import sql from "./sql";
 
 const webtorrent = new WebTorrent({
 	uploadLimit: 0.25 * 1024 * 1024,
@@ -16,6 +17,8 @@ class Stream extends EventEmitter {
 
 	port: number;
 
+	uuid: string;
+
 	magnet: string;
 
 	torrent: null | WebTorrent.Torrent = null;
@@ -28,12 +31,13 @@ class Stream extends EventEmitter {
 
 	private logInterval: null | NodeJS.Timer = null;
 
-	constructor(magnet: string) {
+	constructor(uuid: string, magnet: string) {
 		super();
 		do {
 			this.id = streamID = (streamID + 1) % maxStreams;
 		} while (streams.find((s) => s.id === this.id)); // eslint-disable-line
 		this.port = 1 + Number(process.env.PORT) + this.id;
+		this.uuid = uuid;
 		this.magnet = magnet;
 	}
 
@@ -122,20 +126,31 @@ setInterval(() => {
 		);
 }, 10000);
 
-export function init(req: express.Request, res: express.Response): void {
+export async function init(req: express.Request, res: express.Response): Promise<void> {
 	if (streams.length >= maxStreams) {
 		res.status(500).end("Too many active streams");
 		return;
 	}
 
-	const magnet = req.query.magnet as string;
+	const uuid = req.query.uuid as string;
 	const season = req.query.s as string;
 	const episode = req.query.e as string;
 
-	if (!magnet) {
+	if (!uuid) {
 		res.status(400).end();
 		return;
 	}
+
+	const row = await sql`
+		SELECT magnet FROM magnets
+		WHERE uuid = ${uuid}
+		LIMIT 1
+	`;
+	if (!row.length) {
+		res.status(404).end();
+		return;
+	}
+	const magnet = row[0].magnet;
 
 	const existingStream = streams.find((s) => s.magnet === magnet);
 	if (existingStream) {
@@ -161,7 +176,7 @@ export function init(req: express.Request, res: express.Response): void {
 	}
 
 	req.setTimeout(3 * 60 * 1000);
-	const stream = new Stream(magnet);
+	const stream = new Stream(uuid, magnet);
 	streams.push(stream);
 	stream.on("start", () => {
 		serveInfo(res, stream, season, episode);
@@ -177,7 +192,7 @@ function serveInfo(res: express.Response, stream: Stream, season?: string, episo
 		res.status(404).end();
 		return;
 	}
-	const base = `/stream/${btoa(stream.magnet)}`;
+	const base = `/stream/${stream.uuid}`;
 	const file = stream.torrent.files[index];
 	const filePath = `${base}/${index}/${encodeURIComponent(file.name)}`;
 	const subs = stream.torrent.files.find((s) => s.name === file.name.replace(/...$/, "srt"));
@@ -203,10 +218,10 @@ function findFile(torrent: WebTorrent.Torrent, season?: string, episode?: string
 	return index;
 }
 
-export function proxy(req: express.Request, res: express.Response): void {
+export async function proxy(req: express.Request, res: express.Response): Promise<void> {
 	req.setTimeout(3 * 60 * 1000);
-	const magnet = atob(req.params.magnetBase64);
-	let stream = streams.find((s) => s.magnet === magnet);
+	const uuid = req.params.uuid;
+	let stream = streams.find((s) => s.uuid === uuid);
 
 	function proxyFile(): void {
 		if (!stream) throw new Error();
@@ -240,7 +255,18 @@ export function proxy(req: express.Request, res: express.Response): void {
 	if (stream) {
 		proxyFile();
 	} else {
-		stream = new Stream(magnet);
+		const row = await sql`
+			SELECT magnet FROM magnets
+			WHERE uuid = ${uuid}
+			LIMIT 1;
+		`;
+		if (!row.length) {
+			res.status(404).end();
+			return;
+		}
+		const magnet = row[0].magnet;
+		// eslint-disable-next-line require-atomic-updates
+		stream = new Stream(uuid, magnet);
 		streams.push(stream);
 		stream.once("start", proxyFile);
 		stream.init();
@@ -248,8 +274,8 @@ export function proxy(req: express.Request, res: express.Response): void {
 }
 
 export function deleteStream(req: express.Request, res: express.Response): void {
-	const magnet = atob(req.params.magnetBase64);
-	const stream = streams.find((s) => s.magnet === magnet);
+	const uuid = req.params.uuid;
+	const stream = streams.find((s) => s.uuid === uuid);
 	if (stream) {
 		stream.delete();
 		res.end();

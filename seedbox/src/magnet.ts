@@ -1,9 +1,10 @@
 import cheerio from "cheerio";
 import express from "express";
 import http from "http";
-import parseName from "./parse";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { get } from ".";
+import parseName from "./parse";
+import sql from "./sql";
 
 const aliases: { [key: string]: string } = {
 	"Special Victims Unit": "SVU",
@@ -23,14 +24,33 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export default async function search(req: express.Request, res: express.Response): Promise<void> {
+export default async function getUUID(req: express.Request, res: express.Response): Promise<void> {
 	const type = req.params.type;
 	const query = req.query.q as string;
-	const season = Number(req.query.s);
-	const episode = Number(req.query.e);
+	const season = req.query.s ? Number(req.query.s) : null;
+	const episode = req.query.e ? Number(req.query.e) : null;
 
 	if (!query || (type === "tv" && (!season || !episode))) {
 		res.status(400).end();
+		return;
+	}
+
+	await sql`
+		DELETE FROM magnets
+		WHERE ts < NOW() - INTERVAL '1 day'
+	`;
+	const row = await sql`
+		SELECT uuid, seasons FROM magnets
+		WHERE query = ${query}
+		AND (seasons IS NULL OR ${season} = ANY(seasons))
+		AND (episode IS NULL OR episode = ${episode})
+		LIMIT 1
+	`;
+	if (row[0]) {
+		res.json({
+			uuid: row[0].uuid,
+			seasons: row[0].seasons,
+		});
 		return;
 	}
 
@@ -62,7 +82,7 @@ export default async function search(req: express.Request, res: express.Response
 	const sources = (await Promise.all(searches.map((q) => searchMagnets(q, type)))).flat()
 		.filter(
 			(source) =>
-				type === "movie" || source.seasons?.includes(season) &&
+				type === "movie" || source.seasons?.includes(season!) &&
 				[episode, null].includes(source.episode)
 		)
 		.sort((a, b) => b.score - a.score);
@@ -75,11 +95,18 @@ export default async function search(req: express.Request, res: express.Response
 	const source = sources[0];
 	const magnet = await source.getMagnet();
 	const seasons = source.episode === null ? source.seasons : null;
+	const uuid = (await sql`
+		INSERT INTO magnets (magnet, query, seasons, episode)
+		VALUES (${magnet}, ${query}, ${seasons}, ${episode})
+		ON CONFLICT (magnet) DO UPDATE
+		SET ts = now()
+		RETURNING uuid
+	`)[0].uuid;
 
 	// cache for a week
 	res.set("Cache-Control", "public, max-age=604800");
 	res.json({
-		magnet,
+		uuid,
 		seasons,
 	});
 }

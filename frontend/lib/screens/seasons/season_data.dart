@@ -43,7 +43,7 @@ class EpisodeData {
   final String? still;
 
   @JsonKey(includeFromJson: false)
-  String? magnet;
+  String? uuid;
   @JsonKey(includeFromJson: false)
   bool unavailable = false;
 

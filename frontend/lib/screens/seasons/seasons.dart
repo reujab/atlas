@@ -34,7 +34,7 @@ class _SeasonsState extends State<Seasons> {
   List<SeasonData> seasons = Seasons.seasons ?? [];
 
   Timer? initTimer;
-  Timer? magnetTimer;
+  Timer? uuidTimer;
 
   SeasonData get season => seasons[index];
 
@@ -51,10 +51,10 @@ class _SeasonsState extends State<Seasons> {
         setState(() {
           seasons = Seasons.seasons!;
         });
-        getMagnet();
+        getUUID();
       });
     } else {
-      getMagnet();
+      getUUID();
     }
   }
 
@@ -146,9 +146,9 @@ class _SeasonsState extends State<Seasons> {
         if (index < seasons.length - 1) setIndex(index + 1);
         break;
       case "Enter":
-        if (episode.magnet != null) {
+        if (episode.uuid != null) {
           router.push(
-              "/play?magnet=${Uri.encodeComponent(episode.magnet!)}&s=${season.number}&e=${episode.number}&title=${episode.name}");
+              "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&title=${episode.name}");
         }
         break;
       case "Browser Search":
@@ -168,7 +168,7 @@ class _SeasonsState extends State<Seasons> {
       index = i;
     });
     scrollX();
-    getMagnet();
+    getUUID();
   }
 
   void setEpisodeIndex(int i) {
@@ -176,7 +176,7 @@ class _SeasonsState extends State<Seasons> {
       seasons[index].index = i;
     });
     scrollY();
-    getMagnet();
+    getUUID();
   }
 
   void scrollX() {
@@ -206,17 +206,17 @@ class _SeasonsState extends State<Seasons> {
         .animateTo(y, duration: scrollDuration, curve: Curves.ease);
   }
 
-  void getMagnet() {
-    magnetTimer?.cancel();
-    magnetTimer = Timer(const Duration(seconds: 1), _getMagnet);
+  void getUUID() {
+    uuidTimer?.cancel();
+    uuidTimer = Timer(const Duration(seconds: 1), _getUUID);
   }
 
-  Future<void> _getMagnet() async {
+  Future<void> _getUUID() async {
     final episode = this.episode;
-    if (episode.magnet != null || episode.unavailable) return;
+    if (episode.uuid != null || episode.unavailable) return;
 
     final res = await get(
-        "$host/tv/magnet?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}");
+        "$host/tv/uuid?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}");
     if (!mounted) return;
     if (res.statusCode == 404) {
       setState(() {
@@ -227,11 +227,11 @@ class _SeasonsState extends State<Seasons> {
 
     final Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
     setState(() {
-      episode.magnet = json["magnet"];
+      episode.uuid = json["uuid"];
       for (final seasonNum in json["seasons"] ?? []) {
         final season = seasons.firstWhere((s) => s.number == seasonNum);
         for (final episode in season.episodes) {
-          episode.magnet = json["magnet"];
+          episode.uuid = json["uuid"];
         }
       }
     });
@@ -240,7 +240,7 @@ class _SeasonsState extends State<Seasons> {
   @override
   void dispose() {
     initTimer?.cancel();
-    magnetTimer?.cancel();
+    uuidTimer?.cancel();
     pillScrollController.dispose();
     scrollController.dispose();
     super.dispose();
