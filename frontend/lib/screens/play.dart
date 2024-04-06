@@ -10,7 +10,6 @@ import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/router.dart";
 import "package:frontend/title_data.dart";
 import "package:frontend/screens/title_details/title_details.dart";
-import "package:http/http.dart" as http;
 
 class Play extends StatefulWidget {
   const Play({
@@ -54,10 +53,7 @@ class _PlayState extends State<Play> {
     try {
       stream = await getJson(
           "$host/init?uuid=${widget.uuid}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}");
-      if (!mounted) {
-        _deleteStream();
-        return;
-      }
+      if (!mounted) return;
     } catch (err) {
       pop();
       rethrow;
@@ -73,6 +69,7 @@ class _PlayState extends State<Play> {
     final List<String> opts = [
       "--title=${title.title}$episode",
       "--video=$url",
+      ...(widget.uuid == null ? [] : ["--uuid=${widget.uuid}"]),
       ...(stream?["subs"] == null ? [] : ["--subs=$host${stream!["subs"]}"]),
     ];
     log.info("atlas-overlay ${opts.map((a) => "'$a'").join(" ")}");
@@ -115,20 +112,7 @@ class _PlayState extends State<Play> {
 
   @override
   void dispose() {
-    _deleteStream();
     overlay?.kill();
     super.dispose();
-  }
-
-  void _deleteStream() {
-    if (stream != null) deleteStream("$host${stream!["delete"]!}");
-  }
-
-  static void deleteStream(String deleteUri) async {
-    var uri = Uri.parse(deleteUri);
-    var res = await http.delete(uri);
-    if (res.statusCode != 200) {
-      throw "Failed to delete stream: ${res.statusCode}";
-    }
   }
 }

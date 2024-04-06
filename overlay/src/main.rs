@@ -1,4 +1,5 @@
 mod input_worker;
+mod keepalive_worker;
 mod mpv_worker;
 
 use clap::Parser;
@@ -31,6 +32,8 @@ struct Args {
     video: String,
     #[arg(long)]
     subs: Option<String>,
+    #[arg(long)]
+    uuid: Option<String>,
 }
 
 pub(crate) struct App {
@@ -344,8 +347,12 @@ fn format(secs: f64) -> Format {
 fn main() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
-    info!("Spawning mpv");
     let args = Args::parse();
+    if let Some(uuid) = args.uuid {
+        thread::spawn(move || keepalive_worker::keepalive(&uuid));
+    }
+
+    info!("Spawning mpv");
     let mut mpv_cmd = Command::new("mpv");
     let audio_device =
         std::env::var("AUDIO_DEVICE").unwrap_or("alsa/plughw:CARD=PCH,DEV=3".to_owned());

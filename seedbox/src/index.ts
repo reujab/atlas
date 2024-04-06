@@ -32,9 +32,9 @@ app.get("/:type(movie|tv)/uuid", getUUID);
 
 app.get("/init", stream.init);
 
-app.delete("/stream/:uuid", stream.deleteStream);
-
 app.use("/stream/:uuid/", stream.proxy);
+
+app.head("/keepalive/:uuid", stream.keepalive);
 
 app.use("/update", express.static("/usr/share/atlas-updater"));
 

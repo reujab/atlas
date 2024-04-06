@@ -23,11 +23,9 @@ class Stream extends EventEmitter {
 
 	torrent: null | WebTorrent.Torrent = null;
 
-	clients = 0;
+	destroyTimeout: null | NodeJS.Timeout = null;
 
 	private server: null | http.Server = null;
-
-	private interval: null | NodeJS.Timer = null;
 
 	private logInterval: null | NodeJS.Timer = null;
 
@@ -42,9 +40,9 @@ class Stream extends EventEmitter {
 	}
 
 	init(): void {
-		console.log("Connecting");
+		console.log("Connecting to", this.magnet);
+		this.updateDestroyTimeout();
 		const then = Date.now();
-		this.clients++;
 		webtorrent.add(this.magnet, { destroyStoreOnDestroy: true }, (torrent) => {
 			console.log("Connected in", ((Date.now() - then) / 1000).toFixed(2), "s");
 
@@ -62,28 +60,6 @@ class Stream extends EventEmitter {
 
 			console.log(torrent.files.map((f) => f.name));
 			this.server = torrent.createServer();
-			let timeout: NodeJS.Timeout;
-			let connections = 0;
-
-			const updateTimeout = (): void => {
-				clearTimeout(timeout);
-				timeout = setTimeout(() => {
-					this.destroy();
-				}, 60 * 60 * 1000);
-			};
-
-			updateTimeout();
-			this.server.on("connection", (socket) => {
-				console.log("Connections:", ++connections);
-				clearTimeout(timeout);
-
-				socket.on("close", () => {
-					console.log("Connections:", --connections);
-					if (!connections) {
-						updateTimeout();
-					}
-				});
-			});
 			this.server.on("error", (err) => {
 				console.error(err);
 			});
@@ -93,8 +69,11 @@ class Stream extends EventEmitter {
 		});
 	}
 
-	delete(): void {
-		if (!--this.clients) this.destroy();
+	updateDestroyTimeout(): void {
+		if (this.destroyTimeout) {
+			clearTimeout(this.destroyTimeout);
+		}
+		this.destroyTimeout = setTimeout(() => this.destroy(), 10_000);
 	}
 
 	destroy(): void {
@@ -106,7 +85,6 @@ class Stream extends EventEmitter {
 		console.log(streams);
 		this.server?.close();
 		this.torrent?.destroy();
-		if (this.interval) clearInterval(this.interval);
 		if (this.logInterval) clearInterval(this.logInterval);
 		this.emit("end");
 	}
@@ -154,10 +132,10 @@ export async function init(req: express.Request, res: express.Response): Promise
 
 	const existingStream = streams.find((s) => s.magnet === magnet);
 	if (existingStream) {
-		existingStream.clients++;
 		if (existingStream.torrent) {
 			serveInfo(res, existingStream, season, episode);
 		} else {
+			// Poll until torrent is initialized. Timeout after one minute.
 			const then = Date.now();
 			const interval = setInterval(() => {
 				if (Date.now() - then >= 60000) {
@@ -200,7 +178,6 @@ function serveInfo(res: express.Response, stream: Stream, season?: string, episo
 	res.json({
 		video: filePath,
 		subs: subsPath,
-		delete: base,
 	});
 }
 
@@ -275,13 +252,15 @@ export async function proxy(req: express.Request, res: express.Response): Promis
 	}
 }
 
-export function deleteStream(req: express.Request, res: express.Response): void {
+export async function keepalive(req: express.Request, res: express.Response): Promise<void> {
 	const uuid = req.params.uuid;
-	const stream = streams.find((s) => s.uuid === uuid);
-	if (stream) {
-		stream.delete();
-		res.end();
-	} else {
-		res.sendStatus(404);
+	const stream = streams.find((stream) => stream.uuid == uuid);
+
+	if (!stream) {
+		res.status(404).end();
+		return;
 	}
+
+	stream.updateDestroyTimeout();
+	res.status(200).end();
 }

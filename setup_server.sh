@@ -60,8 +60,8 @@ server {
 server {
 	server_name https;
 
-	listen 443 ssl default_server;
-	listen [::]:443 ssl default_server;
+	listen 443 ssl http2 default_server;
+	listen [::]:443 ssl http2 default_server;
 
 	ssl_certificate		/etc/letsencrypt/live/*/fullchain.pem;
 	ssl_certificate_key		/etc/letsencrypt/live/*/privkey.pem;
