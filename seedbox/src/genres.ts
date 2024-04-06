@@ -1,13 +1,13 @@
 import { Row } from "./rows";
 import sql from "./sql";
 
-const genreMap: { [id: number]: string } = {};
-const sortedGenres: Genre[] = [];
-
 interface Genre {
 	id: number;
 	name: string;
 }
+
+const genreMap: { [id: number]: string } = {};
+const sortedGenres: Genre[] = [];
 
 (async () => {
 	const rows = await sql`SELECT id::bigint, name FROM genres`;
@@ -62,6 +62,7 @@ export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
 	return rows.filter((g) => g.titles.length >= 20);
 }
 
+/// Replaces the genre ids with names.
 export function expandGenres(titles: any[]): void {
 	for (const title of titles) {
 		title.genres = title.genres.map((g: any) => genreMap[g]);
