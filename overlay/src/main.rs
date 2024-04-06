@@ -435,5 +435,10 @@ fn main() {
         .output()
         .unwrap();
 
-    mpv.kill().unwrap();
+    // `mpv.kill()` cannot be used because it sends SIGKILL and does not clean up resources.
+    unsafe {
+        libc::kill(mpv.id() as i32, libc::SIGTERM);
+    }
+    // Ensure mpv exits gracefully.
+    mpv.wait().unwrap();
 }
