@@ -35,21 +35,24 @@ class _ErrorBannerState extends State<ErrorBanner> {
   }
 
   void show(String error) {
-    setState(() {
-      final index = error.indexOf(":");
-      if (index == -1) {
-        title = "";
-        description = error;
-      } else {
-        title = error.substring(0, index);
-        description = error.substring(index + 1).trim();
-      }
-      active = true;
-    });
-    activeTimer?.cancel();
-    activeTimer = Timer(const Duration(seconds: 10), () {
+    // Set state next frame in case the error occured while building ErrorBanner.
+    Timer.run(() {
       setState(() {
-        active = false;
+        final index = error.indexOf(":");
+        if (index == -1) {
+          title = "";
+          description = error;
+        } else {
+          title = error.substring(0, index);
+          description = error.substring(index + 1).trim();
+        }
+        active = true;
+      });
+      activeTimer?.cancel();
+      activeTimer = Timer(const Duration(seconds: 10), () {
+        setState(() {
+          active = false;
+        });
       });
     });
   }
