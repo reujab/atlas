@@ -6,8 +6,7 @@
 # install dependencies
 apt-get install -y curl
 curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-apt-get install -y nodejs git libssl-dev postgresql nginx htop snapd
-snap install --classic certbot
+apt-get install -y nodejs git libssl-dev postgresql nginx htop certbot
 
 # configure swap file
 if [[ ! -e /swap ]]; then
@@ -42,6 +41,7 @@ EOF
 
 # start services
 cp /home/atlas/{seedbox/seedbox.service,tmdbd/tmdbd.service} /etc/systemd/system
+systemctl daemon-reload
 systemctl enable seedbox tmdbd
 systemctl start seedbox tmdbd
 
