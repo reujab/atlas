@@ -16,14 +16,14 @@ class Play extends StatefulWidget {
   const Play({
     super.key,
     this.uuid,
-    this.url,
+    this.trailer,
     this.season,
     this.episode,
     this.title,
   });
 
   final String? uuid;
-  final String? url;
+  final String? trailer;
   final String? season;
   final String? episode;
   final String? title;
@@ -44,8 +44,9 @@ class _PlayState extends State<Play> {
 
     if (widget.uuid != null) {
       initStream();
-    } else if (widget.url != null) {
-      spawnOverlay(widget.url);
+    } else if (widget.trailer != null) {
+      // TODO: remove exclamation point after upgrading to Dart 3.2
+      spawnOverlay(widget.trailer!);
     }
   }
 
@@ -65,7 +66,7 @@ class _PlayState extends State<Play> {
     spawnOverlay("$host${stream!["video"]}");
   }
 
-  Future<void> spawnOverlay(url) async {
+  Future<void> spawnOverlay(String url) async {
     final episode = widget.season == null
         ? ""
         : " S${widget.season.toString().padLeft(2, "0")}E${widget.episode.toString().padLeft(2, "0")} ${widget.title}";

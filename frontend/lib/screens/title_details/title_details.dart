@@ -53,7 +53,7 @@ class _TitleDetailsState extends State<TitleDetails> {
               "Watch trailer",
               icon: FontAwesomeIcons.youtube,
               onClick: () {
-                router.push("/play?url=ytdl://${title.trailer}");
+                router.push("/play?trailer=ytdl://${title.trailer}");
               },
             )
           ]),
