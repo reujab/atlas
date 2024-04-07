@@ -1,3 +1,4 @@
+#!/bin/bash
 set -ex
 
 # install dependencies
@@ -7,6 +8,8 @@ systemctl start systemd-timesyncd
 snap install ubuntu-frame
 cp update/update.sh /usr/local/bin
 cp update/update.{service,timer} /etc/systemd/system
+cp resetd/resetd.sh /usr/local/bin
+cp resetd/resetd.service /etc/systemd/system
 
 # configure ntp
 systemctl enable systemd-timesyncd
