@@ -205,7 +205,7 @@ export async function proxy(req: express.Request, res: express.Response): Promis
 	function proxyFile(): void {
 		if (!stream) throw new Error();
 		const path = `http://127.0.0.1:${stream.port}${req.path}`;
-		http.get(path, { headers: req.headers }, (streamRes) => {
+		const proxyReq = http.get(path, { headers: req.headers }, (streamRes) => {
 			for (const header of Object.keys(streamRes.headers)) {
 				if (header.includes("dlna")) continue;
 				res.header(header, streamRes.headers[header]);
@@ -228,6 +228,9 @@ export async function proxy(req: express.Request, res: express.Response): Promis
 			req.on("close", () => {
 				streamRes.destroy();
 			});
+		});
+		proxyReq.on("error", (err) => {
+			console.error("proxy req err:", err);
 		});
 	}
 

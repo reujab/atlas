@@ -42,10 +42,6 @@ app.listen(port, () => {
 	console.log("Listening to port", port);
 });
 
-app.on("error", (err) => {
-	console.error(err);
-});
-
 export async function get(...args: Parameters<typeof fetch>): Promise<Response> {
 	const start = Date.now();
 	let lastErr;
