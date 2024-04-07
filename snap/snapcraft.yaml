@@ -25,7 +25,6 @@ apps:
       - network-bind
       - network-manager
       - process-control
-      - raw-input
 
 plugs:
   graphics-core22:
@@ -124,6 +123,8 @@ parts:
   dotenv:
     plugin: dump
     source: .
+    organize:
+      client.env: .env
     stage:
       - .env
 
