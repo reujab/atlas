@@ -88,10 +88,11 @@ parts:
     source: overlay
     build-packages:
       - cargo
+      - libgtk-4-dev
+      - libssl-dev
       - libudev-dev
       - pkg-config
       - rustc
-      - libgtk-4-dev
     stage-packages:
       - psmisc
     stage:
