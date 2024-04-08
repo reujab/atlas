@@ -1,6 +1,6 @@
 use crate::mpv_worker::send_command;
 use gilrs::{ev::Button, Event, Gilrs};
-use gtk::{EventControllerKey, Inhibit};
+use gtk::{glib::Propagation, EventControllerKey};
 use log::{debug, info};
 use relm4::prelude::*;
 use std::{
@@ -19,7 +19,7 @@ pub(crate) fn handle_keyboard(
     controller.connect_key_pressed(move |_, key, _, _| {
         let name = match key.name() {
             Some(name) => name,
-            None => return Inhibit(true),
+            None => return Propagation::Stop,
         };
         debug!("key: {name}");
         let mut stream = mutex.lock().unwrap();
@@ -54,7 +54,7 @@ pub(crate) fn handle_keyboard(
             }
             _ => {}
         }
-        Inhibit(true)
+        Propagation::Stop
     });
 }
 

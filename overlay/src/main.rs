@@ -273,7 +273,7 @@ impl SimpleComponent for App {
 
     fn init(
         init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = App {
@@ -287,8 +287,6 @@ impl SimpleComponent for App {
         };
         let widgets = view_output!();
 
-        relm4::set_global_css(include_str!("styles.css"));
-
         let stream = init.stream;
         let sender_clone = sender.clone();
         let stream_clone = stream.clone();
@@ -299,7 +297,7 @@ impl SimpleComponent for App {
         let sender_clone = sender.clone();
         let kbd_controller = EventControllerKey::new();
         input_worker::handle_keyboard(sender_clone, stream, &kbd_controller);
-        root.add_controller(&kbd_controller);
+        root.add_controller(kbd_controller);
 
         ComponentParts { model, widgets }
     }
@@ -423,7 +421,8 @@ fn main() {
         .unwrap();
 
     info!("Starting overlay");
-    let app = RelmApp::new("atlas.overlay");
+    let app = RelmApp::new("atlas.overlay").with_args(Vec::new());
+    app.set_global_css(include_str!("styles.css"));
     app.run::<App>(AppInit {
         stream: Arc::new(Mutex::new(stream)),
         title: args.title,
