@@ -73,7 +73,7 @@ class Stream extends EventEmitter {
 		if (this.destroyTimeout) {
 			clearTimeout(this.destroyTimeout);
 		}
-		this.destroyTimeout = setTimeout(() => this.destroy(), 10_000);
+		this.destroyTimeout = setTimeout(() => this.destroy(), 12_000);
 	}
 
 	destroy(): void {

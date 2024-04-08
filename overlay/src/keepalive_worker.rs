@@ -1,4 +1,7 @@
-use std::{thread::sleep, time::Duration};
+use std::{
+    thread::sleep,
+    time::{Duration, Instant},
+};
 
 use log::{debug, error};
 use reqwest::blocking::Client;
@@ -19,6 +22,8 @@ pub fn keepalive(uuid: &str) {
     let client = builder.build().unwrap();
 
     loop {
+        let start = Instant::now();
+
         debug!("HEAD {url}");
         let res = match client.head(&url).send() {
             Err(err) => {
@@ -28,9 +33,16 @@ pub fn keepalive(uuid: &str) {
             }
             Ok(res) => res,
         };
+        debug!("Reply in {}ms", start.elapsed().as_millis());
+
         if !res.status().is_success() {
             error!("{url} responded with {}", res.status());
         }
-        sleep(Duration::from_secs(5));
+
+        let elapsed = start.elapsed();
+        let interval = Duration::from_secs(4);
+        if elapsed < interval {
+            sleep(interval - elapsed);
+        }
     }
 }
