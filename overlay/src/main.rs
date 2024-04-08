@@ -290,9 +290,6 @@ impl SimpleComponent for App {
         let stream = init.stream;
         let sender_clone = sender.clone();
         let stream_clone = stream.clone();
-        thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream_clone));
-        let sender_clone = sender.clone();
-        let stream_clone = stream.clone();
         thread::spawn(move || mpv_worker::start(sender_clone, stream_clone));
         let sender_clone = sender.clone();
         let kbd_controller = EventControllerKey::new();
