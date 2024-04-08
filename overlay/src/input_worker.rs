@@ -27,7 +27,7 @@ pub(crate) fn handle_keyboard(
             "Menu" => {
                 send_command(vec!["cycle".into(), "sub-visibility".into()], &mut stream).unwrap();
             }
-            "HomePage" | "Back" | "AudioNext" => {
+            "HomePage" | "Back" | "AudioNext" | "Escape" => {
                 sender.input(super::Msg::Quit);
             }
             "Return" | "AudioPlay" => {

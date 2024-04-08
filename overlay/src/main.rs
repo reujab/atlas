@@ -343,7 +343,10 @@ fn format(secs: f64) -> Format {
 }
 
 fn main() {
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("overlay")).init();
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or("atlas_overlay=info"),
+    )
+    .init();
 
     let args = Args::parse();
     if let Some(uuid) = args.uuid {

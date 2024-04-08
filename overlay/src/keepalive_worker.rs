@@ -1,6 +1,6 @@
 use std::{thread::sleep, time::Duration};
 
-use log::error;
+use log::{debug, error};
 use reqwest::blocking::Client;
 
 pub fn keepalive(uuid: &str) {
@@ -19,9 +19,10 @@ pub fn keepalive(uuid: &str) {
     let client = builder.build().unwrap();
 
     loop {
+        debug!("HEAD {url}");
         let res = match client.head(&url).send() {
             Err(err) => {
-                error!("Failed to send keepalive: {err}");
+                error!("Failed to send keepalive, retrying: {err}");
                 sleep(Duration::from_millis(100));
                 continue;
             }
