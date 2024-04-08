@@ -97,12 +97,10 @@ webtorrent.on("error", (err) => {
 setInterval(() => {
 	if (streams.length)
 		console.log(
-			"DL:",
-			Math.round(webtorrent.downloadSpeed / 1024),
-			"KiB/s",
-			"UP:", Math.round(webtorrent.uploadSpeed / 1024), "KiB/s"
+			"DL:", Math.round(webtorrent.downloadSpeed / 1024), "KiB/s",
+			"UP:", Math.round(webtorrent.uploadSpeed / 1024), "KiB/s",
 		);
-}, 10000);
+}, 10_000);
 
 export async function init(req: express.Request, res: express.Response): Promise<void> {
 	if (streams.length >= maxStreams) {

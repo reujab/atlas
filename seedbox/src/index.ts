@@ -42,6 +42,7 @@ app.listen(port, () => {
 	console.log("Listening to port", port);
 });
 
+/** Fetches a resource and retries up to 4 times on network failure or server error. */
 export async function get(...args: Parameters<typeof fetch>): Promise<Response> {
 	const start = Date.now();
 	let lastErr;

@@ -1,4 +1,4 @@
-import getGenres, { expandGenres } from "./genres";
+import getGenreRows, { expandGenres } from "./genres";
 import sql from "./sql";
 
 export interface Row {
@@ -10,7 +10,7 @@ export default async function getRows(type: "movie" | "tv"): Promise<Row[]> {
 	return (await Promise.all([
 		getTrending(type),
 		getTopRated(type),
-		getGenres(type),
+		getGenreRows(type),
 	])).flat();
 }
 

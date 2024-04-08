@@ -18,7 +18,8 @@ const sortedGenres: Genre[] = [];
 	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 })();
 
-export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
+/** Returns the most popular movies for each genre. */
+export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]> {
 	const rows: Row[] = [];
 
 	await Promise.all(sortedGenres.map(async (genre) => {
@@ -44,6 +45,7 @@ export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
 		} else {
 			row.titles = await sql`
 				SELECT id, type, title, genres, overview, released, trailer, rating, poster
+				-- This is done to force Postgres to use the proper index.
 				FROM (
 					SELECT * FROM titles
 					WHERE type = ${type}
@@ -62,7 +64,7 @@ export default async function getGenres(type: "movie" | "tv"): Promise<Row[]> {
 	return rows.filter((g) => g.titles.length >= 20);
 }
 
-/// Replaces the genre ids with names.
+/** Replaces the genre ids with names. */
 export function expandGenres(titles: any[]): void {
 	for (const title of titles) {
 		title.genres = title.genres.map((g: any) => genreMap[g]);
