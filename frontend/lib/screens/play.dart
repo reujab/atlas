@@ -52,7 +52,7 @@ class _PlayState extends State<Play> {
   Future<void> initStream() async {
     try {
       stream = await getJson(
-          "$host/init?uuid=${widget.uuid}${widget.season == null ? "" : "&s=${widget.season!}&e=${widget.episode}"}");
+          "$host/init/${widget.uuid}${widget.season == null ? "" : "?s=${widget.season!}&e=${widget.episode}"}");
       if (!mounted) return;
     } catch (err) {
       pop();

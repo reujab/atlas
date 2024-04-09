@@ -215,8 +215,10 @@ class _SeasonsState extends State<Seasons> {
     final episode = this.episode;
     if (episode.uuid != null || episode.unavailable) return;
 
+    final cleanTitle =
+        Uri.encodeComponent(title.title.replaceAll(nonSearchableChars, ""));
     final res = await get(
-        "$host/tv/uuid?q=${Uri.encodeComponent(title.title)}&s=${season.number}&e=${episode.number}");
+        "$host/get-uuid/tv/$cleanTitle?s=${season.number}&e=${episode.number}");
     if (!mounted) return;
     if (res.statusCode == 404) {
       setState(() {

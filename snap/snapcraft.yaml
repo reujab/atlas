@@ -17,14 +17,13 @@ apps:
       - bin/wayland-launch
     command: bin/wrapper
     plugs:
-      - opengl
-      - wayland
-      # additional plugs
       - alsa
       - network
       - network-bind
       - network-manager
+      - opengl
       - process-control
+      - wayland
 
 plugs:
   graphics-core22:

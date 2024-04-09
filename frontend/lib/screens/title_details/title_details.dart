@@ -81,8 +81,11 @@ class _TitleDetailsState extends State<TitleDetails> {
   Future<void> getUUID() async {
     Map<String, dynamic> json;
     try {
-      var res = await get(
-          "$host/movie/uuid?q=${Uri.encodeComponent("${title.title} ${title.released?.year ?? ""}")}");
+      final cleanTitle = title.title.replaceAll(nonSearchableChars, "");
+      final encodedTitle =
+          Uri.encodeComponent("$cleanTitle ${title.released?.year ?? ""}")
+              .trimRight();
+      var res = await get("$host/get-uuid/movie/$encodedTitle");
       if (res.statusCode == 404) {
         _setState(() {
           buttons[0].name = "Unavailable";

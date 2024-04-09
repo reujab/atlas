@@ -7,10 +7,7 @@ use log::{debug, error};
 use reqwest::blocking::Client;
 
 pub fn keepalive(uuid: &str) {
-    let url = format!(
-        "{}/keepalive/{uuid}",
-        std::env::var("SEEDBOX_HOST").unwrap()
-    );
+    let url = format!("{}/keepalive/{uuid}", std::env::var("SERVER").unwrap());
     let mut builder = Client::builder();
     // If https is being used, force HTTP/2 and set TCP keepalive to 10 seconds.
     // This allows debugging on localhost.
