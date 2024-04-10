@@ -34,6 +34,7 @@ export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]>
 			name: genre.name,
 			titles: [],
 		};
+		rows.push(row);
 
 		if (genre.name === "Kids") {
 			// Replace the "Kids" genre with every title rated less than PG-13.
@@ -64,7 +65,6 @@ export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]>
 			`;
 		}
 		expandGenres(row.titles);
-		rows.push(row);
 	}));
 
 	return rows.filter((g) => g.titles.length >= 20);
