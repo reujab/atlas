@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 # configure environment
+# shellcheck disable=1090
 . ~/.env
 
 # install dependencies
@@ -17,7 +18,7 @@ if [[ ! -e /swap ]]; then
 fi
 
 # configure atlas user
-if [[ ! grep atlas /etc/passwd ]]; then
+if ! grep atlas /etc/passwd; then
 	adduser --disabled-password --gecos "" atlas
 	mkdir -p /home/atlas/.ssh
 	cp ~/.ssh/authorized_keys /home/atlas/.ssh
@@ -34,16 +35,16 @@ cd
 git clone https://github.com/reujab/atlas
 createdb atlas
 psql -f migrations/*
-cd atlas/seedbox
+cd atlas/server
 npm i
 npm run build
 EOF
 
 # start services
-cp /home/atlas/{seedbox/seedbox.service,tmdbd/tmdbd.service} /etc/systemd/system
+cp /home/atlas/{server/atlas-server.service,tmdbd/tmdbd.service} /etc/systemd/system
 systemctl daemon-reload
-systemctl enable seedbox tmdbd
-systemctl start seedbox tmdbd
+systemctl enable atlas-server tmdbd
+systemctl start atlas-server tmdbd
 
 cat > /etc/nginx/sites-enabled/default << EOF
 server {
@@ -74,4 +75,4 @@ EOF
 
 # TODO: configure sshd
 
-echo Successful.
+echo Success
