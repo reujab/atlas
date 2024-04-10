@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ ! "$1" ]]; then
-	echo "Usage: push.sh <IP>"
+	echo "Usage: push_client.sh <IP>"
 	exit 1
 fi
 set -ex
