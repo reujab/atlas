@@ -14,8 +14,13 @@ src=$(readlink -f -- "$(dirname -- "$0")/..")
 root="root@$1"
 
 cd "$src"
-rm atlas*.snap
+rm -f atlas*.snap
 snapcraft -v --debug
 scp atlas*.snap "$root:atlas.snap"
-ssh "$root" "snap install --dangerous atlas.snap && systemctl restart snap.ubuntu-frame.daemon snap.atlas.frontend"
+ssh "$root" "
+	set -ex
+	snap install --dangerous atlas.snap
+	systemctl restart snap.ubuntu-frame.daemon snap.atlas.frontend
+	systemctl enable snap.atlas.frontend
+"
 echo Success
