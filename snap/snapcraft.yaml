@@ -49,6 +49,7 @@ environment:
   GTK_USE_PORTAL: 0
   # other
   PYTHONPATH: $PYTHONPATH:$SNAP/usr/lib/python3/dist-packages
+  RUST_BACKTRACE: 1
   XKB_CONFIG_ROOT: $SNAP/usr/share/X11/xkb
 
 parts:
