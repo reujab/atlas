@@ -4,8 +4,9 @@ summary: Atlas client
 description: Atlas client
 confinement: strict
 compression: lzo
-grade: stable
-base: core22
+grade: devel
+base: core24
+build-base: devel
 
 apps:
   frontend:
@@ -13,7 +14,7 @@ apps:
     restart-condition: always
     restart-delay: 1s
     command-chain:
-      - bin/graphics-core22-wrapper
+      - bin/graphics-core24-wrapper
       - bin/wayland-launch
     command: bin/wrapper
     plugs:
@@ -26,14 +27,15 @@ apps:
       - wayland
 
 plugs:
-  graphics-core22:
+  graphics-core24:
     interface: content
     target: $SNAP/graphics
-    default-provider: mesa-core22
+    default-provider: mesa-core24
+    channel: beta
 
 environment:
   # graphics
-  LD_LIBRARY_PATH: $SNAP/graphics/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/samba:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  LD_LIBRARY_PATH: $SNAP/graphics/lib:$SNAP/usr/local/lib:$SNAP/usr/local/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/samba:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/oss4-libsalsa:$LD_LIBRARY_PATH
   LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
   LIBVA_DRIVERS_PATH: $SNAP/graphics/dri
   __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
@@ -60,8 +62,8 @@ parts:
       - flutter/latest/stable
     build-environment:
       - C_INCLUDE_PATH: /snap/flutter/current/usr/include
-      - LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET
-      - PKG_CONFIG_PATH: ${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig
+      - LD_LIBRARY_PATH: ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+      - PKG_CONFIG_PATH: ${PKG_CONFIG_PATH:+$PKG_CONFIG_PATH:}/snap/flutter/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig
       - XDG_DATA_DIRS: /snap/flutter/current/usr/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}
     override-build: |
       set -eux
@@ -101,12 +103,160 @@ parts:
   deps:
     plugin: nil
     stage-packages:
-      - libasound2
       - libgtk-4-1
       - mpv
       - network-manager
       - ubuntu-restricted-extras
       - yt-dlp
+      - xkb-data
+
+  # meson:
+  #   plugin: nil
+  #   build-packages:
+  #     - python3-pip
+  #   override-build: |
+  #     pip install meson
+
+  # libdovi:
+  #   plugin: nil
+  #   source: https://github.com/quietvoid/dovi_tool.git
+  #   source-tag: libdovi-3.3.0
+  #   source-depth: 1
+  #   build-packages:
+  #     - cargo
+  #     - libssl-dev # Required for cargo-c
+  #     - pkg-config
+  #     - rsync
+  #   override-build: |
+  #     cd dolby_vision
+  #     cargo install cargo-c
+  #     cargo cinstall --release --prefix=$CRAFT_PART_INSTALL/usr/local
+  #     # Merge files from $CRAFT_PART_INSTALL with root, following destination symlinks.
+  #     # This installs the library to the build environment as well.
+  #     rsync -aKuv $CRAFT_PART_INSTALL/ /usr/local
+  #   stage:
+  #     - usr/local/lib
+
+  # libplacebo:
+  #   after:
+  #     - meson
+  #     - libdovi
+  #   plugin: nil
+  #   source: https://code.videolan.org/videolan/libplacebo.git
+  #   source-tag: v6.338.2
+  #   source-depth: 1
+  #   build-packages:
+  #     # - libshaderc-dev
+  #     - glslang-dev
+  #     - liblcms2-dev # Probably not required
+  #     - ninja-build
+  #     - pkg-config
+  #     - rsync
+  #   override-build: |
+  #     meson build -Dprefix=$CRAFT_PART_INSTALL/usr/local -Dglslang=enabled -Dlcms=enabled -Dbuildtype=release -Ddemos=false -Dvulkan=enabled -Ddovi=enabled -Dopengl=enabled
+  #     ninja -Cbuild install
+  #     rsync -aKuv $CRAFT_PART_INSTALL/ /
+  #   stage:
+  #     - usr/local/lib
+
+  # mpv:
+  #   after:
+  #     - libplacebo
+  #   plugin: nil
+  #   source: https://github.com/mpv-player/mpv.git
+  #   source-tag: v0.37.0
+  #   source-depth: 1
+  #   build-packages:
+  #     # - meson
+  #     - libass-dev
+  #     - libavcodec-dev
+  #     - libavfilter-dev
+  #     - liblua5.2-dev
+  #     - libva-dev
+  #     - libvulkan-dev
+  #     - libwayland-dev
+  #     - libxkbcommon-dev
+  #     - libzimg-dev
+  #     - pkg-config
+  #     - wayland-protocols
+  #     - libasound2-dev
+  #     - libxss-dev
+  #     - libxpresent-dev
+  #     - libvdpau-dev
+  #   override-build: |
+  #     meson setup build -Dprefix=$CRAFT_PART_INSTALL -Dbuildtype=release -Dalsa=enabled -Dcaca=disabled -Ddmabuf-wayland=enabled -Ddrm=enabled -Degl=enabled -Degl-drm=enabled -Degl-wayland=enabled -Degl-x11=enabled -Dgbm=enabled -Dgl-x11=enabled -Dlcms2=enabled -Dlibmpv=true -Dlua=enabled -Dvaapi=enabled -Dvaapi-drm=enabled -Dvaapi-wayland=enabled -Dvaapi-x11=enabled -Dvulkan=enabled -Dvdpau=enabled -Dvdpau-gl-x11=enabled -Dwayland=enabled -Dx11=enabled -Dzimg=enabled -Dzlib=enabled
+  #     meson compile -C build
+  #     meson install -C build
+  #   stage-packages:
+  #     - ocl-icd-libopencl1
+  #     - libaom3
+  #     - libass9
+  #     - libavcodec58
+  #     - libavfilter7
+  #     - libavformat58
+  #     - libavutil56
+  #     - libblas3
+  #     - libbluray2
+  #     - libbs2b0
+  #     - libchromaprint1
+  #     - libcodec2-1.0
+  #     - libdav1d5
+  #     - libflite1
+  #     - libgfortran5
+  #     - libgme0
+  #     - libgomp1
+  #     - libgsm1
+  #     - liblapack3
+  #     - liblilv-0-0
+  #     - liblua5.2-0
+  #     - libmfx1
+  #     - libmp3lame0
+  #     - libmpg123-0
+  #     - libmysofa1
+  #     - libnorm1
+  #     - libnuma1
+  #     - libogg0
+  #     - libopenjp2-7
+  #     - libopenmpt0
+  #     - libopus0
+  #     - libpgm-5.3-0
+  #     - libpocketsphinx3
+  #     - libpostproc55
+  #     - libquadmath0
+  #     - librabbitmq4
+  #     - librubberband2
+  #     - libsamplerate0
+  #     - libserd-0-0
+  #     - libshine3
+  #     - libsnappy1v5
+  #     - libsodium23
+  #     - libsord-0-0
+  #     - libsoxr0
+  #     - libspeex1
+  #     - libsphinxbase3
+  #     - libsratom-0-0
+  #     - libsrt1.4-gnutls
+  #     - libssh-gcrypt-4
+  #     - libswresample3
+  #     - libswscale5
+  #     - libtheora0
+  #     - libtwolame0
+  #     - libudfread0
+  #     - libva-wayland2
+  #     - libvidstab1.1
+  #     - libvorbis0a
+  #     - libvorbisenc2
+  #     - libvorbisfile3
+  #     - libvpx7
+  #     - libwebpmux3
+  #     - libx264-163
+  #     - libx265-199
+  #     - libxvidcore4
+  #     - libzimg2
+  #     - libzmq5
+  #     - libzvbi0
+  #     - libxpresent1
+  #     - libxss1
 
   fonts:
     plugin: nil
@@ -122,7 +272,7 @@ parts:
 
   dotenv:
     plugin: dump
-    source: .
+    source: env
     organize:
       client.env: .env
     stage:
@@ -151,7 +301,7 @@ parts:
       update-mime-database ${CRAFT_PART_INSTALL}/usr/share/mime
       # build immodules cache
       mkdir -p ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/
-      /usr/lib/${CRAFT_ARCH_TRIPLET}/libgtk-3-0/gtk-query-immodules-3.0 > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
+      /usr/lib/${CRAFT_ARCH_TRIPLET}/libgtk-3-0*/gtk-query-immodules-3.0 > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0/3.0.0/immodules.cache
     stage-packages:
       - librsvg2-common
       - gsettings-desktop-schemas
@@ -172,30 +322,32 @@ parts:
     override-build: |
       # The plugs needed to run Wayland. (wayland-launch checks them, setup.sh connects them)
       # You may add further plugs here if you want these options
-      PLUGS="opengl wayland graphics-core22"
+      PLUGS="opengl wayland graphics-core24"
       sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/wayland-launch
       sed --in-place "s/%PLUGS%/$PLUGS/g" $CRAFT_PART_BUILD/bin/setup.sh
       craftctl default
     stage-packages:
       - inotify-tools
 
-  graphics-core22:
+  graphics-core24:
     after:
       - frontend
       - overlay
+      - deps
+      # - mpv
       - gsettings+pixbuf+immodules
       - setup
-    source: https://github.com/MirServer/graphics-core22.git
+    source: https://github.com/canonical/graphics-core.git
     plugin: dump
     override-prime: |
       craftctl default
-      ${CRAFT_PART_SRC}/bin/graphics-core22-cleanup mesa-core22 nvidia-core22
+      ${CRAFT_PART_SRC}/bin/graphics-core24-cleanup mesa-core24 nvidia-core24
       cd "$CRAFT_PRIME/usr/share/"
       rm -rf bug drirc.d glvnd libdrm lintian man
       rm -rf applications apport bash-completion dbus-1 doc-base doc gtk-doc\
              help pkgconfig libthai metainfo themes thumbnailers xml
     prime:
-      - bin/graphics-core22-wrapper
+      - bin/graphics-core24-wrapper
 
 layout:
   /usr/share/libdrm:
@@ -210,8 +362,8 @@ layout:
     bind: $SNAP/usr/share/sounds
   /etc/fonts:
     bind: $SNAP/etc/fonts
-  /usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0
   /usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0:
     bind: $SNAP/usr/lib/${CRAFT_ARCH_TRIPLET}/gtk-3.0
   /usr/share/mime:
