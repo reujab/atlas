@@ -356,6 +356,7 @@ fn main() {
         std::env::var("AUDIO_DEVICE").unwrap_or("alsa/plughw:CARD=PCH,DEV=3".to_owned());
     mpv_cmd.args(&[
         &format!("--audio-device={audio_device}"),
+        "--log-file=/var/snap/atlas/common/mpv.log",
         "--input-ipc-server=/tmp/mpv",
         "--network-timeout=300",
         "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
