@@ -1,0 +1,14 @@
+[Unit]
+Description=Atlas server
+After=postgresql.service
+
+[Service]
+Type=exec
+User=atlas
+Group=atlas
+WorkingDirectory=/home/atlas/atlas/server
+ExecStart=/home/atlas/atlas/server/start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

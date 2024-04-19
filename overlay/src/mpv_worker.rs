@@ -1,6 +1,5 @@
 use super::{MPVInfo, Msg};
 use log::{debug, error, info};
-use regex::Regex;
 use relm4::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -35,17 +34,6 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
     info!("Starting mpv info worker");
 
     let mut stream = mutex.lock().unwrap();
-    let censor = Regex::new(r"(?i)fuck").unwrap();
-    let key = Regex::new(r"\?key=.*").unwrap();
-    let title = get_property("media-title", &mut stream)
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_owned();
-    let title = censor.replace_all(&title, "****").to_string();
-    let title = key.replace_all(&title, "").to_string();
-    sender.input(Msg::SetTitle(title));
-
     let duration = get_property("duration", &mut stream)
         .unwrap()
         .as_f64()

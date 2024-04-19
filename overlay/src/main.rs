@@ -1,6 +1,8 @@
 mod input_worker;
+mod keepalive_worker;
 mod mpv_worker;
 
+use clap::Parser;
 use gtk::{
     prelude::*, Align, ApplicationWindow, Box, EventControllerKey, Image, Label, Orientation,
     Revealer,
@@ -13,7 +15,7 @@ use std::{
     fs::File,
     io::prelude::*,
     os::unix::net::UnixStream,
-    process::Command,
+    process::{Command, Stdio},
     sync::{Arc, Mutex},
     thread,
     time::Duration,
@@ -21,6 +23,18 @@ use std::{
 
 const PROGRESS_BAR_WIDTH: i32 = 750;
 const PROGRESS_BAR_HEIGHT: i32 = 48;
+
+#[derive(Parser, Debug)]
+struct Args {
+    #[arg(long)]
+    title: String,
+    #[arg(long)]
+    video: String,
+    #[arg(long)]
+    subs: Option<String>,
+    #[arg(long)]
+    uuid: Option<String>,
+}
 
 pub(crate) struct App {
     mpv: MPVInfo,
@@ -46,7 +60,6 @@ pub struct MPVInfo {
 pub enum Msg {
     SetMPVInfo(MPVInfo),
 
-    SetTitle(String),
     SetDuration(f64),
 
     Quit,
@@ -58,9 +71,14 @@ struct Format {
     seconds: String,
 }
 
+struct AppInit {
+    stream: Arc<Mutex<UnixStream>>,
+    title: String,
+}
+
 #[relm4::component]
 impl SimpleComponent for App {
-    type Init = Arc<Mutex<UnixStream>>;
+    type Init = AppInit;
     type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -254,14 +272,14 @@ impl SimpleComponent for App {
     }
 
     fn init(
-        stream: Self::Init,
-        root: &Self::Root,
+        init: Self::Init,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = App {
             mpv: MPVInfo::default(),
 
-            title: "Loading...".to_owned(),
+            title: init.title,
             duration: 0.0,
 
             buffered_width: 0,
@@ -269,18 +287,14 @@ impl SimpleComponent for App {
         };
         let widgets = view_output!();
 
-        relm4::set_global_css(include_str!("styles.css"));
-
-        let sender_clone = sender.clone();
-        let stream_clone = stream.clone();
-        thread::spawn(move || input_worker::handle_gamepad(sender_clone, stream_clone));
+        let stream = init.stream;
         let sender_clone = sender.clone();
         let stream_clone = stream.clone();
         thread::spawn(move || mpv_worker::start(sender_clone, stream_clone));
         let sender_clone = sender.clone();
         let kbd_controller = EventControllerKey::new();
         input_worker::handle_keyboard(sender_clone, stream, &kbd_controller);
-        root.add_controller(&kbd_controller);
+        root.add_controller(kbd_controller);
 
         ComponentParts { model, widgets }
     }
@@ -289,9 +303,6 @@ impl SimpleComponent for App {
         match msg {
             Msg::SetMPVInfo(info) => {
                 self.mpv = info;
-            }
-            Msg::SetTitle(title) => {
-                self.title = title;
             }
             Msg::SetDuration(duration) => {
                 self.duration = duration;
@@ -329,14 +340,45 @@ fn format(secs: f64) -> Format {
 }
 
 fn main() {
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or("atlas_overlay=info"),
+    )
+    .init();
+
+    let args = Args::parse();
+    if let Some(uuid) = args.uuid {
+        thread::spawn(move || keepalive_worker::keepalive(&uuid));
+    }
+
+    info!("Spawning mpv");
+    let mut mpv_cmd = Command::new("mpv");
+    let audio_device =
+        std::env::var("AUDIO_DEVICE").unwrap_or("alsa/plughw:CARD=PCH,DEV=3".to_owned());
+    mpv_cmd.args(&[
+        &format!("--audio-device={audio_device}"),
+        "--log-file=/var/snap/atlas/common/mpv.log",
+        "--input-ipc-server=/tmp/mpv",
+        "--network-timeout=300",
+        "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
+        "--hwdec=vaapi",
+        "--vo=gpu",
+    ]);
+    if let Some(subs) = args.subs {
+        mpv_cmd.arg(format!("--sub-file={subs}"));
+    }
+    mpv_cmd.arg(args.video);
+    let mut mpv = mpv_cmd
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .unwrap();
 
     info!("Connecting to mpv");
     let mut stream = loop {
         match UnixStream::connect("/tmp/mpv") {
             Ok(stream) => break stream,
             Err(_) => {
-                thread::sleep(Duration::from_millis(100));
+                thread::sleep(Duration::from_millis(50));
                 continue;
             }
         }
@@ -380,8 +422,12 @@ fn main() {
         .unwrap();
 
     info!("Starting overlay");
-    let app = RelmApp::new("atlas.overlay");
-    app.run::<App>(Arc::new(Mutex::new(stream.try_clone().unwrap())));
+    let app = RelmApp::new("atlas.overlay").with_args(Vec::new());
+    app.set_global_css(include_str!("styles.css"));
+    app.run::<App>(AppInit {
+        stream: Arc::new(Mutex::new(stream)),
+        title: args.title,
+    });
 
     info!("Quitting");
     Command::new("killall")
@@ -389,5 +435,10 @@ fn main() {
         .output()
         .unwrap();
 
-    let _ = send_command(vec!["quit".into()], &mut stream);
+    // `mpv.kill()` cannot be used because it sends SIGKILL and does not clean up resources.
+    unsafe {
+        libc::kill(mpv.id() as i32, libc::SIGTERM);
+    }
+    // Ensure mpv exits gracefully.
+    mpv.wait().unwrap();
 }
