@@ -28,7 +28,7 @@ export async function proxy(req: Request, res: Response): Promise<void> {
 	const magnet = row[0].magnet;
 	stream = new Stream(uuid, magnet);
 	streams.push(stream);
-	stream.once("start", proxyFile);
+	stream.once("start", () => proxyFile(req, res, stream!));
 	stream.init();
 }
 
