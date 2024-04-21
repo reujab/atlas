@@ -122,7 +122,7 @@ parts:
 
   dotenv:
     plugin: dump
-    source: .
+    source: env
     organize:
       client.env: .env
     stage:
