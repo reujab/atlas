@@ -62,7 +62,7 @@ export default class Stream extends EventEmitter {
 	updateTimeout(): void {
 		if (this.destroyTimeout)
 			clearTimeout(this.destroyTimeout);
-		this.destroyTimeout = setTimeout(() => this.destroy(), 12_000);
+		this.destroyTimeout = setTimeout(() => this.destroy(), 60_000);
 	}
 
 	private startServer(): void {
