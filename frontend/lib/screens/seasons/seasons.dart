@@ -51,11 +51,17 @@ class _SeasonsState extends State<Seasons> {
         setState(() {
           seasons = Seasons.seasons!;
         });
-        getUUID();
+        init();
       });
     } else {
-      getUUID();
+      init();
     }
+  }
+
+  // Get UUID and scroll after loading seasons.
+  void init() {
+    getUUID();
+    Timer.run(scrollX);
   }
 
   @override
@@ -208,6 +214,8 @@ class _SeasonsState extends State<Seasons> {
 
   void getUUID() {
     uuidTimer?.cancel();
+    // Only actually get the UUID after 1 second of hovering to prevent spamming
+    // requests while scrolling.
     uuidTimer = Timer(const Duration(seconds: 1), _getUUID);
   }
 
