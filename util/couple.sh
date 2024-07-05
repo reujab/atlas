@@ -8,8 +8,6 @@ cleanup() {
 	kill -9 $(jobs -p) 2> /dev/null
 }
 trap cleanup EXIT
-# Suspend frontend for performance
-killall -STOP frontend
 
 # Run commands
 cmd=()

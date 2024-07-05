@@ -15,6 +15,7 @@ use std::{
     fs::File,
     io::prelude::*,
     os::unix::net::UnixStream,
+    process::Command,
     sync::{Arc, Mutex},
     thread,
     time::Duration,
@@ -387,6 +388,11 @@ fn main() {
         }
         thread::sleep(Duration::from_millis(100));
     }
+
+    Command::new("killall")
+        .args(&["-STOP", "frontend"])
+        .spawn()
+        .unwrap();
 
     info!("Starting overlay");
     let app = RelmApp::new("atlas.overlay").with_args(Vec::new());
