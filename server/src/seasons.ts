@@ -29,7 +29,7 @@ export async function getSeasons(id: string): Promise<any[]> {
 
 		for (let j = 0; j < 20; j++) {
 			const season = json[`season/${i * 20 + j + 1}`];
-			if (!season?.episodes.length) continue;
+			if (!season?.episodes?.length) continue;
 			seasons.push({
 				number: season.season_number,
 				episodes: season.episodes.map((episode: any) => ({
