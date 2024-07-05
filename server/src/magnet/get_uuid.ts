@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import sql from "../sql";
+import aliases from "./aliases";
 import searchMagnets from "./search";
-
-const aliases: { [key: string]: string } = {
-	"Special Victims Unit": "SVU",
-};
 
 /**
  * Searches the web for a magnet that best fits the query and returns its UUID.
@@ -43,9 +40,10 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 	}
 
 	const queries = [query];
-	for (const key of Object.keys(aliases)) {
-		if (query.toLowerCase().includes(key.toLowerCase())) {
-			queries.push(query.toLowerCase().replace(key.toLowerCase(), aliases[key]));
+	for (const alias of aliases) {
+		if (alias.regex.test(query)) {
+			if (!alias.add) queries.splice(0, queries.length);
+			queries.push(query.replace(alias.regex, alias.replace));
 		}
 	}
 
