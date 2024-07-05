@@ -11,7 +11,7 @@ const aliases: { [key: string]: string } = {
  * Caches UUID for 24 hours.
  * */
 export default async function getUUID(req: Request, res: Response): Promise<void> {
-	const type = req.params.type;
+	const type = req.params.type as "movie" | "tv";
 	const query = req.params.query;
 	const season = req.query.s ? Number(req.query.s) : null;
 	const episode = req.query.e ? Number(req.query.e) : null;

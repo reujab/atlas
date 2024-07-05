@@ -18,7 +18,7 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export default async function searchMagnets(query: string, type: string): Promise<Source[]> {
+export default async function searchMagnets(query: string, type: "movie" | "tv"): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
 	let sources = (await Promise.allSettled([searchPB(query, type), search1337x(query, type)]))
 		// DEBUG
@@ -135,7 +135,7 @@ function searchPB(query: string, type?: string): Promise<Source[]> {
 	});
 }
 
-async function search1337x(query: string, type?: string): Promise<Source[]> {
+async function search1337x(query: string, type: "movie" | "tv"): Promise<Source[]> {
 	const path = type === "movie"
 		? `category-search/${query}/Movies/1/`
 		: type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
