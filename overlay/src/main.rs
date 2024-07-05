@@ -15,7 +15,6 @@ use std::{
     fs::File,
     io::prelude::*,
     os::unix::net::UnixStream,
-    process::{Command, Stdio},
     sync::{Arc, Mutex},
     thread,
     time::Duration,
@@ -28,10 +27,6 @@ const PROGRESS_BAR_HEIGHT: i32 = 48;
 struct Args {
     #[arg(long)]
     title: String,
-    #[arg(long)]
-    video: String,
-    #[arg(long)]
-    subs: Option<String>,
     #[arg(long)]
     uuid: Option<String>,
 }
@@ -350,29 +345,6 @@ fn main() {
         thread::spawn(move || keepalive_worker::keepalive(&uuid));
     }
 
-    info!("Spawning mpv");
-    let mut mpv_cmd = Command::new("mpv");
-    let audio_device =
-        std::env::var("AUDIO_DEVICE").unwrap_or("alsa/plughw:CARD=PCH,DEV=3".to_owned());
-    mpv_cmd.args(&[
-        &format!("--audio-device={audio_device}"),
-        "--log-file=/var/snap/atlas/common/mpv.log",
-        "--input-ipc-server=/tmp/mpv",
-        "--network-timeout=300",
-        "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
-        "--hwdec=vaapi",
-        "--vo=gpu",
-    ]);
-    if let Some(subs) = args.subs {
-        mpv_cmd.arg(format!("--sub-file={subs}"));
-    }
-    mpv_cmd.arg(args.video);
-    let mut mpv = mpv_cmd
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .unwrap();
-
     info!("Connecting to mpv");
     let mut stream = loop {
         match UnixStream::connect("/tmp/mpv") {
@@ -416,11 +388,6 @@ fn main() {
         thread::sleep(Duration::from_millis(100));
     }
 
-    Command::new("killall")
-        .args(&["-STOP", "frontend"])
-        .output()
-        .unwrap();
-
     info!("Starting overlay");
     let app = RelmApp::new("atlas.overlay").with_args(Vec::new());
     app.set_global_css(include_str!("styles.css"));
@@ -428,17 +395,5 @@ fn main() {
         stream: Arc::new(Mutex::new(stream)),
         title: args.title,
     });
-
     info!("Quitting");
-    Command::new("killall")
-        .args(&["-CONT", "frontend"])
-        .output()
-        .unwrap();
-
-    // `mpv.kill()` cannot be used because it sends SIGKILL and does not clean up resources.
-    unsafe {
-        libc::kill(mpv.id() as i32, libc::SIGTERM);
-    }
-    // Ensure mpv exits gracefully.
-    mpv.wait().unwrap();
 }

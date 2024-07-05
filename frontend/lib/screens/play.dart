@@ -35,7 +35,7 @@ class _PlayState extends State<Play> {
   final TitleData title = TitleDetails.title!;
 
   Map<String, dynamic>? stream;
-  Process? overlay;
+  Process? couple;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _PlayState extends State<Play> {
       initStream();
     } else if (widget.trailer != null) {
       // TODO: remove exclamation point after upgrading to Dart 3.2
-      spawnOverlay(widget.trailer!);
+      spawnCouple(widget.trailer!);
     }
   }
 
@@ -59,29 +59,42 @@ class _PlayState extends State<Play> {
       rethrow;
     }
 
-    spawnOverlay("$host${stream!["video"]}");
+    spawnCouple("$host${stream!["video"]}");
   }
 
-  Future<void> spawnOverlay(String url) async {
+  Future<void> spawnCouple(String url) async {
     final episode = widget.season == null
         ? ""
         : " S${widget.season.toString().padLeft(2, "0")}E${widget.episode.toString().padLeft(2, "0")} ${widget.title}";
-    final List<String> opts = [
-      "--title=${title.title}$episode",
-      "--video=$url",
-      ...(widget.uuid == null ? [] : ["--uuid=${widget.uuid}"]),
-      ...(stream?["subs"] == null ? [] : ["--subs=$host${stream!["subs"]}"]),
+    final List<String> mpvOpts = [
+      "mpv",
+      "--audio-device=${Platform.environment["AUDIO_DEVICE"]!}",
+      "--log-file=/tmp/mpv.log",
+      "--input-ipc-server=/tmp/mpv",
+      "--network-timeout=300",
+      "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
+      "--hwdec=vaapi",
+      "--vo=gpu",
+      "--fullscreen",
+      ...(stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"]),
+      url,
+      "---",
     ];
-    log.info("atlas-overlay ${opts.map((a) => "'$a'").join(" ")}");
-    overlay = await Process.start(
+    final List<String> overlayOpts = [
       "atlas-overlay",
-      opts,
+      "--title=${title.title}$episode",
+      ...(widget.uuid == null ? [] : ["--uuid=${widget.uuid}"]),
+      "---",
+    ];
+    couple = await Process.start(
+      "couple.sh",
+      [...mpvOpts, ...overlayOpts],
       mode: ProcessStartMode.inheritStdio,
     );
-    final exitCode = await overlay!.exitCode;
-    overlay = null;
+    final exitCode = await couple!.exitCode;
+    couple = null;
     pop();
-    if (exitCode != 0) throw "Overlay exit code: $exitCode";
+    if (exitCode != 0) throw "Couple exit code: $exitCode";
   }
 
   @override
@@ -112,7 +125,7 @@ class _PlayState extends State<Play> {
 
   @override
   void dispose() {
-    overlay?.kill();
+    couple?.kill();
     super.dispose();
   }
 }
