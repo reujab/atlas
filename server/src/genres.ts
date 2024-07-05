@@ -50,17 +50,13 @@ export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]>
 		} else {
 			row.titles = await sql`
 				SELECT id, type, title, genres, overview, released, trailer, rating, poster
-				-- This is done to force Postgres to use the proper index.
-				FROM (
-					SELECT * FROM titles
-					WHERE type = ${type}
-					AND ${genre.id} = ANY(genres)
-					ORDER BY popularity DESC NULLS LAST
-					LIMIT 300
-				) AS titles
-				-- For documentaries, show titles with any rating.
-				WHERE (rating >= 'PG-13' OR ${genre.id} = 99)
+				FROM titles
+				WHERE type = ${type}
 				AND language = 'en'
+				AND ${genre.id} = ANY(genres)
+				-- For documentaries, show titles with any rating.
+				AND (rating >= 'PG-13' OR ${genre.id} = 99)
+				ORDER BY popularity DESC NULLS LAST
 				LIMIT 100
 			`;
 		}

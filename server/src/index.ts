@@ -25,7 +25,9 @@ app.use(morgan("dev"));
 
 app.get("/rows/:type(movie|tv)", async (req, res) => {
 	try {
-		res.json(await getRows(req.params.type as "movie" | "tv"));
+		const rows = await getRows(req.params.type as "movie" | "tv");
+		res.header("Cache-Control", "public, max-age=86400");
+		res.json(rows);
 	} catch (err) {
 		console.error("Error getting rows:", err);
 		res.status(500).end();
