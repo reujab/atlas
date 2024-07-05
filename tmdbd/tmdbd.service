@@ -9,6 +9,7 @@ Group=atlas
 WorkingDirectory=/home/atlas
 ExecStart=/home/atlas/tmdbd
 Restart=always
+RuntimeMaxSec=86400
 
 [Install]
 WantedBy=multi-user.target
