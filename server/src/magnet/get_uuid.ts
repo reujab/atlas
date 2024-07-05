@@ -86,10 +86,9 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 
 	const source = sources[0];
 	const magnet = await source.getMagnet();
-	const seasons = source.episode === null ? null : source.seasons;
 	const uuid = (await sql`
 		INSERT INTO magnets (magnet, query, seasons, episode)
-		VALUES (${magnet}, ${query}, ${seasons}, ${episode})
+		VALUES (${magnet}, ${query}, ${source.seasons}, ${source.episode})
 		ON CONFLICT (magnet) DO UPDATE
 		SET ts = now()
 		RETURNING uuid
@@ -97,6 +96,6 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 
 	res.json({
 		uuid,
-		seasons,
+		seasons: source.episode === null ? source.seasons : null,
 	});
 }
