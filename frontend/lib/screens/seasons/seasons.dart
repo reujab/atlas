@@ -28,7 +28,7 @@ class _SeasonsState extends State<Seasons> {
   final title = TitleDetails.title!;
 
   final pillScrollController = ScrollController();
-  final scrollController = ScrollController();
+  ScrollController? scrollController;
 
   int index = 0;
   List<SeasonData> seasons = Seasons.seasons ?? [];
@@ -51,17 +51,15 @@ class _SeasonsState extends State<Seasons> {
         setState(() {
           seasons = Seasons.seasons!;
         });
-        init();
+        getUUID();
       });
     } else {
-      init();
+      getUUID();
     }
-  }
 
-  // Get UUID and scroll after loading seasons.
-  void init() {
-    getUUID();
-    Timer.run(scrollX);
+    scrollController = ScrollController(onAttach: (_) {
+      scrollY();
+    });
   }
 
   @override
@@ -191,7 +189,7 @@ class _SeasonsState extends State<Seasons> {
       duration: scrollDuration,
       curve: Curves.ease,
     );
-    scrollController.animateTo(
+    scrollController!.animateTo(
       MediaQuery.of(context).size.width * index,
       duration: scrollDuration,
       curve: Curves.ease,
@@ -252,7 +250,7 @@ class _SeasonsState extends State<Seasons> {
     initTimer?.cancel();
     uuidTimer?.cancel();
     pillScrollController.dispose();
-    scrollController.dispose();
+    scrollController!.dispose();
     super.dispose();
   }
 }
