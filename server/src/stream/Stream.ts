@@ -5,9 +5,7 @@ import { port } from "..";
 
 export const streams: Stream[] = [];
 
-let webtorrent = new WebTorrent({
-	uploadLimit: 0.25 * 1024 * 1024,
-} as any);
+let webtorrent = new WebTorrent();
 
 export default class Stream extends EventEmitter {
 	uuid: string;
@@ -103,7 +101,5 @@ setInterval(() => {
 webtorrent.on("error", (err) => {
 	console.error("WebTorrent encountered a fatal error:", err);
 	for (const stream of streams) stream.destroy();
-	webtorrent = new WebTorrent({
-		uploadLimit: 0.25 * 1024 * 1024,
-	} as any);
+	webtorrent = new WebTorrent();
 })
