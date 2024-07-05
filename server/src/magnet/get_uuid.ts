@@ -86,7 +86,7 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 
 	const source = sources[0];
 	const magnet = await source.getMagnet();
-	const seasons = source.episode === null ? source.seasons : null;
+	const seasons = source.episode === null ? null : source.seasons;
 	const uuid = (await sql`
 		INSERT INTO magnets (magnet, query, seasons, episode)
 		VALUES (${magnet}, ${query}, ${seasons}, ${episode})
