@@ -41,3 +41,33 @@ Future<T> getJson<T>(String url) async {
   }
   return jsonDecode(utf8.decode(res.bodyBytes));
 }
+
+Future<T> postJson<T>(String url, Object body) async {
+  log.info("Posting to $url");
+
+  final start = DateTime.now();
+
+  http.Response res;
+  Object? error;
+  final encodedBody = json.encode(body);
+  for (int i = 0; i < maxTries; i++) {
+    try {
+      res = await http.post(Uri.parse(url),
+          headers: {"Content-Type": "application/json"}, body: encodedBody);
+    } catch (err) {
+      error = err;
+      log.shout("Unable to connect to $url: $err");
+      await Future.delayed(const Duration(milliseconds: 500));
+      continue;
+    }
+
+    final replyMs = DateTime.now().difference(start).inMilliseconds;
+    log.info("Got reply in ${replyMs}ms");
+
+    if (res.statusCode != 200) throw "Error ${res.statusCode}";
+
+    return jsonDecode(utf8.decode(res.bodyBytes));
+  }
+
+  throw error!;
+}

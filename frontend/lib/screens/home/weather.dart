@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
@@ -24,9 +25,9 @@ class _WeatherState extends State<Weather> {
   Future<String> getCoords() async {
     if (Weather.coords != null) return Weather.coords!;
 
-    final loc = (await getJson(
-            "https://location.services.mozilla.com/v1/geolocate?key=geoclue"))[
-        "location"];
+    final loc = (await postJson(
+        "https://www.googleapis.com/geolocation/v1/geolocate?key=${Platform.environment["GOOGLE_LOCATION_KEY"]}",
+        {"considerIp": true}))["location"];
     Weather.coords = "${loc["lat"]},${loc["lng"]}";
     return Weather.coords!;
   }
@@ -50,10 +51,11 @@ class _WeatherState extends State<Weather> {
       loaded = true;
       city = meta["properties"]["relativeLocation"]["properties"]["city"];
       temp = "${weather["temperature"]} °${weather["temperatureUnit"]}";
-      icon = weather["icon"];
+      icon = "https://api.weather.gov${weather["icon"]}";
       forecast = weather["shortForecast"]
           .replaceFirst(RegExp(" then.*"), "")
-          .replaceAll("and", "&");
+          .replaceAll(RegExp(r"\band\b", caseSensitive: false), "&")
+          .replaceFirst("Slight ", "");
     });
   }
 

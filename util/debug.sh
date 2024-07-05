@@ -16,6 +16,8 @@ trap cleanup EXIT
 # Set variables.
 # shellcheck disable=1091
 . env/server.env
+# shellcheck disable=1091
+. env/client.env
 export TMDB_KEY
 export SERVER=http://localhost:8000
 export AUDIO_DEVICE=alsa
@@ -23,6 +25,7 @@ export DATABASE_URL=postgres://localhost/atlas
 export PORT=8000
 export RUST_BACKTRACE=1
 export PATH="$PWD/overlay/target/debug:$PWD/util:$PATH"
+export GOOGLE_LOCATION_KEY
 
 # Compile and install overlay.
 (
