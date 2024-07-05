@@ -154,6 +154,7 @@ class _HomeState extends State<Home> {
         tiles[index].onClick();
         break;
       case "Browser Search":
+      case " ":
         router.push("/search");
         break;
     }
