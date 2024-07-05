@@ -3,4 +3,3 @@ dist
 http
 node_modules
 target
-*.snap

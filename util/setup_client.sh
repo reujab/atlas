@@ -3,9 +3,8 @@ set -ex
 
 # install dependencies
 # fontconfig is required by plymouth
-apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf snapd network-manager curl evtest
+apt-get install -y unattended-upgrades systemd-timesyncd fontconfig plymouth resolvconf weston network-manager curl evtest
 systemctl start systemd-timesyncd
-snap install ubuntu-frame
 cp update/update.sh /usr/local/bin
 cp update/update.{service,timer} /etc/systemd/system
 cp resetd/resetd.sh /usr/local/bin
@@ -39,11 +38,6 @@ systemctl start NetworkManager
 systemctl daemon-reload
 systemctl enable update.timer
 systemctl start update.timer
-
-# start ubuntu-frame
-snap set ubuntu-frame config=vt=1
-snap set ubuntu-frame config=cursor=null
-snap set ubuntu-frame daemon=true
 
 # disable tty1
 systemctl disable getty@tty1

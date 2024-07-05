@@ -2,8 +2,7 @@
 
 clear
 
-src=$(readlink -f -- "$(dirname -- "$0")/..")
-dev=$(readlink -f -- "$src/../atlas.dev")
+cd "$(readlink -f -- "$(dirname -- "$0")/..")"
 
 cleanup() {
 	killall -CONT frontend || true
@@ -14,21 +13,16 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Copy source files to new directory to prevent conflict with Snapcraft build.
-rsync -av --delete --exclude={node_modules,target,dist,build,.dart_tool,ephemeral,.git}/ -- "$src/" "$dev/"
-
-cd "$dev"
-
 # Set variables.
 # shellcheck disable=1091
-. server.env
+. env/server.env
 export TMDB_KEY
 export SERVER=http://localhost:8000
 export AUDIO_DEVICE=alsa
 export DATABASE_URL=postgres://localhost/atlas
 export PORT=8000
 export RUST_BACKTRACE=1
-export PATH="$dev/overlay/target/debug:$PATH"
+export PATH="$PWD/overlay/target/debug:$PWD/util:$PATH"
 
 # Compile and install overlay.
 (
