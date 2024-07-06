@@ -1,0 +1,15 @@
+[Unit]
+Description=Atlas frontend
+After=weston.service
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/frontend.sh
+Restart=always
+RestartSec=1
+Environment=XDG_RUNTIME_DIR=/run/user/0
+Environment=WAYLAND_DISPLAY=wayland-1
+
+[Install]
+WantedBy=multi-user.target
+

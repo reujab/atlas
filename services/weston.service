@@ -1,0 +1,14 @@
+[Unit]
+Description=Weston
+
+[Service]
+Type=exec
+ExecStartPre=/usr/bin/mkdir -pm700 /run/user/0
+ExecStart=/usr/bin/weston --tty=1
+Restart=always
+RestartSec=1
+Environment=XDG_RUNTIME_DIR=/run/user/0
+Environment=HOME=/root
+
+[Install]
+WantedBy=multi-user.target
