@@ -1,15 +1,21 @@
 import "package:flutter/widgets.dart";
+import "package:frontend/const.dart";
 import "package:frontend/screens/home/home.dart";
 import "package:frontend/screens/play.dart";
 import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/screens/titles/titles.dart";
+import "package:frontend/screens/wifi/wifi.dart";
 import "package:go_router/go_router.dart";
 
 final router = GoRouter(
-  initialLocation: "/home",
+  initialLocation: isInitialized ? "/home" : "/wifi",
   routes: [
+    GoRoute(
+      path: "/wifi",
+      pageBuilder: _getPageBuilder((_) => const Wifi()),
+    ),
     GoRoute(
       path: "/home",
       pageBuilder: _getPageBuilder((_) => const Home()),

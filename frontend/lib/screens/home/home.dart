@@ -35,6 +35,13 @@ class _HomeState extends State<Home> {
       },
     ),
     TileData(
+      name: "Wi-Fi",
+      img: const AssetImage("img/wifi.png"),
+      onClick: () {
+        router.push("/wifi");
+      },
+    ),
+    TileData(
       name: "Restart",
       img: const AssetImage("img/shutdown.png"),
       onClick: () {

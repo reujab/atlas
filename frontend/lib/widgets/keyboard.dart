@@ -16,6 +16,7 @@ class Keyboard extends StatefulWidget {
     required this.onSubmit,
     required this.inputEvent,
     this.onExit,
+    this.submitIcon = FontAwesomeIcons.magnifyingGlass,
   });
 
   final bool active;
@@ -23,6 +24,7 @@ class Keyboard extends StatefulWidget {
   final Function() onSubmit;
   final InputEvent? inputEvent;
   final Function()? onExit;
+  final IconData submitIcon;
 
   @override
   State<Keyboard> createState() => _KeyboardState();
@@ -130,7 +132,7 @@ class _KeyboardState extends State<Keyboard>
     } else if (key == shift) {
       icon = FontAwesomeIcons.arrowUp;
     } else if (key == submit) {
-      icon = FontAwesomeIcons.magnifyingGlass;
+      icon = widget.submitIcon;
     } else {
       throw UnimplementedError();
     }

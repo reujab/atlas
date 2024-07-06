@@ -38,3 +38,12 @@ final host = Platform.environment["SERVER"]!;
 final log = Logger("atlas");
 
 final nonSearchableChars = RegExp(r"[^a-zA-Z0-9 ]");
+
+final isInitialized =
+    Process.runSync("nmcli", ["-t", "-f=NAME", "connection", "show"])
+        .stdout
+        .toString()
+        .trim()
+        .split("\n")
+        .where((name) => name != "lo")
+        .isNotEmpty;

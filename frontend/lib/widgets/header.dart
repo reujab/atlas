@@ -3,8 +3,9 @@ import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 
 class Header extends StatelessWidget {
-  const Header(this.title, {super.key, this.search = false});
+  const Header(this.title, {super.key, this.search = false, this.back = true});
 
+  final bool back;
   final String title;
   final bool search;
 
@@ -19,7 +20,12 @@ class Header extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const FaIcon(FontAwesomeIcons.arrowLeft, size: 56, color: Colors.white),
+        ...(back
+            ? const [
+                FaIcon(FontAwesomeIcons.arrowLeft,
+                    size: 56, color: Colors.white)
+              ]
+            : []),
         const SizedBox(width: 32),
         const Text("", style: TextStyle(height: 1.35, fontSize: 96)),
         Expanded(

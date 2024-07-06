@@ -4,9 +4,10 @@ import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
 
 class Cursor extends StatefulWidget {
-  const Cursor({super.key, this.blinking = true});
+  const Cursor({super.key, this.blinking = true, this.size = 72.0});
 
   final bool blinking;
+  final double size;
 
   @override
   State<Cursor> createState() => _CursorState();
@@ -47,7 +48,7 @@ class _CursorState extends State<Cursor> {
       opacity: opacity,
       duration: Duration(milliseconds: opacity == 0 ? 333 : 250),
       curve: Curves.ease,
-      child: Container(width: 4, height: 72, color: Colors.black),
+      child: Container(width: 4, height: widget.size, color: Colors.black),
     );
   }
 
