@@ -55,9 +55,14 @@ class _WifiState extends State<Wifi> {
       throw "NetworkManager exit code: ${nmcli.exitCode}";
     }
 
+    final output = nmcli.stdout.toString().trimRight();
+    if (output.isEmpty) {
+      return;
+    }
+
     final selectedMAC = networks.isEmpty ? null : networks[index].mac;
     setState(() {
-      networks = nmcli.stdout.toString().trimRight().split("\n").map((line) {
+      networks = output.split("\n").map((line) {
         final parts = line.split(":");
         return NetworkData(
             mac: parts.sublist(1, 7).join(":").replaceAll(r"\", ""),
