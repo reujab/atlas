@@ -2,52 +2,54 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
+cp "$0" /tmp
+
 # cd to source root.
 cd "$(readlink -f -- "$(dirname -- "$0")/..")"
 
-if ! grep -q ' hypervisor ' /proc/cpuinfo; then
-	echo You must run this inside a Debian 12 VM.
-fi
-echo WARNING: This script will erase everything. Press enter to continue.
-read -r
+# if ! grep -q ' hypervisor ' /proc/cpuinfo; then
+# 	echo You must run this inside a Debian 12 VM.
+# fi
+# echo WARNING: This script will erase everything. Press enter to continue.
+# read -r
 
-if [[ ! -f env/client.env ]]; then
-	echo "Don't forget to copy your env file."
-	exit 1
-fi
+# if [[ ! -f env/client.env ]]; then
+# 	echo "Don't forget to copy your env file."
+# 	exit 1
+# fi
 
-set -x
+# set -x
 
-# Install systemd-boot
-rm -rf /boot/efi/*
-apt-get purge -y grub2-common
-apt-get autoremove -y
-rm -rf /boot/grub
-apt-get install -y systemd-boot
-# sed -i '/^options/ s/$/ quiet splash vt.cur_default=1/' /boot/efi/loader/entries/*.conf
+# # Install systemd-boot
+# rm -rf /boot/efi/*
+# apt-get purge -y grub2-common
+# apt-get autoremove -y
+# rm -rf /boot/grub
+# apt-get install -y systemd-boot
+# # sed -i '/^options/ s/$/ quiet splash vt.cur_default=1/' /boot/efi/loader/entries/*.conf
 
-# Install build dependencies.
-cd
-apt-get install -y clang cmake curl libgtk-3-dev libgtk-4-dev ninja-build pkg-config
-curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.9-stable.tar.xz | tar xJof -
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile=minimal --no-modify-path
-export PATH=$HOME/flutter/bin:$HOME/.cargo/bin:$PATH
-cd -
+# # Install build dependencies.
+# cd
+# apt-get install -y clang cmake curl libgtk-3-dev libgtk-4-dev ninja-build pkg-config
+# curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.9-stable.tar.xz | tar xJof -
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile=minimal --no-modify-path
+# export PATH=$HOME/flutter/bin:$HOME/.cargo/bin:$PATH
+# cd -
 
-# Install frontend.
-cd frontend
-flutter doctor
-flutter pub get
-flutter build linux --dart-define=ATLAS_VERSION=0.0.0 --release -v
-pwd
-mv build/linux/*/release/bundle /opt/frontend
-cd ..
+# # Install frontend.
+# cd frontend
+# flutter doctor
+# flutter pub get
+# flutter build linux --dart-define=ATLAS_VERSION=0.0.0 --release -v
+# pwd
+# mv build/linux/*/release/bundle /opt/frontend
+# cd ..
 
-# Install overlay.
-cd overlay
-cargo build --release
-mv target/release/atlas-overlay /usr/local/bin
-cd ..
+# # Install overlay.
+# cd overlay
+# cargo build --release
+# mv target/release/atlas-overlay /usr/local/bin
+# cd ..
 
 # Install services.
 cp services/*.sh /usr/local/bin
@@ -73,7 +75,8 @@ apt-get remove -y apt-utils bash-completion bind9-dnsutils bind9-host bzip2 clan
 	vim-common wamerican wget whiptail xz-utils
 
 # Install runtime dependencies.
-apt-get install -y evtest libgtk-3-0 libgtk-4-1 firmware-iwlwifi mpv network-manager weston yt-dlp
+apt-get install -y evtest libgtk-3-0 libgtk-4-1 firmware-iwlwifi mpv network-manager strace weston \
+	yt-dlp
 apt-get autoremove -y
 
 # Enable/disable services
@@ -90,17 +93,18 @@ apt-get --allow-remove-essential purge -y bsdutils debconf-i18n e2fsprogs gzip h
 ln -sf /bin/busybox /bin/rm
 shopt -s extglob
 rm -rf /!(bin|boot|dev|etc|lib*|opt|proc|root|run|sbin|sys|tmp|usr|var)
-rm -rf /etc/!(NetworkManager|ca-certificates*|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|libnl*|local*|machine-id|magic*|mime*|net*|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssl|sys*|timezone|udev|vulkan|wpa*|*tab)
+rm -rf /etc/!(NetworkManager|alternatives|ca-certificates*|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|libnl*|local*|machine-id|magic*|mime*|net*|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssl|sys*|timezone|udev|vulkan|wpa*|*tab)
+rm -rf /etc/alternatives/!(*.so*)
 rm -rf /usr/!(bin|lib*|local|sbin|share)
-rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|journalctl|kmod|ldd|login*|mount|mpv|nmcli|python*|rm|run-parts|su|system*|weston|yt-dlp|udev*)
+rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|journalctl|kmod|ldd|login*|mount|mpv|nmcli|python*|rm|run-parts|strace|su|system*|udev*|weston|yt-dlp)
 rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
-rm -rf /usr/lib/*/{avahi,bluetooth,perl*,pulseaudio}
+rm -rf /usr/lib/*/{avahi,bluetooth,perl*}
 rm -rf /usr/lib/python*/apt*
-rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|sulogin)
+rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|sulogin|wpa_supplicant)
 rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|systemd|vulkan|weston|zoneinfo)
 rm -rf /usr/share/X11/!(xkb)
 rm -rf /usr/share/icons/!(Adwaita)
-rm -rf /usr/share/icons/Adwaita/!(16x16|icon-theme.cache|scalable)
+rm -rf /usr/share/icons/Adwaita/!(icon-theme.cache|scalable)
 rm -rf /var/!(lib|local|lock|run|tmp)
 rm -rf /var/lib/!(dbus|dhcp|NetworkManager|pam|systemd)
 
@@ -150,16 +154,13 @@ done < <((
 
 find /usr/lib -type f -regextype awk -regex '.*\.so(\.|$).*' |
 grep -ivE '\/dri\/|mesa|pam|weston|vdpau|vk|vulk' |
-grep -ivE 'libdrm|libedit|libgl|libllvm|libpciaccess|libsensors|libxcb|libxshm|libz3' |
+grep -ivE 'libdrm|libedit|libelf|libgl|libllvm|libpciaccess|libsensors|libxcb|libxshm|libz3' |
 while read -r object; do
-	object=$(readlink -f -- "$object")
-	hasItem "$object" "${scanned[@]}" || (
-		echo "$object" >> /tmp/unused.txt
-		rm "$object"
-	)
+	object=$(readlink -f "$object")
+	hasItem "$object" "${scanned[@]}" || rm "$object"
 done
 
-rm -rf /usr/bin/{file,find,ldd} /usr/lib/{file,mime} /usr/share/{file,misc}
+rm -rf /usr/bin/{file,find,ldd} /usr/lib/{file,mime} /usr/share/{file,misc} /tmp/*
 ln -s /bin/busybox /bin/find
 
 echo Success
