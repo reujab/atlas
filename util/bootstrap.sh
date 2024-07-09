@@ -115,6 +115,7 @@ for cmd in $(busybox --list); do
 done
 
 # Remove unused libraries
+set +x
 scanned=()
 
 hasItem() {
@@ -147,6 +148,8 @@ done < <((
 	find /usr/lib/{systemd,udev} -type f -executable &
 	wait
 ) 2> /dev/null)
+
+set -x
 
 find /usr/lib -type f -regextype awk -regex '.*\.so(\.|$).*' |
 grep -ivE '\/dri\/|mesa|NetworkManager|pam|weston|vdpau|vk|vulk' |
