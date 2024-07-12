@@ -1,16 +1,16 @@
 #!/bin/bash -e
+set -o pipefail
 
-if ! grep -q ' hypervisor ' /proc/cpuinfo; then
-	echo You must run this inside a Debian 12 VM.
+if [[ $BOOTSTRAP != 1 ]]; then
+	echo Do not run this script manually. 2>&1
+	exit 1
 fi
-echo WARNING: This script will erase everything. Press enter to continue.
-read -r
 
 # cd to source root.
 cd "$(readlink -f -- "$(dirname -- "$0")/..")"
 
 if [[ ! -f env/client.env ]]; then
-	echo "Don't forget to copy your env file."
+	echo "Don't forget to copy your env file." 2>&1
 	exit 1
 fi
 
@@ -20,7 +20,7 @@ export PATH=$HOME/flutter/bin:$HOME/.cargo/bin:$PATH
 shopt -s extglob
 
 # Error handling for concurrent operations
-go() {
+concurrently() {
 	if [[ $ATLAS_DEBUG = 1 ]]; then
 		"$@"
 		return
@@ -36,15 +36,9 @@ wait() {
 	cmds=()
 }
 
-install-bootloader() {
-	rm -rf /boot/efi/*
-	apt-get purge -y grub2-common
-	apt-get autoremove -y
-	rm -rf /boot/grub
-	apt-get install -y systemd-boot
-	if [[ $ATLAS_DEBUG != 1 ]]; then
-		sed -i '/^options/ s/$/ quiet splash vt.cur_default=1/' /boot/efi/loader/entries/*.conf
-	fi
+add-sources() {
+	sed -i 's/$/ non-free-firmware/' /etc/apt/sources.list
+	apt update
 }
 
 install-services() {
@@ -53,16 +47,19 @@ install-services() {
 }
 
 install-build-deps() (
-	apt-get install -y clang cmake libgtk-3-dev libgtk-4-dev ninja-build pkg-config
+	apt-get install -y busybox clang cmake file git libgtk-3-dev libgtk-4-dev ninja-build \
+		pkg-config > /dev/null
 )
 
 install-flutter() {
-	curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.9-stable.tar.xz | tar xJof - -C/root
+	curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.9-stable.tar.xz |
+	tar xJof - -C/root
 }
 
 install-rust() { (
 	cd
-	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile=minimal --no-modify-path
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs |
+	sh -s -- -y --profile=minimal --no-modify-path
 ) }
 
 install-frontend() { (
@@ -90,49 +87,80 @@ wipe-home() {
 	mv /tmp/weston.ini /root/.config
 }
 
-install-runtime-deps() {
-	apt-get remove -y apt-utils bash-completion bind9-dnsutils bind9-host bzip2 clang cmake cron \
-		cron-daemon-common curl debian-faq discover dmidecode doc-debian eject fdisk git gpgv \
-		groff-base iamerican ibritish inetutils-telnet inetutils-telnet installation-report \
-		iputils-ping keyboard-configuration krb5-locales laptop-detect less libgtk-3-dev \
-		libgtk-4-dev logrotate lsof manpages netbase util-linux-locales netcat-traditional \
-		nftables ninja-build openssh-client os-prober pciutils perl pkg-config qemu-guest-agent \
-		tasksel traceroute usbutils vim-common wamerican wget whiptail xz-utils
-	apt-get install -y evtest libgtk-3-0 libgtk-4-1 firmware-iwlwifi mpv network-manager weston \
-		yt-dlp
-	if [[ $ATLAS_DEBUG = 1 ]]; then
-		apt-get install -y ssh rsync strace
-	fi
-	apt-get autoremove -y
+install-dracut() {
+	apt-get install -y dracut-squash
+	kernel=$(ls /lib/modules)
+	dracut --add-drivers virtio_gpu /boot/efi/initrd.img "$kernel"
 }
 
-configure-services() {
-	systemctl daemon-reload
+install-runtime-deps() {
+	apt-get install -y evtest libgtk-3-0 libgtk-4-1 linux-image-amd64 firmware-iwlwifi mpv \
+		network-manager weston yt-dlp
 	systemctl disable apparmor dpkg-db-backup.timer fstrim.timer getty@tty1 ModemManager \
 		remote-fs.target
+	if [[ $ATLAS_DEBUG = 1 ]]; then
+		apt-get install -y ssh rsync strace
+		return
+	fi
+
+	install-dracut
+
+	apt-get purge -y apt-utils clang cmake cron cron-daemon-common dmidecode fdisk git \
+		iputils-ping less libgtk-3-dev libgtk-4-dev ninja-build pkg-config logrotate nano nftables \
+		sensible-utils tasksel vim-common whiptail
+	apt-get autoremove -y
+
+	rm -f /var/lib/dpkg/info/{console-setup,e2fsprogs,keyboard-configuration,sgml-base}*
+	apt purge -y --allow-remove-essential apt bsdutils debconf-i18n debian-archive-keyring \
+		e2fsprogs gpgv grep gzip ncurses-base ncurses-bin perl-base
+}
+
+configure-system() {
+	systemctl daemon-reload
 	systemctl enable NetworkManager weston frontend resetd
 
 	# This logs the root user in on boot, creating the dbus runtime,
 	# allowing weston to start on boot.
-	loginctl enable-linger root
-}
+	# loginctl enable-linger root
+	mkdir -p /var/lib/systemd/linger
+	touch /var/lib/systemd/linger/root
 
-remove-system-packages() {
-	[[ $ATLAS_DEBUG = 1 ]] && return
-	apt-get --allow-remove-essential purge -y bsdutils debconf-i18n e2fsprogs gzip hostname \
-		ncurses-base ncurses-bin apt
+	mv /boot/vmlinuz* /boot/efi/vmlinuz
+	mkdir -p /boot/efi/loader/entries
+	cat > /boot/efi/loader/entries/atlas.conf << EOF
+title Atlas
+options root=PARTLABEL=root rw loglevel=4
+linux /vmlinuz
+initrd /initrd.img
+EOF
+	cat > /etc/fstab << EOF
+PARTLABEL=root	/	squashfs	defaults	0 1
+PARTLABEL=boot	/boot	ext4	defaults	0 2
+PARTLABEL=esp	/boot/efi	vfat	defaults	0 2
+PARTLABEL=local	/var/local	ext4	defaults	0 2
+EOF
+
+	passwd --stdin <<< atlas
+
+	# Remove symlink before overwriting.
+	rm /etc/os-release
+	cat > /etc/os-release << EOF
+PRETTY_NAME="Atlas"
+NAME="Atlas"
+ID=debian
+EOF
 }
 
 clean-fs() {
 	[[ $ATLAS_DEBUG = 1 ]] && return
 	ln -sf /bin/busybox /bin/rm
 	rm -rf /!(bin|boot|dev|etc|lib*|opt|proc|root|run|sbin|sys|tmp|usr|var)
-	rm -rf /etc/!(NetworkManager|alternatives|ca-certificates*|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|libnl*|local*|machine-id|magic*|mime*|net*|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssl|sys*|timezone|udev|vulkan|wpa*|*tab)
+	rm -rf /etc/!(NetworkManager|alternatives|ca-certificates*|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|libnl*|local*|machine-id|magic*|mime*|net*|os-release|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssl|sys*|timezone|udev|vulkan|wpa*|*tab)
 	rm -rf /etc/alternatives/!(*.so*)
 	rm -rf /usr/!(bin|lib*|local|sbin|share)
-	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|journalctl|kmod|ldd|login*|mount|mpv|nmcli|python*|rm|run-parts|su|system*|udev*|weston|wpa*|yt-dlp)
+	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mount|mpv|nmcli|python*|rm|run-parts|su|system*|udev*|weston|wpa*|yt-dlp)
 	rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
-	rm -rf /usr/lib/*/{avahi,bluetooth,perl*}
+	rm -rf /usr/lib/*/{avahi,bluetooth}
 	rm -rf /usr/lib/python*/apt*
 	rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sulogin|wpa*)
 	rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|systemd|vulkan|weston|zoneinfo)
@@ -172,6 +200,8 @@ scan() {
 }
 
 remove-unused-libraries() {
+	[[ $ATLAS_DEBUG = 1 ]] && return
+
 	scanned=()
 
 	# Cannot use pipe because scan must not run in subshell
@@ -190,7 +220,7 @@ remove-unused-libraries() {
 	while read -r object; do
 		object=$(readlink -f "$object")
 		hasItem "$object" "${scanned[@]}" || (
-			if [[ $ATLAS_DEBUG = 0 ]]; then
+			if [[ $ATLAS_DEBUG = 1 ]]; then
 				mkdir -p "/root/$(dirname "$object")"
 				mv "$object" "/root/$object"
 			else
@@ -205,24 +235,23 @@ remove-unused-libraries() {
 
 set -x
 
-install-bootloader
+add-sources
 install-services
 
-apt-get install -y curl
-go install-build-deps
-go install-flutter
-go install-rust
+apt-get install -y curl xz-utils
+# concurrently install-build-deps
+# concurrently install-flutter
+# concurrently install-rust
 wait
 
-go install-frontend
-go install-overlay
+concurrently install-frontend
+concurrently install-overlay
 wait
 
 install-config
 wipe-home
 install-runtime-deps
-configure-services
-remove-system-packages
+configure-system
 clean-fs
 
 set +x
