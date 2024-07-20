@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -o pipefail
 
-if [[ -z $1 ]]; then
+if [[ ! $1 ]]; then
 	echo "Usage: $0 <output>"
 	exit 1
 fi
@@ -23,12 +23,11 @@ unmount-filesystems() {
 	sudo umount -R root/sys
 	sudo umount root/proc
 }
-
 cleanup() {
-	set +xe
+	set +ex
 	kill "$sudo_loop_pid"
 	unmount-filesystems
-	[[ -n $loopback ]] && sudo losetup -d "$loopback"
+	[[ $loopback ]] && sudo losetup -d "$loopback"
 	sudo rm -rf "$tmp"
 }
 trap cleanup EXIT

@@ -13,7 +13,7 @@ trap cleanup EXIT
 cmd=()
 pids=()
 for arg in "$@"; do
-	if [[ $arg == --- ]]; then
+	if [[ $arg = --- ]]; then
 		"${cmd[@]}" &
 		pids+=($!)
 		cmd=()
