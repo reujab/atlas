@@ -78,7 +78,7 @@ app.get(`/init/${uuidParam}`, (req, res) => {
 	});
 })
 
-app.head(`/keepalive/${uuidParam}`, keepalive);
+app.get(`/keepalive/${uuidParam}`, keepalive);
 
 app.use(`/stream/${uuidParam}/`, proxy);
 
