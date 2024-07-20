@@ -15,9 +15,9 @@ trap cleanup EXIT
 
 # Set variables.
 # shellcheck disable=1091
-. env/server.env
+. client/server.env
 # shellcheck disable=1091
-. env/client.env
+. client/client.env
 export TMDB_KEY
 export SERVER=http://localhost:8000
 export AUDIO_DEVICE=alsa

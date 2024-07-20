@@ -1,15 +1,13 @@
 [Unit]
 Description=Weston
-After=dbus.socket
+After=user@0.service
 
 [Service]
-Type=notify
-ExecStart=weston.sh
+Type=exec
+ExecStart=weston
 Restart=always
-RestartSec=1
 
 Environment=HOME=/root
-Environment=PATH=/usr/local/bin:/sbin:/bin
 Environment=XDG_RUNTIME_DIR=/run/user/0
 
 [Install]
