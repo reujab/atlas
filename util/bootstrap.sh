@@ -62,6 +62,12 @@ install-overlay() { (
 	mv target/release/atlas-overlay /usr/local/bin
 ) }
 
+# After install-rust
+install-sqlx() {
+	cargo install sqlx-cli
+	mv ~/.cargo/bin/sqlx /usr/local/bin
+}
+
 # After install-build-deps
 install-runtime-deps() {
 	apt-get install -y evtest firmware-iwlwifi firmware-linux-free file \
@@ -80,6 +86,8 @@ install-dracut() {
 # After install-frontend
 install-config() {
 	cp atlas/config/client.env /opt/frontend/env
+
+	cp -r atlas/migrations/client /opt/frontend/migrations
 
 	mkdir -p /etc/xdg/weston
 	cp atlas/config/weston.ini /etc/xdg/weston
@@ -258,6 +266,7 @@ wait
 
 concurrently install-frontend
 concurrently install-overlay
+concurrently install-sqlx
 concurrently install-runtime-deps
 wait
 

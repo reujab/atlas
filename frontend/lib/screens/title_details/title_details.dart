@@ -33,6 +33,7 @@ class _TitleDetailsState extends State<TitleDetails> {
   String? uuid;
 
   final title = TitleDetails.title!;
+  final poster = GlobalKey<PosterState>();
 
   late final buttons = [
     ButtonData(
@@ -42,7 +43,9 @@ class _TitleDetailsState extends State<TitleDetails> {
         if (title.type == "tv") {
           router.push("/seasons");
         } else if (uuid != null) {
-          router.push("/play?uuid=$uuid");
+          router.push("/play?uuid=$uuid").then((_) {
+            poster.currentState?.updatePercent();
+          });
         }
       },
     ),
@@ -130,7 +133,11 @@ class _TitleDetailsState extends State<TitleDetails> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Poster(title: title, width: TitlesRow.imgWidth),
+                      Poster(
+                        key: poster,
+                        title: title,
+                        width: TitlesRow.imgWidth,
+                      ),
                       const SizedBox(height: 32),
                       ...released,
                     ],

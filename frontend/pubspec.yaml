@@ -39,6 +39,8 @@ dependencies:
   json_annotation: ^4.8.0
   json_serializable: ^6.6.1
   logging: ^1.1.1
+  sqflite: ^2.3.2
+  sqflite_common_ffi: ^2.1.1+1
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to

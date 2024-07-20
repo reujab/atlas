@@ -4,16 +4,18 @@ After=weston.service
 
 [Service]
 Type=exec
+ExecStartPre=sqlx database create
+ExecStartPre=sqlx migrate run --source=/opt/frontend/migrations
 ExecStart=/opt/frontend/frontend
 Restart=always
 RestartSec=1
 
 EnvironmentFile=/opt/frontend/env
+Environment=GTK_A11Y=none
 Environment=HOME=/root
 Environment=PATH=/usr/local/bin:/sbin:/bin
 Environment=WAYLAND_DISPLAY=wayland-1
 Environment=XDG_RUNTIME_DIR=/run/user/0
-Environment=GTK_A11Y=none
 
 [Install]
 WantedBy=multi-user.target

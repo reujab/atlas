@@ -15,16 +15,17 @@ class Play extends StatefulWidget {
   const Play({
     super.key,
     this.uuid,
-    this.trailer,
     this.season,
     this.episode,
+    this.trailer,
     this.title,
   });
 
   final String? uuid;
-  final String? trailer;
   final String? season;
   final String? episode;
+
+  final String? trailer;
   final String? title;
 
   @override
@@ -95,6 +96,28 @@ class _PlayState extends State<Play> {
     couple = null;
     pop();
     if (exitCode != 0) throw "Couple exit code: $exitCode";
+
+    if (widget.uuid == null) return;
+    final file = File("/tmp/progress");
+    try {
+      final progress = file.readAsLinesSync().map(double.parse).toList();
+      db!.execute('''
+        INSERT INTO title_progress (type, id, season, episode, percent, position)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+        ON CONFLICT (type, id, season, episode)
+        DO UPDATE
+        SET percent = ?5, position = ?6
+      ''', [
+        title.type,
+        title.id,
+        widget.season,
+        widget.episode,
+        progress[0],
+        progress[1]
+      ]);
+    } finally {
+      file.delete();
+    }
   }
 
   @override

@@ -14,18 +14,15 @@ cleanup() {
 trap cleanup EXIT
 
 # Set variables.
-# shellcheck disable=1091
 . config/server.env
-# shellcheck disable=1091
 . config/client.env
-export TMDB_KEY
-export SERVER=http://localhost:8000
 export AUDIO_DEVICE=alsa
-export DATABASE_URL=postgres://localhost/atlas
+export GOOGLE_LOCATION_KEY
+export PATH="$PWD/overlay/target/debug:$PWD/services:$PATH"
 export PORT=8000
 export RUST_BACKTRACE=1
-export PATH="$PWD/overlay/target/debug:$PWD/util:$PATH"
-export GOOGLE_LOCATION_KEY
+export SERVER=http://localhost:8000
+export TMDB_KEY
 
 # Compile and install overlay.
 (
@@ -34,6 +31,9 @@ export GOOGLE_LOCATION_KEY
 ) &
 
 if [[ "$1" != "--no-frontend" ]]; then
+	export DATABASE_URL=sqlite:///tmp/atlas.db
+	sqlx database create
+	sqlx migrate run --source=migrations/client
 	gnome-terminal -- sh -c "cd frontend && flutter pub get && flutter run"
 fi
 
@@ -41,4 +41,4 @@ fi
 cd server
 npm i
 npm run build
-node --enable-source-maps .
+DATABASE_URL=postgres://localhost/atlas node --enable-source-maps .

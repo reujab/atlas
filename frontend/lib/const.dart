@@ -2,12 +2,14 @@ import "dart:io";
 
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
+import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
 class Colors {
   static const transparent = Color(0x00000000);
   static const black = Color(0xFF000000);
   static const gray = Color(0xFF888888);
   static const white = Color(0xFFEEEEEE);
+  static const red = Color(0xFFB91C1C);
 }
 
 const scrollDuration = Duration(milliseconds: 300);
@@ -47,3 +49,5 @@ final isInitialized =
         .split("\n")
         .where((name) => name != "lo")
         .isNotEmpty;
+
+Database? db;

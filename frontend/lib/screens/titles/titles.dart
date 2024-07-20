@@ -13,6 +13,7 @@ import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
+import "package:frontend/widgets/poster.dart";
 
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
@@ -33,6 +34,7 @@ class Titles extends StatefulWidget {
 
 class _TitlesState extends State<Titles> {
   final scrollController = ScrollController();
+  final poster = GlobalKey<PosterState>();
 
   Timer? timer;
   List<RowData>? rows;
