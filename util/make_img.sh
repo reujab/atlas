@@ -48,8 +48,7 @@ tmp=$(mktemp -dp ~/.cache)
 cd "$tmp"
 
 # Bootstrap Debian 13.
-# sudo debootstrap trixie root
-	sudo cp -a ~/Downloads/trixie/ root/
+sudo debootstrap trixie root
 
 # Create image.
 if [[ $ATLAS_FS = ext ]]; then

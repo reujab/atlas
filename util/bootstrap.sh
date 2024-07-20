@@ -252,8 +252,8 @@ install-services
 apt-get install -y curl xz-utils
 
 concurrently install-build-deps
-# concurrently install-flutter
-# concurrently install-rust
+concurrently install-flutter
+concurrently install-rust
 wait
 
 concurrently install-frontend
