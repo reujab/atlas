@@ -51,7 +51,7 @@ class _WeatherState extends State<Weather> {
       loaded = true;
       city = meta["properties"]["relativeLocation"]["properties"]["city"];
       temp = "${weather["temperature"]} °${weather["temperatureUnit"]}";
-      icon = "https://api.weather.gov${weather["icon"]}";
+      icon = weather["icon"];
       forecast = weather["shortForecast"]
           .replaceFirst(RegExp(" then.*"), "")
           .replaceAll(RegExp(r"\band\b", caseSensitive: false), "&")
