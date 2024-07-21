@@ -34,7 +34,7 @@ su atlas << EOF
 cd
 git clone https://github.com/reujab/atlas
 createdb atlas
-psql -f migrations/*
+psql -f migrations/server/*
 cd atlas/server
 npm i
 npm run build
