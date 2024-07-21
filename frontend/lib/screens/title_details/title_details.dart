@@ -41,7 +41,9 @@ class _TitleDetailsState extends State<TitleDetails> {
       icon: FontAwesomeIcons.play,
       onClick: () {
         if (title.type == "tv") {
-          router.push("/seasons");
+          router.push("/seasons").then((_) {
+            poster.currentState?.updatePercent();
+          });
         } else if (uuid != null) {
           router.push("/play?uuid=$uuid").then((_) {
             poster.currentState?.updatePercent();

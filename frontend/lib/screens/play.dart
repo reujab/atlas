@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
+import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/const.dart";
 import "package:frontend/widgets/header.dart";
@@ -97,6 +98,7 @@ class _PlayState extends State<Play> {
     pop();
     if (exitCode != 0) throw "Couple exit code: $exitCode";
 
+    // Update movie/episode progress.
     if (widget.uuid == null) return;
     final file = File("/tmp/progress");
     try {
@@ -117,6 +119,30 @@ class _PlayState extends State<Play> {
       ]);
     } finally {
       file.delete();
+    }
+
+    // Update series progress.
+    if (title.type == "tv") {
+      final seasons = Seasons.seasons!;
+      int totalEpisodes = 0;
+      int currentEpisode = 0;
+      for (final season in seasons) {
+        for (final episode in season.episodes) {
+          totalEpisodes++;
+          if (season.number.toString() == widget.season &&
+              episode.number.toString() == widget.episode) {
+            currentEpisode = totalEpisodes;
+          }
+        }
+      }
+      final seriesPercent = currentEpisode / totalEpisodes;
+      db!.execute("""
+        INSERT INTO title_progress (type, id, percent)
+        VALUES ('tv', ?1, ?2)
+        ON CONFLICT (type, id, season, episode)
+        DO UPDATE
+        SET percent = ?2, ts = CURRENT_TIMESTAMP
+      """, [title.id, seriesPercent]);
     }
   }
 
