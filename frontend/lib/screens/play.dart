@@ -72,14 +72,14 @@ class _PlayState extends State<Play> {
     final List<String> mpvOpts = [
       "mpv",
       "--audio-device=${Platform.environment["AUDIO_DEVICE"]!}",
-      "--log-file=/tmp/mpv.log",
-      "--input-ipc-server=/tmp/mpv",
-      "--network-timeout=300",
-      "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
-      "--hwdec=vaapi",
-      "--vo=gpu",
       "--fullscreen",
+      "--hwdec=vaapi",
+      "--input-ipc-server=/tmp/mpv",
+      "--log-file=/tmp/mpv.log",
+      "--network-timeout=300",
       "--start=$startTime",
+      "--vo=gpu",
+      "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
       ...(stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"]),
       url,
       "---",
@@ -114,8 +114,8 @@ class _PlayState extends State<Play> {
       """, [
         title.type,
         title.id,
-        widget.season,
-        widget.episode,
+        widget.season ?? "-1",
+        widget.episode ?? "-1",
         progress[0],
         progress[1]
       ]);
@@ -153,11 +153,9 @@ class _PlayState extends State<Play> {
       SELECT position
       FROM title_progress
       WHERE type = ? AND id = ?
-      -- NULL will not be casted.
-      AND season IS CAST(? AS INT)
-      AND episode IS CAST(? AS INT)
+      AND season LIKE ? AND episode LIKE ?
       LIMIT 1
-    """, [title.type, title.id, widget.season, widget.episode]);
+    """, [title.type, title.id, widget.season ?? "-1", widget.episode ?? "-1"]);
     if (rows.isEmpty) return 0;
     return rows[0]["position"] as double;
   }

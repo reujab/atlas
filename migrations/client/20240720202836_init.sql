@@ -1,11 +1,12 @@
 CREATE TABLE title_progress (
-	type TEXT,
-	id INT,
+	type TEXT NOT NULL,
+	id INT NOT NULL,
 
-	season INT,
-	episode INT,
+	-- These columns cannot default to NULL because of how sqlite treats NULL primary keys.
+	season INT NOT NULL DEFAULT -1,
+	episode INT NOT NULL DEFAULT -1,
 
-	percent FLOAT,
+	percent FLOAT NOT NULL,
 	position FLOAT,
 
 	ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

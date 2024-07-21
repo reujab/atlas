@@ -47,8 +47,8 @@ class _EpisodeState extends State<Episode>
       FROM title_progress
       WHERE type = 'tv'
       AND id = ?
-      AND season IS ?
-      AND episode IS ?
+      AND season = ?
+      AND episode = ?
       LIMIT 1
     """, [widget.titleId, widget.season.number, widget.episode.number]);
     if (row.isEmpty) return;

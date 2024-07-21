@@ -30,8 +30,8 @@ class PosterState extends State<Poster> {
       FROM title_progress
       WHERE type = ?
       AND id = ?
-      AND season IS NULL
-      AND episode IS NULL
+      AND season = -1
+      AND episode = -1
       LIMIT 1
     """, [widget.title.type, widget.title.id]);
     if (row.isEmpty) return;
