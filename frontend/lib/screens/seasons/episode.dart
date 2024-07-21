@@ -5,13 +5,22 @@ import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 import "package:frontend/animation_mixin.dart";
 import "package:frontend/screens/seasons/season_data.dart";
+import "package:frontend/widgets/progress_overlay.dart";
 
 class Episode extends StatefulWidget {
-  const Episode(this.episode, {super.key, required this.active});
+  const Episode({
+    super.key,
+    required this.titleId,
+    required this.season,
+    required this.episode,
+    required this.active,
+  });
 
   static const height = 127.0 + 2, imgWidth = 227.0, padY = 22.0;
 
+  final SeasonData season;
   final EpisodeData episode;
+  final int titleId;
   final bool active;
 
   @override
@@ -20,12 +29,32 @@ class Episode extends StatefulWidget {
 
 class _EpisodeState extends State<Episode>
     with TickerProviderStateMixin, AnimationMixin {
+  double percent = 0;
+
   @override
   void initState() {
     super.initState();
+    updatePercent();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       animate(widget.active ? scale : 1);
+    });
+  }
+
+  void updatePercent() async {
+    final row = await db!.rawQuery("""
+      SELECT percent, position
+      FROM title_progress
+      WHERE type = 'tv'
+      AND id = ?
+      AND season IS ?
+      AND episode IS ?
+      LIMIT 1
+    """, [widget.titleId, widget.season.number, widget.episode.number]);
+    if (row.isEmpty) return;
+
+    setState(() {
+      percent = row[0]["percent"] as double;
     });
   }
 
@@ -65,9 +94,13 @@ class _EpisodeState extends State<Episode>
                       child: SizedBox(
                         width: Episode.imgWidth,
                         height: Episode.height,
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              "https://image.tmdb.org/t/p/w227_and_h127_bestv2${widget.episode.still}",
+                        child: ProgressOverlay(
+                          width: Episode.imgWidth,
+                          percent: percent,
+                          child: CachedNetworkImage(
+                            imageUrl:
+                                "https://image.tmdb.org/t/p/w227_and_h127_bestv2${widget.episode.still}",
+                          ),
                         ),
                       ),
                     ),

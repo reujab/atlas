@@ -3,6 +3,7 @@ import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/const.dart";
 import "package:frontend/title_data.dart";
+import "package:frontend/widgets/progress_overlay.dart";
 
 class Poster extends StatefulWidget {
   const Poster({super.key, required this.title, required this.width});
@@ -46,45 +47,28 @@ class PosterState extends State<Poster> {
       decoration: const BoxDecoration(boxShadow: boxShadow),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(5)),
-        child: Stack(
-          children: [
-            CachedNetworkImage(
-              imageUrl:
-                  "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.title.poster}",
-              width: widget.width,
-              errorWidget: (context, url, error) {
-                log.shout("Error loading $url: $error");
-                return const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FaIcon(
-                      FontAwesomeIcons.circleExclamation,
-                      size: 64,
-                      color: Colors.white,
-                    ),
-                    Text("Error"),
-                  ],
-                );
-              },
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              child: Container(
-                height: 8,
-                width: widget.width * percent,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: percent == 0
-                      ? BorderRadius.zero
-                      : const BorderRadius.only(
-                          topRight: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
-                        ),
-                ),
-              ),
-            ),
-          ],
+        child: ProgressOverlay(
+          width: widget.width,
+          percent: percent,
+          child: CachedNetworkImage(
+            imageUrl:
+                "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.title.poster}",
+            width: widget.width,
+            errorWidget: (context, url, error) {
+              log.shout("Error loading $url: $error");
+              return const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.circleExclamation,
+                    size: 64,
+                    color: Colors.white,
+                  ),
+                  Text("Error"),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

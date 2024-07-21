@@ -114,7 +114,9 @@ class _SeasonsState extends State<Seasons> {
                               children: [
                                 for (int i = 0; i < season.episodes.length; i++)
                                   Episode(
-                                    season.episodes[i],
+                                    titleId: title.id,
+                                    season: season,
+                                    episode: season.episodes[i],
                                     active: season.index == i,
                                   ),
                                 // spacer
