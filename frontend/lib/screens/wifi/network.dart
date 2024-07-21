@@ -39,7 +39,7 @@ class _NetworkState extends State<Network> {
       transform.scale(1.1, 1.1);
     }
     if (widget.hidden) {
-      transform.translate(0.0, MediaQuery.of(context).size.height * 2);
+      transform.translate(0, MediaQuery.of(context).size.height * 2);
     }
     if (widget.selected) {
       transform.scale(1.1, 1.1);
@@ -137,9 +137,9 @@ class _NetworkState extends State<Network> {
               child: widget.selected
                   ? Padding(
                       padding: const EdgeInsets.only(
-                        left: 48.0,
-                        right: 48.0,
-                        bottom: 48.0,
+                        left: 48,
+                        right: 48,
+                        bottom: 48,
                       ),
                       child: Row(
                         children: [

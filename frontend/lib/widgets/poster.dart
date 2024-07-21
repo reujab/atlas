@@ -15,7 +15,7 @@ class Poster extends StatefulWidget {
 }
 
 class PosterState extends State<Poster> {
-  double percent = 0.0;
+  double percent = 0;
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class PosterState extends State<Poster> {
   }
 
   void updatePercent() async {
-    final row = await db!.rawQuery('''
+    final row = await db!.rawQuery("""
       SELECT percent, position
       FROM title_progress
       WHERE type = ?
@@ -32,7 +32,7 @@ class PosterState extends State<Poster> {
       AND season IS NULL
       AND episode IS NULL
       LIMIT 1
-    ''', [widget.title.type, widget.title.id]);
+    """, [widget.title.type, widget.title.id]);
     if (row.isEmpty) return;
 
     setState(() {
@@ -45,7 +45,7 @@ class PosterState extends State<Poster> {
     return Container(
       decoration: const BoxDecoration(boxShadow: boxShadow),
       child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
         child: Stack(
           children: [
             CachedNetworkImage(
@@ -75,7 +75,7 @@ class PosterState extends State<Poster> {
                 width: widget.width * percent,
                 decoration: BoxDecoration(
                   color: Colors.red,
-                  borderRadius: percent == 0.0
+                  borderRadius: percent == 0
                       ? BorderRadius.zero
                       : const BorderRadius.only(
                           topRight: Radius.circular(4),
