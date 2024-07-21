@@ -106,7 +106,7 @@ class _PlayState extends State<Play> {
         VALUES (?1, ?2, ?3, ?4, ?5, ?6)
         ON CONFLICT (type, id, season, episode)
         DO UPDATE
-        SET percent = ?5, position = ?6
+        SET percent = ?5, position = ?6, ts = CURRENT_TIMESTAMP
       ''', [
         title.type,
         title.id,

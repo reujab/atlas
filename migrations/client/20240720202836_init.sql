@@ -8,5 +8,7 @@ CREATE TABLE title_progress (
 	percent FLOAT,
 	position FLOAT,
 
+	ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 	PRIMARY KEY (type, id, season, episode)
 );
