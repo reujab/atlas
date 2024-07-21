@@ -65,6 +65,7 @@ class _PlayState extends State<Play> {
   }
 
   Future<void> spawnCouple(String url) async {
+    final startTime = await getStartTime();
     final episode = widget.season == null
         ? ""
         : " S${widget.season.toString().padLeft(2, "0")}E${widget.episode.toString().padLeft(2, "0")} ${widget.title}";
@@ -78,6 +79,7 @@ class _PlayState extends State<Play> {
       "--hwdec=vaapi",
       "--vo=gpu",
       "--fullscreen",
+      "--start=$startTime",
       ...(stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"]),
       url,
       "---",
@@ -144,6 +146,20 @@ class _PlayState extends State<Play> {
         SET percent = ?2, ts = CURRENT_TIMESTAMP
       """, [title.id, seriesPercent]);
     }
+  }
+
+  Future<double> getStartTime() async {
+    final rows = await db!.rawQuery("""
+      SELECT position
+      FROM title_progress
+      WHERE type = ? AND id = ?
+      -- NULL will not be casted.
+      AND season IS CAST(? AS INT)
+      AND episode IS CAST(? AS INT)
+      LIMIT 1
+    """, [title.type, title.id, widget.season, widget.episode]);
+    if (rows.isEmpty) return 0;
+    return rows[0]["position"] as double;
   }
 
   @override
