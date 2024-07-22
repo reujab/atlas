@@ -7,9 +7,10 @@ Type=exec
 User=atlas
 Group=atlas
 WorkingDirectory=/home/atlas
-ExecStart=/home/atlas/tmdbd
+ExecStart=/home/atlas/atlas/tmdbd/target/release/tmdbd
 Restart=always
 RuntimeMaxSec=86400
+EnvironmentFile=/home/atlas/atlas/config/server.env
 
 [Install]
 WantedBy=multi-user.target

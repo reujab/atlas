@@ -11,7 +11,7 @@ for cmd in "${reqd_cmds[@]}"; do
 	which "$cmd" > /dev/null || missing_cmds+=("$cmd")
 done
 if (( ${#missing_cmds[@]} )); then
-	echo Missing tools: "${missing_cmds[@]}" 2>&1
+	echo Missing tools: "${missing_cmds[@]}" 1>&2
 	exit 1
 fi
 set -x
