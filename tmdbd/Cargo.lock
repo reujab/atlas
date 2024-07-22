@@ -1376,7 +1376,6 @@ name = "tmdbd"
 version = "0.0.0"
 dependencies = [
  "chrono",
- "dotenv",
  "env_logger",
  "flate2",
  "futures",

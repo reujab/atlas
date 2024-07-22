@@ -18,7 +18,7 @@ trap cleanup EXIT
 . config/client.env
 export AUDIO_DEVICE=alsa
 export GOOGLE_LOCATION_KEY
-export PATH="$PWD/overlay/target/debug:$PWD/services:$PATH"
+export PATH="$PWD/overlay/target/debug:$PWD/services:/opt/flutter/bin:$PATH"
 export PORT=8000
 export RUST_BACKTRACE=1
 export SERVER=http://localhost:8000
