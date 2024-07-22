@@ -1,9 +1,11 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/const.dart";
+import "package:frontend/screens/attributions.dart";
 import "package:frontend/screens/home/home.dart";
 import "package:frontend/screens/play.dart";
 import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/seasons.dart";
+import 'package:frontend/screens/settings/settings.dart';
 import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/screens/titles/titles.dart";
 import "package:frontend/screens/wifi/wifi.dart";
@@ -48,6 +50,14 @@ final router = GoRouter(
           title: state.queryParams["title"],
         ),
       ),
+    ),
+    GoRoute(
+      path: "/settings",
+      pageBuilder: _getPageBuilder((_) => const Settings()),
+    ),
+    GoRoute(
+      path: "/attributions",
+      pageBuilder: _getPageBuilder((_) => const Attributions()),
     ),
   ],
 );
