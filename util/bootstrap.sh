@@ -146,6 +146,8 @@ AuthorizedKeysFile /var/local/authorized_keys
 PermitRootLogin yes
 EOF
 
+	echo atlas > /etc/hostname
+
 	# Rebuild font cache
 	rm -rf /usr/share/fonts/!(opentype|truetype)
 	rm -rf /usr/share/fonts/opentype/!(cantarell|noto)
