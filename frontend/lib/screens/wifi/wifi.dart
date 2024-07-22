@@ -7,7 +7,6 @@ import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/const.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/wifi/network.dart";
-import "package:frontend/screens/wifi/network_data.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
@@ -96,26 +95,26 @@ class _WifiState extends State<Wifi> {
                   back: !connecting && (isInitialized || selected),
                 ),
                 Expanded(
-                    child: networks.isEmpty
-                        ? const SpinKitRipple(color: Colors.white, size: 256)
-                        : ListView(
-                            controller: scrollController,
-                            children: [
-                              for (int i = 0; i < networks.length; i++)
-                                Network(
-                                  networks[i],
-                                  active: i == index,
-                                  selected: i == index && selected,
-                                  hidden: selected && i > index,
-                                  passwordLength: password.length,
-                                  connecting: i == index && connecting,
-                                  known:
-                                      knownNetworks.contains(networks[i].name),
-                                ),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height),
-                            ],
-                          )),
+                  child: networks.isEmpty
+                      ? const SpinKitRipple(color: Colors.white, size: 256)
+                      : ListView(
+                          controller: scrollController,
+                          children: [
+                            for (int i = 0; i < networks.length; i++)
+                              Network(
+                                networks[i],
+                                active: i == index,
+                                selected: i == index && selected,
+                                hidden: selected && i > index,
+                                passwordLength: password.length,
+                                connecting: i == index && connecting,
+                                known: knownNetworks.contains(networks[i].name),
+                              ),
+                            SizedBox(
+                                height: MediaQuery.of(context).size.height),
+                          ],
+                        ),
+                ),
               ],
             ),
           ),

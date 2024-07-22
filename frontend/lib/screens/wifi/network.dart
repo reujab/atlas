@@ -2,7 +2,6 @@ import "package:flutter/material.dart" as material;
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/const.dart";
-import "package:frontend/screens/wifi/network_data.dart";
 import "package:frontend/widgets/cursor.dart";
 
 class Network extends StatefulWidget {
@@ -162,4 +161,18 @@ class _NetworkState extends State<Network> {
       ),
     );
   }
+}
+
+class NetworkData {
+  NetworkData({
+    required this.mac,
+    required this.name,
+    required this.secure,
+    required this.strength,
+  });
+
+  String mac;
+  String name;
+  bool secure;
+  int strength;
 }

@@ -21,7 +21,7 @@ const sortedGenres: Genre[] = [];
  * Returns the most popular movies for each genre.
  * The "Kids" genre will only show titles rated less than PG-13.
  * The "Documentaries" genre will show titles with any rating.
- * Every other genre will show tities that are PG-13+.
+ * Every other genre will show titles that are PG-13+.
  * Genres with fewer than 20 titles will be filtered out.
 */
 export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]> {
