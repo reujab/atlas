@@ -77,6 +77,11 @@ class _TitleDetailsState extends State<TitleDetails> {
   }
 
   Future<void> getSeasons() async {
+    if (Seasons.seasons != null) {
+      for (final season in Seasons.seasons!) {
+        season.scrollController.dispose();
+      }
+    }
     Seasons.seasons = null;
 
     final List<dynamic>? json =

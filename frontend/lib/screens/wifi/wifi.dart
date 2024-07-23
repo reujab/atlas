@@ -255,6 +255,7 @@ class _WifiState extends State<Wifi> {
   @override
   void dispose() {
     timer?.cancel();
+    scrollController.dispose();
     super.dispose();
   }
 }

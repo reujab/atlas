@@ -77,4 +77,10 @@ class _SettingsState extends State<Settings> {
         break;
     }
   }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 }
