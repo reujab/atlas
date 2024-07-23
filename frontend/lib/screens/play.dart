@@ -35,6 +35,7 @@ class Play extends StatefulWidget {
 
 class _PlayState extends State<Play> {
   final TitleData title = TitleDetails.title!;
+  final client = HttpClient();
 
   Map<String, dynamic>? stream;
   Process? couple;
@@ -53,9 +54,9 @@ class _PlayState extends State<Play> {
 
   Future<void> initStream() async {
     try {
-      stream = await getJson(
+      stream = await client.getJson(
           "$host/init/${widget.uuid}${widget.season == null ? "" : "?s=${widget.season!}&e=${widget.episode}"}");
-      if (!mounted) return;
+      if (!mounted || stream == null) return;
     } catch (err) {
       pop();
       rethrow;
@@ -188,6 +189,7 @@ class _PlayState extends State<Play> {
 
   @override
   void dispose() {
+    client.close();
     couple?.kill();
     super.dispose();
   }

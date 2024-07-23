@@ -2,6 +2,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
+import "package:frontend/net.dart" as net;
 import "package:frontend/router.dart";
 import "package:frontend/screens/home/tile.dart";
 import "package:frontend/screens/home/info.dart";
@@ -61,9 +62,9 @@ class _HomeState extends State<Home> {
     router.addListener(() {
       if (router.location == "/home") precacheRows();
     });
-    NetworkInterface.list().then((interfaces) {
+    net.waitUntilOnline().then((_) {
       setState(() {
-        localIP = interfaces.asMap()[0]?.addresses.asMap()[0]?.address;
+        localIP = net.localIP;
       });
     });
   }

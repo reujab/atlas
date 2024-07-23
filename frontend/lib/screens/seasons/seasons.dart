@@ -26,6 +26,7 @@ class Seasons extends StatefulWidget {
 
 class _SeasonsState extends State<Seasons> {
   final title = TitleDetails.title!;
+  final client = HttpClient();
 
   final pillScrollController = ScrollController();
   ScrollController? scrollController;
@@ -225,9 +226,9 @@ class _SeasonsState extends State<Seasons> {
 
     final cleanTitle =
         Uri.encodeComponent(title.title.replaceAll(nonSearchableChars, ""));
-    final res = await get(
+    final res = await client.get(
         "$host/get-uuid/tv/$cleanTitle?s=${season.number}&e=${episode.number}");
-    if (!mounted) return;
+    if (!mounted || res == null) return;
     if (res.statusCode == 404) {
       setState(() {
         episode.unavailable = true;
@@ -249,6 +250,7 @@ class _SeasonsState extends State<Seasons> {
 
   @override
   void dispose() {
+    client.close();
     initTimer?.cancel();
     uuidTimer?.cancel();
     pillScrollController.dispose();

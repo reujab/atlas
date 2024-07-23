@@ -28,12 +28,13 @@ class TitleDetails extends StatefulWidget {
 }
 
 class _TitleDetailsState extends State<TitleDetails> {
+  final title = TitleDetails.title!;
+  final poster = GlobalKey<PosterState>();
+  final client = HttpClient();
+
   int index = 0;
 
   String? uuid;
-
-  final title = TitleDetails.title!;
-  final poster = GlobalKey<PosterState>();
 
   late final buttons = [
     ButtonData(
@@ -78,7 +79,9 @@ class _TitleDetailsState extends State<TitleDetails> {
   Future<void> getSeasons() async {
     Seasons.seasons = null;
 
-    final List<dynamic> json = await getJson("$host/seasons/${title.id}");
+    final List<dynamic>? json =
+        await client.getJson("$host/seasons/${title.id}");
+    if (json == null) return;
 
     Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
   }
@@ -90,7 +93,8 @@ class _TitleDetailsState extends State<TitleDetails> {
       final encodedTitle =
           Uri.encodeComponent("$cleanTitle ${title.released?.year ?? ""}")
               .trimRight();
-      var res = await get("$host/get-uuid/movie/$encodedTitle");
+      var res = await client.get("$host/get-uuid/movie/$encodedTitle");
+      if (res == null) return;
       if (res.statusCode == 404) {
         _setState(() {
           buttons[0].name = "Unavailable";
@@ -207,6 +211,12 @@ class _TitleDetailsState extends State<TitleDetails> {
         router.pop();
         break;
     }
+  }
+
+  @override
+  void dispose() {
+    client.close();
+    super.dispose();
   }
 }
 

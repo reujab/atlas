@@ -22,6 +22,8 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  final client = HttpClient();
+
   String query = "";
   bool keyboardActive = true;
   InputEvent? inputEvent;
@@ -185,8 +187,9 @@ class _SearchState extends State<Search> {
 
     final cleanQuery =
         Uri.encodeComponent(query.replaceAll(nonSearchableChars, ""));
-    final List<dynamic> json = await getJson(
-        "$host/search/$cleanQuery?blacklist=${blacklist.join(",")}");
+    final List<dynamic>? json = await client
+        .getJson("$host/search/$cleanQuery?blacklist=${blacklist.join(",")}");
+    if (json == null) return;
     cache[query] = json.map((j) => TitleData.fromJson(j)).toList();
     setState(() {
       results = cache[query]!;
@@ -200,5 +203,11 @@ class _SearchState extends State<Search> {
       index = min(visibleResults - 1, 1);
       keyboardActive = false;
     });
+  }
+
+  @override
+  void dispose() {
+    client.close();
+    super.dispose();
   }
 }

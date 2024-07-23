@@ -16,6 +16,8 @@ class Weather extends StatefulWidget {
 }
 
 class _WeatherState extends State<Weather> {
+  final client = HttpClient();
+
   bool loaded = false;
   String? city;
   String? temp;
@@ -25,7 +27,7 @@ class _WeatherState extends State<Weather> {
   Future<String> getCoords() async {
     if (Weather.coords != null) return Weather.coords!;
 
-    final loc = (await postJson(
+    final loc = (await client.postJson(
         "https://www.googleapis.com/geolocation/v1/geolocate?key=${Platform.environment["GOOGLE_LOCATION_KEY"]}",
         {"considerIp": true}))["location"];
     Weather.coords = "${loc["lat"]},${loc["lng"]}";
@@ -36,10 +38,12 @@ class _WeatherState extends State<Weather> {
     if (!mounted) return;
 
     final coords = await getCoords();
-    final Map<String, dynamic> meta, json;
+    final Map<String, dynamic>? meta, json;
     try {
-      meta = await getJson("https://api.weather.gov/points/$coords");
-      json = await getJson(meta["properties"]["forecast"]);
+      meta = await client.getJson("https://api.weather.gov/points/$coords");
+      if (meta == null) return;
+      json = await client.getJson(meta["properties"]["forecast"]);
+      if (json == null) return;
     } catch (err) {
       Timer(const Duration(seconds: 1), updateWeather);
       throw "Failed to get forecast: $err";
@@ -49,7 +53,7 @@ class _WeatherState extends State<Weather> {
     final weather = json["properties"]["periods"][0];
     setState(() {
       loaded = true;
-      city = meta["properties"]["relativeLocation"]["properties"]["city"];
+      city = meta!["properties"]["relativeLocation"]["properties"]["city"];
       temp = "${weather["temperature"]} °${weather["temperatureUnit"]}";
       icon = weather["icon"];
       forecast = weather["shortForecast"]
