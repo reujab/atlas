@@ -13,7 +13,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Set variables.
 . config/server.env
 . config/client.env
 export AUDIO_DEVICE=alsa
@@ -24,7 +23,6 @@ export RUST_BACKTRACE=1
 export SERVER=http://localhost:8000
 export TMDB_KEY
 
-# Compile and install overlay.
 (
 	cd overlay
 	cargo build

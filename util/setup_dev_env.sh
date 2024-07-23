@@ -2,7 +2,7 @@
 
 reqd_cmds=(cargo psql sqlx)
 for cmd in "${reqd_cmds[@]}"; do
-	which "$cmd" > /dev/null || missing_cmds+=("$cmd")
+	which "$cmd" &> /dev/null || missing_cmds+=("$cmd")
 done
 if (( ${#missing_cmds[@]} )); then
 	echo Missing tools: "${missing_cmds[@]}" 1>&2

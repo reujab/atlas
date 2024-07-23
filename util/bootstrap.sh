@@ -5,6 +5,7 @@ if [[ $BOOTSTRAP != 1 ]]; then
 	echo Do not run this script manually. 1>&2
 	exit 1
 fi
+set -x
 
 export DEBIAN_FRONTEND=noninteractive
 export PATH=$HOME/flutter/bin:$HOME/.cargo/bin:$PATH
@@ -34,7 +35,7 @@ install-services() {
 }
 
 install-build-deps() {
-	apt-get install -y clang cmake git libgtk-{3,4}-dev ninja-build pkg-config
+	apt-get install -y clang cmake git libgtk-{3,4}-dev libssl-dev ninja-build pkg-config
 }
 
 install-flutter() {
@@ -98,8 +99,8 @@ remove-packages() {
 	extra_pkgs=()
 	[[ $ATLAS_DEBUG != 1 ]] && extra_pkgs=(sensible-utils)
 	apt-get purge -y --autoremove apt-utils clang cmake cron cron-daemon-common dmidecode \
-		dracut-core fdisk git iputils-ping less libgtk-{3,4}-dev lvm2 ninja-build pkg-config \
-		logrotate nano nftables tasksel vim-common whiptail "${extra_pkgs[@]}"
+		dracut-core fdisk git iputils-ping less libgtk-{3,4}-dev libssl-dev lvm2 ninja-build \
+		pkg-config logrotate nano nftables tasksel vim-common whiptail "${extra_pkgs[@]}"
 
 	rm -f /var/lib/dpkg/info/{console-setup*,keyboard-configuration}.postrm
 	apt-get purge -y --allow-remove-essential --autoremove apt bsdutils debconf-i18n \
@@ -148,7 +149,7 @@ EOF
 
 	echo atlas > /etc/hostname
 
-	# Rebuild font cache
+	# Rebuild font cache.
 	rm -rf /usr/share/fonts/!(opentype|truetype)
 	rm -rf /usr/share/fonts/opentype/!(cantarell|noto)
 	rm -rf /usr/share/fonts/opentype/noto/!(NotoSansCJK-Regular.ttc)
@@ -156,8 +157,11 @@ EOF
 	rm -rf /usr/share/fonts/truetype/noto/!(NotoSansMono-*.ttf)
 	fc-cache -fv
 
-	# Rebuild dynamic linker cache
+	# Rebuild dynamic linker cache.
 	ldconfig -X
+
+	# Required by sqflite.
+	ln -s libsqlite3.so.0 /lib/x86_64-linux-gnu/libsqlite3.so
 }
 
 # After configure-system
@@ -219,7 +223,7 @@ remove-unused-libraries() {
 
 	find /usr/lib -type f -regextype awk -regex '.*\.so(\.|$).*' |
 	grep -ivE '\/dri\/|mesa|NetworkManager|pam|python|weston|vdpau|vk|vulk' |
-	grep -ivE 'libdrm|libedit|libelf|libgl|libigdgmm|libllvm|libpciaccess|libseat|libsensors|libxcb|libxshm|libz3' |
+	grep -ivE 'libdrm|libedit|libelf|libgl|libigdgmm|libllvm|libpciaccess|libseat|libsensors|libsqlite|libxcb|libxshm|libz3' |
 	while read -r object; do
 		object=$(readlink -f "$object")
 		hasItem "$object" "${scanned[@]}" || (
@@ -254,8 +258,6 @@ hasItem() {
 	for e; do [[ $e = "$test" ]] && return 0; done
 	return 1
 }
-
-set -x
 
 add-sources
 install-services

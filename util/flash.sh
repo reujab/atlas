@@ -8,7 +8,7 @@ set -x
 
 dd if="$1" of="$2" bs=64K status=progress
 sgdisk -e "$2"
-sgdisk -n 0:1GiB:0 -t 0:8300 -c local "$2"
+sgdisk -n 0:1GiB:0 -t 0:8300 -c 0:local "$2"
 if [[ ! $(lsblk --noheadings -o FSTYPE "${2}p3") ]]; then
 	mkfs.ext4 "${2}p3"
 fi

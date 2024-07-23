@@ -8,7 +8,7 @@ fi
 
 reqd_cmds=(bootctl debootstrap sgdisk mkfs.fat mkfs.ext4 rsync mksquashfs)
 for cmd in "${reqd_cmds[@]}"; do
-	which "$cmd" > /dev/null || missing_cmds+=("$cmd")
+	which "$cmd" &> /dev/null || missing_cmds+=("$cmd")
 done
 if (( ${#missing_cmds[@]} )); then
 	echo Missing tools: "${missing_cmds[@]}" 1>&2
@@ -19,16 +19,16 @@ set -x
 unmount-filesystems() {
 	sudo umount mnt || true
 	sudo umount root/boot/efi || true
-	sudo umount -R root/dev
-	sudo umount -R root/sys
 	sudo umount root/proc
+	sudo umount -R root/sys
+	sudo umount -R root/dev
 }
 cleanup() {
 	set +ex
 	kill "$sudo_loop_pid"
 	unmount-filesystems
 	[[ $loopback ]] && sudo losetup -d "$loopback"
-	sudo rm -rf "$tmp"
+	sudo rm -rf --one-file-system "$tmp"
 }
 trap cleanup EXIT
 
@@ -43,7 +43,7 @@ trap cleanup EXIT
 sudo_loop_pid=$!
 
 src=$(readlink -f -- "$(dirname -- "$0")/..")
-tmp=$(mktemp -dp ~/.cache)
+tmp=$(mkdir -p ~/.cache && mktemp -dp ~/.cache)
 
 cd "$tmp"
 
@@ -78,7 +78,7 @@ sudo mkdir -p root/boot/efi
 sudo mount "${loopback}p1" root/boot/efi
 
 # Copy source code.
-sudo rsync -a --exclude={.dart_tool,.git,build,node_modules,target} "$src/" root/root/atlas/
+sudo rsync -a --exclude={.dart_tool,.flutter*,.git,build,ephemeral,node_modules,target} "$src/" root/root/atlas/
 
 # Install Atlas.
 sudo chroot root bash -e << EOF
@@ -95,7 +95,7 @@ if [[ $ATLAS_FS = ext ]]; then
 	sudo mkfs.ext4 -F "${loopback}p2"
 	mkdir -p mnt
 	sudo mount "${loopback}p2" mnt
-	sudo cp -a root/ mnt/
+	sudo cp -aT root mnt
 	sudo umount mnt
 else
 	# Make readonly squashfs root.
