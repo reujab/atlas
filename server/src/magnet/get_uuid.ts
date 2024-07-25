@@ -28,13 +28,14 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 		WHERE query = ${query}
 		AND (seasons IS NULL OR ${season} = ANY(seasons))
 		AND (episode IS NULL OR episode = ${episode})
-		RETURNING uuid, seasons
+		RETURNING uuid, seasons, episode
 	`;
 	if (existingRow[0]) {
 		console.log("Serving existing UUID");
 		res.json({
 			uuid: existingRow[0].uuid,
 			seasons: existingRow[0].seasons,
+			episode: existingRow[0].episode,
 		});
 		return;
 	}
@@ -94,6 +95,7 @@ export default async function getUUID(req: Request, res: Response): Promise<void
 
 	res.json({
 		uuid,
-		seasons: source.episode === null ? source.seasons : null,
+		seasons: source.seasons,
+		episode: source.episode,
 	});
 }

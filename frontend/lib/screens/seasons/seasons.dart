@@ -239,7 +239,10 @@ class _SeasonsState extends State<Seasons> {
     final Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
     setState(() {
       episode.uuid = json["uuid"];
-      for (final seasonNum in json["seasons"] ?? []) {
+      // If `json["episode"] == null`, this uuid refers to one or more seasons,
+      // so update the relevant seasons with the UUID.
+      if (json["episode"] != null) return;
+      for (final seasonNum in json["seasons"]) {
         final season = seasons.firstWhere((s) => s.number == seasonNum);
         for (final episode in season.episodes) {
           episode.uuid = json["uuid"];
