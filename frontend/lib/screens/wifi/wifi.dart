@@ -31,7 +31,7 @@ class _WifiState extends State<Wifi> {
           .split("\n");
 
   List<NetworkData> networks = [];
-  int index = 0;
+  int networkIndex = 0;
   bool selected = false;
   Timer? timer;
   InputEvent? inputEvent;
@@ -59,7 +59,7 @@ class _WifiState extends State<Wifi> {
       return;
     }
 
-    final selectedMAC = networks.isEmpty ? null : networks[index].mac;
+    final selectedMAC = networks.isEmpty ? null : networks[networkIndex].mac;
     setState(() {
       networks = output.split("\n").map((line) {
         final parts = line.split(":");
@@ -69,11 +69,11 @@ class _WifiState extends State<Wifi> {
             secure: parts[13] != "",
             strength: int.parse(parts[11]));
       }).toList();
-      if (index == 0) return;
-      index = 0;
+      if (networkIndex == 0) return;
+      networkIndex = 0;
       for (int i = 0; i < networks.length; i++) {
         if (networks[i].mac == selectedMAC) {
-          index = i;
+          networkIndex = i;
           break;
         }
       }
@@ -103,11 +103,11 @@ class _WifiState extends State<Wifi> {
                             for (int i = 0; i < networks.length; i++)
                               Network(
                                 networks[i],
-                                active: i == index,
-                                selected: i == index && selected,
-                                hidden: selected && i > index,
+                                active: i == networkIndex,
+                                selected: i == networkIndex && selected,
+                                hidden: selected && i > networkIndex,
                                 passwordLength: password.length,
-                                connecting: i == index && connecting,
+                                connecting: i == networkIndex && connecting,
                                 known: knownNetworks.contains(networks[i].name),
                               ),
                             SizedBox(
@@ -159,17 +159,17 @@ class _WifiState extends State<Wifi> {
 
     switch (e.name) {
       case "Arrow Up":
-        if (index > 0) {
+        if (networkIndex > 0) {
           setState(() {
-            index--;
+            networkIndex--;
           });
           scroll();
         }
         break;
       case "Arrow Down":
-        if (index < networks.length - 1) {
+        if (networkIndex < networks.length - 1) {
           setState(() {
-            index++;
+            networkIndex++;
           });
           scroll();
         }
@@ -177,7 +177,7 @@ class _WifiState extends State<Wifi> {
       case "Enter":
         timer?.cancel();
 
-        if (knownNetworks.contains(networks[index].name)) {
+        if (knownNetworks.contains(networks[networkIndex].name)) {
           connect();
           break;
         }
@@ -188,14 +188,16 @@ class _WifiState extends State<Wifi> {
         });
         break;
       case "Context Menu":
-        forget(networks[index].name);
+        forget(networks[networkIndex].name);
         break;
     }
   }
 
   void scroll() {
-    scrollController.animateTo(index * (Network.height + Network.margin * 2),
-        duration: scrollDuration, curve: Curves.ease);
+    scrollController.animateTo(
+        networkIndex * (Network.height + Network.margin * 2),
+        duration: scrollDuration,
+        curve: Curves.ease);
   }
 
   void onKey(String key) {
@@ -218,7 +220,7 @@ class _WifiState extends State<Wifi> {
     });
 
     final args = ["dev", "wifi", "connect"];
-    final network = networks[index];
+    final network = networks[networkIndex];
     if (network.name.isNotEmpty) {
       args.add(network.name);
     } else {

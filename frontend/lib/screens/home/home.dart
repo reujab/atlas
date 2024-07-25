@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
     ),
   ];
 
-  int index = 0;
+  int tileIndex = 0;
 
   String? localIP;
 
@@ -116,7 +116,7 @@ class _HomeState extends State<Home> {
                 direction: Axis.vertical,
                 children: [
                   for (int i = 0; i < tiles.length; i++)
-                    Tile(tiles[i], active: i == index)
+                    Tile(tiles[i], active: i == tileIndex)
                 ],
               ),
             ),
@@ -147,19 +147,21 @@ class _HomeState extends State<Home> {
   void onKeyDown(InputEvent e) {
     switch (e.name) {
       case "Arrow Up":
-        if (index % 2 == 1) setIndex(index - 1);
+        if (tileIndex % 2 == 1) setIndex(tileIndex - 1);
         break;
       case "Arrow Down":
-        if (index % 2 == 0 && index + 1 < tiles.length) setIndex(index + 1);
+        if (tileIndex % 2 == 0 && tileIndex + 1 < tiles.length) {
+          setIndex(tileIndex + 1);
+        }
         break;
       case "Arrow Left":
-        if (index >= 2) setIndex(index - 2);
+        if (tileIndex >= 2) setIndex(tileIndex - 2);
         break;
       case "Arrow Right":
-        if (index + 2 < tiles.length) setIndex(index + 2);
+        if (tileIndex + 2 < tiles.length) setIndex(tileIndex + 2);
         break;
       case "Enter":
-        tiles[index].onClick();
+        tiles[tileIndex].onClick();
         break;
       case "Browser Search":
       case " ":
@@ -170,7 +172,7 @@ class _HomeState extends State<Home> {
 
   void setIndex(int i) {
     setState(() {
-      index = i;
+      tileIndex = i;
     });
   }
 }

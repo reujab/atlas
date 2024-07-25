@@ -9,7 +9,7 @@ class TitlesRow extends StatefulWidget {
     required this.name,
     required this.titles,
     required this.active,
-    required this.index,
+    required this.titleIndex,
     required this.onRowHeight,
   });
 
@@ -20,7 +20,7 @@ class TitlesRow extends StatefulWidget {
   final String name;
   final List<TitleData> titles;
   final bool active;
-  final int index;
+  final int titleIndex;
   final Function(double) onRowHeight;
 
   @override
@@ -43,7 +43,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   late final animations = List.generate(
     widget.titles.length,
     (i) => controllers[i].drive(_curve).drive(Tween<double>(
-        begin: 0, end: widget.active && i == widget.index ? scale : 1)),
+        begin: 0, end: widget.active && i == widget.titleIndex ? scale : 1)),
   );
 
   @override
@@ -59,12 +59,13 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(TitlesRow oldRow) {
     super.didUpdateWidget(oldRow);
-    if (oldRow.index != widget.index) {
-      animate(oldRow.index, 1);
+    if (oldRow.titleIndex != widget.titleIndex) {
+      animate(oldRow.titleIndex, 1);
       scroll();
     }
-    if (oldRow.index != widget.index || oldRow.active != widget.active) {
-      animate(widget.index, widget.active ? scale : 1);
+    if (oldRow.titleIndex != widget.titleIndex ||
+        oldRow.active != widget.active) {
+      animate(widget.titleIndex, widget.active ? scale : 1);
     }
   }
 
@@ -128,7 +129,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
 
   void scroll() {
     scrollController.animateTo(
-      widget.index * getImgWidthScaled(),
+      widget.titleIndex * getImgWidthScaled(),
       duration: scrollDuration,
       curve: Curves.ease,
     );

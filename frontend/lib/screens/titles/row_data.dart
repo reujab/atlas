@@ -5,13 +5,13 @@ part "row_data.g.dart";
 
 @JsonSerializable()
 class RowData {
-  RowData({required this.name, required this.titles, this.index = 0});
+  RowData({required this.name, required this.titles, this.titleIndex = 0});
 
   final String name;
   final List<TitleData> titles;
 
   @JsonKey(includeFromJson: false)
-  int index;
+  int titleIndex;
 
   factory RowData.fromJson(Map<String, dynamic> json) =>
       _$RowDataFromJson(json);

@@ -30,6 +30,16 @@ class _SeasonsState extends State<Seasons> {
   final episodeKey = GlobalKey<EpisodeState>();
 
   final pillScrollController = ScrollController();
+
+  int seasonIndex = 0;
+  List<SeasonData> seasons = Seasons.seasons ?? [];
+
+  Timer? initTimer;
+  Timer? uuidTimer;
+
+  SeasonData get season => seasons[seasonIndex];
+  EpisodeData get episode => season.episodes[season.episodeIndex];
+
   late final ScrollController scrollController = ScrollController(
     onAttach: (_) async {
       final rows = await db!.rawQuery("""
@@ -44,9 +54,9 @@ class _SeasonsState extends State<Seasons> {
       """, [title.id]);
       if (rows.isNotEmpty) {
         setState(() {
-          index = seasons
+          seasonIndex = seasons
               .indexWhere((season) => season.number == rows[0]["season"]);
-          seasons[index].index = seasons[index]
+          seasons[seasonIndex].episodeIndex = seasons[seasonIndex]
               .episodes
               .indexWhere((episode) => episode.number == rows[0]["episode"]);
         });
@@ -54,16 +64,6 @@ class _SeasonsState extends State<Seasons> {
       scrollX();
     },
   );
-
-  int index = 0;
-  List<SeasonData> seasons = Seasons.seasons ?? [];
-
-  Timer? initTimer;
-  Timer? uuidTimer;
-
-  SeasonData get season => seasons[index];
-
-  EpisodeData get episode => season.episodes[season.index];
 
   @override
   void initState() {
@@ -118,7 +118,10 @@ class _SeasonsState extends State<Seasons> {
                       controller: pillScrollController,
                       children: [
                         for (int i = 0; i < seasons.length; i++)
-                          SeasonPill(seasons[i].number, active: i == index)
+                          SeasonPill(
+                            seasons[i].number,
+                            active: i == seasonIndex,
+                          )
                       ],
                     ),
                   ),
@@ -139,7 +142,7 @@ class _SeasonsState extends State<Seasons> {
                                     titleId: title.id,
                                     season: season,
                                     episode: season.episodes[i],
-                                    active: season.index == i,
+                                    active: season.episodeIndex == i,
                                   ),
                                 // spacer
                                 SizedBox(
@@ -160,18 +163,21 @@ class _SeasonsState extends State<Seasons> {
   void onKeyDown(InputEvent e) {
     switch (e.name) {
       case "Arrow Up":
-        if (seasons[index].index > 0) setEpisodeIndex(seasons[index].index - 1);
+        if (seasons[seasonIndex].episodeIndex > 0) {
+          setEpisodeIndex(seasons[seasonIndex].episodeIndex - 1);
+        }
         break;
       case "Arrow Down":
-        if (seasons[index].index < seasons[index].episodes.length - 1) {
-          setEpisodeIndex(seasons[index].index + 1);
+        if (seasons[seasonIndex].episodeIndex <
+            seasons[seasonIndex].episodes.length - 1) {
+          setEpisodeIndex(seasons[seasonIndex].episodeIndex + 1);
         }
         break;
       case "Arrow Left":
-        if (index > 0) setIndex(index - 1);
+        if (seasonIndex > 0) setIndex(seasonIndex - 1);
         break;
       case "Arrow Right":
-        if (index < seasons.length - 1) setIndex(index + 1);
+        if (seasonIndex < seasons.length - 1) setIndex(seasonIndex + 1);
         break;
       case "Enter":
         if (episode.uuid != null) {
@@ -199,7 +205,7 @@ class _SeasonsState extends State<Seasons> {
 
   void setIndex(int i) {
     setState(() {
-      index = i;
+      seasonIndex = i;
     });
     scrollX();
     getUUID();
@@ -207,7 +213,7 @@ class _SeasonsState extends State<Seasons> {
 
   void setEpisodeIndex(int i) {
     setState(() {
-      seasons[index].index = i;
+      seasons[seasonIndex].episodeIndex = i;
     });
     scrollY();
     getUUID();
@@ -215,12 +221,12 @@ class _SeasonsState extends State<Seasons> {
 
   void scrollX() {
     pillScrollController.animateTo(
-      index.toDouble() * (SeasonPill.width + SeasonPill.marginX * 2),
+      seasonIndex.toDouble() * (SeasonPill.width + SeasonPill.marginX * 2),
       duration: scrollDuration,
       curve: Curves.ease,
     );
     scrollController.animateTo(
-      MediaQuery.of(context).size.width * index,
+      MediaQuery.of(context).size.width * seasonIndex,
       duration: scrollDuration,
       curve: Curves.ease,
     );
@@ -228,14 +234,14 @@ class _SeasonsState extends State<Seasons> {
   }
 
   void scrollY() {
-    if (!seasons[index].scrollController.hasClients) {
+    if (!seasons[seasonIndex].scrollController.hasClients) {
       Timer(const Duration(milliseconds: 50), scrollY);
       return;
     }
 
-    final y =
-        (Episode.height + Episode.padY * 2) * seasons[index].index.toDouble();
-    seasons[index]
+    final y = (Episode.height + Episode.padY * 2) *
+        seasons[seasonIndex].episodeIndex.toDouble();
+    seasons[seasonIndex]
         .scrollController
         .animateTo(y, duration: scrollDuration, curve: Curves.ease);
   }

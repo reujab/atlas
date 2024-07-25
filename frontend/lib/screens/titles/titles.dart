@@ -75,16 +75,16 @@ class _TitlesState extends State<Titles> {
 
   Timer? timer;
   List<RowData>? rows;
-  int index = 0;
+  int rowIndex = 0;
   bool alreadyScrolled = false;
   double rowHeight = 0;
 
   RowData? get row {
-    return rows?[index];
+    return rows?[rowIndex];
   }
 
   TitleData? get title {
-    return row?.titles[row!.index];
+    return row?.titles[row!.titleIndex];
   }
 
   @override
@@ -141,10 +141,10 @@ class _TitlesState extends State<Titles> {
                           for (var i = 0; i < rows.length; i++)
                             TitlesRow(
                               key: ObjectKey(rows[i]),
-                              index: rows[i].index,
+                              titleIndex: rows[i].titleIndex,
                               name: rows[i].name,
                               titles: rows[i].titles,
-                              active: i == index,
+                              active: i == rowIndex,
                               onRowHeight: (double height) {
                                 rowHeight = height;
                                 if (!alreadyScrolled) {
@@ -179,16 +179,18 @@ class _TitlesState extends State<Titles> {
     if (rows == null || row == null) return;
     switch (e.name) {
       case "Arrow Up":
-        setIndex(index > 0 ? index - 1 : rows.length - 1);
+        setIndex(rowIndex > 0 ? rowIndex - 1 : rows.length - 1);
         break;
       case "Arrow Down":
-        setIndex(index < rows.length - 1 ? index + 1 : 0);
+        setIndex(rowIndex < rows.length - 1 ? rowIndex + 1 : 0);
         break;
       case "Arrow Left":
-        setRowIndex(row.index > 0 ? row.index - 1 : row.titles.length - 1);
+        setRowIndex(
+            row.titleIndex > 0 ? row.titleIndex - 1 : row.titles.length - 1);
         break;
       case "Arrow Right":
-        setRowIndex(row.index < row.titles.length - 1 ? row.index + 1 : 0);
+        setRowIndex(
+            row.titleIndex < row.titles.length - 1 ? row.titleIndex + 1 : 0);
         break;
       case "Browser Search":
         router.push("/search");
@@ -207,7 +209,7 @@ class _TitlesState extends State<Titles> {
             }
           } else if (myList.isNotEmpty) {
             Titles.rows[widget.type]!.insert(0, myListRow);
-            index++;
+            rowIndex++;
           } else {
             return;
           }
@@ -225,20 +227,20 @@ class _TitlesState extends State<Titles> {
 
   void setIndex(int i) {
     setState(() {
-      index = i;
+      rowIndex = i;
     });
     scroll();
   }
 
   void setRowIndex(int i) {
     setState(() {
-      row!.index = i;
+      row!.titleIndex = i;
     });
   }
 
   void scroll() {
     scrollController.animateTo(
-      rowHeight * index.toDouble(),
+      rowHeight * rowIndex.toDouble(),
       duration: scrollDuration,
       curve: Curves.ease,
     );

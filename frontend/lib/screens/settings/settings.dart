@@ -25,7 +25,7 @@ class _SettingsState extends State<Settings> {
 
   final scrollController = ScrollController();
 
-  int index = 0;
+  int settingIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class _SettingsState extends State<Settings> {
                 controller: scrollController,
                 children: [
                   for (int i = 0; i < settings.length; i++)
-                    Setting(data: settings[i], active: i == index)
+                    Setting(data: settings[i], active: i == settingIndex)
                 ],
               ),
             ),
@@ -59,21 +59,21 @@ class _SettingsState extends State<Settings> {
         router.pop();
         break;
       case "Arrow Up":
-        if (index > 0) {
+        if (settingIndex > 0) {
           setState(() {
-            index--;
+            settingIndex--;
           });
         }
         break;
       case "Arrow Down":
-        if (index < settings.length - 1) {
+        if (settingIndex < settings.length - 1) {
           setState(() {
-            index++;
+            settingIndex++;
           });
         }
         break;
       case "Enter":
-        router.push(settings[index].path);
+        router.push(settings[settingIndex].path);
         break;
     }
   }

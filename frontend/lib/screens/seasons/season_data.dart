@@ -9,7 +9,7 @@ class SeasonData {
   SeasonData({
     required this.number,
     required this.episodes,
-    this.index = 0,
+    this.episodeIndex = 0,
   });
 
   final int number;
@@ -17,7 +17,7 @@ class SeasonData {
   final ScrollController scrollController = ScrollController();
 
   @JsonKey(includeFromJson: false)
-  int index;
+  int episodeIndex;
 
   factory SeasonData.fromJson(Map<String, dynamic> json) =>
       _$SeasonDataFromJson(json);

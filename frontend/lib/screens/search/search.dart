@@ -29,7 +29,7 @@ class _SearchState extends State<Search> {
   InputEvent? inputEvent;
   Map<String, List<TitleData>> cache = {};
   List<TitleData> results = [];
-  int index = 0;
+  int resultIndex = 0;
 
   int get visibleResults =>
       query.isEmpty ? 0 : min(results.length, keyboardActive ? 2 : 5);
@@ -72,7 +72,7 @@ class _SearchState extends State<Search> {
                       for (int i = 0; i < results.length; i++)
                         Result(
                           results[i],
-                          active: !keyboardActive && i == index,
+                          active: !keyboardActive && i == resultIndex,
                         ),
                     ]),
                   ),
@@ -122,16 +122,16 @@ class _SearchState extends State<Search> {
 
     switch (e.name) {
       case "Arrow Up":
-        if (index > 0) {
+        if (resultIndex > 0) {
           setState(() {
-            index--;
+            resultIndex--;
           });
         }
         break;
       case "Arrow Down":
-        if (index < visibleResults - 1) {
+        if (resultIndex < visibleResults - 1) {
           setState(() {
-            index++;
+            resultIndex++;
           });
         } else {
           Timer(const Duration(milliseconds: 20), () {
@@ -142,7 +142,7 @@ class _SearchState extends State<Search> {
         }
         break;
       case "Enter":
-        TitleDetails.title = results[index];
+        TitleDetails.title = results[resultIndex];
         router.push("/title");
         break;
     }
@@ -200,7 +200,7 @@ class _SearchState extends State<Search> {
     if (query.isEmpty || results.isEmpty) return;
 
     setState(() {
-      index = min(visibleResults - 1, 1);
+      resultIndex = min(visibleResults - 1, 1);
       keyboardActive = false;
     });
   }

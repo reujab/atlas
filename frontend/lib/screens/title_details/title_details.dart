@@ -32,7 +32,7 @@ class _TitleDetailsState extends State<TitleDetails> {
   final poster = GlobalKey<PosterState>();
   final client = HttpClient();
 
-  int index = 0;
+  int buttonIndex = 0;
   String? uuid;
   bool inMyList = false;
 
@@ -221,7 +221,7 @@ class _TitleDetailsState extends State<TitleDetails> {
                   Button(
                     buttons[i].name,
                     icon: buttons[i].icon,
-                    active: i == index,
+                    active: i == buttonIndex,
                     loading: title.type == "movie" &&
                         i == 0 &&
                         uuid == null &&
@@ -239,21 +239,21 @@ class _TitleDetailsState extends State<TitleDetails> {
   void onKeyDown(InputEvent e) {
     switch (e.name) {
       case "Arrow Left":
-        if (index > 0) {
+        if (buttonIndex > 0) {
           setState(() {
-            index--;
+            buttonIndex--;
           });
         }
         break;
       case "Arrow Right":
-        if (index < buttons.length - 1) {
+        if (buttonIndex < buttons.length - 1) {
           setState(() {
-            index++;
+            buttonIndex++;
           });
         }
         break;
       case "Enter":
-        buttons[index].onClick();
+        buttons[buttonIndex].onClick();
         break;
       case "Browser Search":
         router.push("/search");
