@@ -13,6 +13,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
+make_server=${SERVER+0}
+make_server=${make_server:-1}
+
 . config/server.env
 . config/client.env
 export AUDIO_DEVICE=alsa
@@ -20,7 +23,7 @@ export GOOGLE_LOCATION_KEY
 export PATH="$PWD/overlay/target/debug:$PWD/services:/opt/flutter/bin:$PATH"
 export PORT=8000
 export RUST_BACKTRACE=1
-export SERVER=http://localhost:8000
+export SERVER=${SERVER:-http://localhost:$PORT}
 export TMDB_KEY
 
 (
@@ -32,7 +35,14 @@ if [[ "$1" != "--no-frontend" ]]; then
 	export DATABASE_URL=sqlite:///tmp/atlas.db
 	sqlx database create
 	sqlx migrate run --source=migrations/client
-	gnome-terminal -- sh -c "cd frontend && flutter pub get && flutter run"
+	if [[ $make_server = 0 ]]; then
+		cd frontend
+		flutter pub get
+		flutter run
+		exit $?
+	fi
+
+	gnome-terminal -- sh -c "cd frontend && flutter pub get && flutter run || read"
 fi
 
 # Compile and launch server.
