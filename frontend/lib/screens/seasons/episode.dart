@@ -24,10 +24,10 @@ class Episode extends StatefulWidget {
   final bool active;
 
   @override
-  State<Episode> createState() => _EpisodeState();
+  State<Episode> createState() => EpisodeState();
 }
 
-class _EpisodeState extends State<Episode>
+class EpisodeState extends State<Episode>
     with TickerProviderStateMixin, AnimationMixin {
   double percent = 0;
 

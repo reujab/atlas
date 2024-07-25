@@ -1,10 +1,12 @@
+import "package:flutter/widgets.dart";
+import "package:frontend/widgets/poster.dart";
 import "package:json_annotation/json_annotation.dart";
 
 part "title_data.g.dart";
 
 @JsonSerializable()
 class TitleData {
-  const TitleData({
+  TitleData({
     required this.id,
     required this.type,
     required this.title,
@@ -25,6 +27,7 @@ class TitleData {
   final String? trailer;
   final String? rating;
   final String poster;
+  final posterKey = GlobalKey<PosterState>();
 
   factory TitleData.fromJson(Map<String, dynamic> json) =>
       _$TitleDataFromJson(json);

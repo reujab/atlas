@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart";
+import "package:frontend/screens/seasons/episode.dart";
 import "package:json_annotation/json_annotation.dart";
 
 part "season_data.g.dart";
@@ -41,6 +42,7 @@ class EpisodeData {
   final String? overview;
   final int? runtime;
   final String? still;
+  final key = GlobalKey<EpisodeState>();
 
   @JsonKey(includeFromJson: false)
   String? uuid;

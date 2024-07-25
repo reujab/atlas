@@ -96,7 +96,11 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
           padding: EdgeInsets.symmetric(vertical: imgPadY, horizontal: imgPadX),
           child: ScaleTransition(
             scale: animations[i],
-            child: Poster(title: widget.titles[i], width: imgWidth),
+            child: Poster(
+              key: widget.titles[i].posterKey,
+              title: widget.titles[i],
+              width: imgWidth,
+            ),
           ),
         ),
     ];

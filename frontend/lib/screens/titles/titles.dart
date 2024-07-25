@@ -163,7 +163,9 @@ class _TitlesState extends State<Titles> {
         router.push("/search");
         break;
       case "Enter":
-        router.push("/title");
+        router.push("/title").then((_) {
+          title?.posterKey.currentState?.updatePercent();
+        });
         break;
       case " ":
         router.push("/search");

@@ -27,6 +27,7 @@ class Seasons extends StatefulWidget {
 class _SeasonsState extends State<Seasons> {
   final title = TitleDetails.title!;
   final client = HttpClient();
+  final episodeKey = GlobalKey<EpisodeState>();
 
   final pillScrollController = ScrollController();
   ScrollController? scrollController;
@@ -115,6 +116,7 @@ class _SeasonsState extends State<Seasons> {
                               children: [
                                 for (int i = 0; i < season.episodes.length; i++)
                                   Episode(
+                                    key: season.episodes[i].key,
                                     titleId: title.id,
                                     season: season,
                                     episode: season.episodes[i],
@@ -154,8 +156,14 @@ class _SeasonsState extends State<Seasons> {
         break;
       case "Enter":
         if (episode.uuid != null) {
-          router.push(
-              "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&title=${episode.name}");
+          router
+              .push(
+                  "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&title=${episode.name}")
+              .then((_) {
+            for (final episode in season.episodes) {
+              episode.key.currentState?.updatePercent();
+            }
+          });
         }
         break;
       case "Browser Search":
