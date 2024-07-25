@@ -59,9 +59,9 @@ class _EpisodeState extends State<Episode>
   }
 
   @override
-  void didUpdateWidget(Episode oldEpisode) {
-    super.didUpdateWidget(oldEpisode);
-    if (widget.active != oldEpisode.active) {
+  void didUpdateWidget(Episode oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active != oldWidget.active) {
       animate(widget.active ? scale : 1);
     }
   }
