@@ -13,3 +13,6 @@ CREATE TABLE title_progress (
 
 	PRIMARY KEY (type, id, season, episode)
 );
+
+-- I figure if the index is ascending, sqlite won't have to resort it each time a title is added.
+CREATE INDEX title_progress_ts ON title_progress (ts ASC);

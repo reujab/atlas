@@ -30,7 +30,30 @@ class _SeasonsState extends State<Seasons> {
   final episodeKey = GlobalKey<EpisodeState>();
 
   final pillScrollController = ScrollController();
-  ScrollController? scrollController;
+  late final ScrollController scrollController = ScrollController(
+    onAttach: (_) async {
+      final rows = await db!.rawQuery("""
+        SELECT season, episode
+        FROM title_progress
+        WHERE type = 'tv'
+        AND id = ?1
+        AND season != -1
+        AND episode != -1
+        ORDER BY ts DESC
+        LIMIT 1
+      """, [title.id]);
+      if (rows.isNotEmpty) {
+        setState(() {
+          index = seasons
+              .indexWhere((season) => season.number == rows[0]["season"]);
+          seasons[index].index = seasons[index]
+              .episodes
+              .indexWhere((episode) => episode.number == rows[0]["episode"]);
+        });
+      }
+      scrollX();
+    },
+  );
 
   int index = 0;
   List<SeasonData> seasons = Seasons.seasons ?? [];
@@ -58,10 +81,6 @@ class _SeasonsState extends State<Seasons> {
     } else {
       getUUID();
     }
-
-    scrollController = ScrollController(onAttach: (_) {
-      scrollY();
-    });
   }
 
   @override
@@ -200,7 +219,7 @@ class _SeasonsState extends State<Seasons> {
       duration: scrollDuration,
       curve: Curves.ease,
     );
-    scrollController!.animateTo(
+    scrollController.animateTo(
       MediaQuery.of(context).size.width * index,
       duration: scrollDuration,
       curve: Curves.ease,
@@ -265,7 +284,7 @@ class _SeasonsState extends State<Seasons> {
     initTimer?.cancel();
     uuidTimer?.cancel();
     pillScrollController.dispose();
-    scrollController!.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 }
