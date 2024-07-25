@@ -32,5 +32,5 @@ while true; do
 			exit $?
 		fi
 	done
-	sleep 0.5
+	sleep 0.1
 done
