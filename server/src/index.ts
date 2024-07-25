@@ -23,7 +23,7 @@ app.disable("x-powered-by");
 
 app.use(morgan("dev"));
 
-app.get("/rows/:type(movie|tv)", async (req, res) => {
+app.get("/rows/:type(movie|tv)", async (req: Request, res: Response) => {
 	try {
 		const rows = await getRows(req.params.type as "movie" | "tv");
 		res.header("Cache-Control", "public, max-age=86400");
@@ -34,9 +34,11 @@ app.get("/rows/:type(movie|tv)", async (req, res) => {
 	}
 });
 
-app.get("/seasons/:id(\\d{1,8})", async (req, res) => {
+app.get("/seasons/:id(\\d{1,8})", async (req: Request, res: Response) => {
 	try {
-		res.json(await getSeasons(req.params.id));
+		const seasons = await getSeasons(req.params.id);
+		res.header("Cache-Control", "public, max-age=86400");
+		res.json(seasons);
 	} catch (err) {
 		if (err == dneError) {
 			res.status(404).end();
@@ -47,7 +49,7 @@ app.get("/seasons/:id(\\d{1,8})", async (req, res) => {
 	}
 });
 
-app.get("/search/:query", validateQuery, async (req, res) => {
+app.get("/search/:query", validateQuery, async (req: Request, res: Response) => {
 	try {
 		const blacklist = req.query.blacklist ? String(req.query.blacklist).split(",") : [];
 
@@ -57,21 +59,23 @@ app.get("/search/:query", validateQuery, async (req, res) => {
 			return;
 		}
 
-		res.json(await searchTitles(req.params.query, blacklist));
+		const titles = await searchTitles(req.params.query, blacklist);
+		res.header("Cache-Control", "public, max-age=86400");
+		res.json(titles);
 	} catch (err) {
 		console.error("Error searching titles:", err);
 		res.status(500).end();
 	}
 });
 
-app.get("/get-uuid/:type(movie|tv)/:query", validateQuery, (req, res) => {
+app.get("/get-uuid/:type(movie|tv)/:query", validateQuery, (req: Request, res: Response) => {
 	getUUID(req, res).catch((err) => {
 		console.error("Error getting UUID:", err);
 		res.status(500).end();
 	});
 });
 
-app.get(`/init/${uuidParam}`, (req, res) => {
+app.get(`/init/${uuidParam}`, (req: Request, res: Response) => {
 	initStream(req, res).catch((err) => {
 		console.error("Error initializing stream:", err);
 		res.status(500).end();
@@ -81,8 +85,6 @@ app.get(`/init/${uuidParam}`, (req, res) => {
 app.get(`/keepalive/${uuidParam}`, keepalive);
 
 app.use(`/stream/${uuidParam}/`, proxy);
-
-app.use("/update", express.static("/usr/share/atlas-updater"));
 
 app.listen(port, () => {
 	console.log("Listening to port", port);
