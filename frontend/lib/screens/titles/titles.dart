@@ -92,6 +92,7 @@ class _TitlesState extends State<Titles> {
 
   updateRows() {
     Titles.rows[widget.type]!.then((rows) {
+      if (!mounted) return;
       setState(() {
         this.rows = rows;
       });
