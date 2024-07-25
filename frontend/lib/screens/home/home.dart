@@ -25,15 +25,21 @@ class _HomeState extends State<Home> {
     TileData(
       name: "Movies",
       img: const AssetImage("img/popcorn.png"),
-      onClick: () {
-        router.push("/movie/titles");
+      onClick: () async {
+        await router.push("/movie/titles");
+        for (final row in await Titles.rows["movie"]!) {
+          row.titleIndex = 0;
+        }
       },
     ),
     TileData(
       name: "TV",
       img: const AssetImage("img/tv.png"),
-      onClick: () {
-        router.push("/tv/titles");
+      onClick: () async {
+        await router.push("/tv/titles");
+        for (final row in await Titles.rows["tv"]!) {
+          row.titleIndex = 0;
+        }
       },
     ),
     TileData(
