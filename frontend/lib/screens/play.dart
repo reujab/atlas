@@ -125,7 +125,8 @@ class _PlayState extends State<Play> {
 
     // Update series progress.
     if (title.type == "tv") {
-      final seasons = Seasons.seasons!;
+      final seasons = await Seasons.seasons!;
+      if (seasons == null) return;
       int totalEpisodes = 0;
       int currentEpisode = 0;
       for (final season in seasons) {

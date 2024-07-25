@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:flutter/widgets.dart";
@@ -125,19 +126,15 @@ class _TitleDetailsState extends State<TitleDetails> {
     });
   }
 
-  Future<void> getSeasons() async {
-    if (Seasons.seasons != null) {
-      for (final season in Seasons.seasons!) {
+  void getSeasons() {
+    Seasons.seasons?.then((seasons) {
+      if (seasons == null) return;
+      for (final season in seasons) {
         season.scrollController.dispose();
       }
-    }
-    Seasons.seasons = null;
-
-    final List<dynamic>? json =
-        await client.getJson("$host/seasons/${title.id}");
-    if (json == null) return;
-
-    Seasons.seasons = json.map((j) => SeasonData.fromJson(j)).toList();
+    });
+    Seasons.seasons = client.getJson("$host/seasons/${title.id}").then((json) =>
+        (json as List<dynamic>?)?.map((j) => SeasonData.fromJson(j)).toList());
   }
 
   Future<void> getUUID() async {

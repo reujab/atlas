@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 import "dart:math";
 
@@ -59,9 +60,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     precacheRows();
-    router.addListener(() {
-      if (router.location == "/home") precacheRows();
-    });
+    Timer.periodic(const Duration(days: 1), (timer) => precacheRows());
     net.waitUntilOnline().then((_) {
       setState(() {
         localIP = net.localIP;
@@ -74,7 +73,8 @@ class _HomeState extends State<Home> {
       Titles.initRows("movie"),
       Titles.initRows("tv"),
     ]);
-    for (final rows in Titles.rows.values) {
+    for (final future in Titles.rows.values) {
+      final rows = await future;
       for (final row in rows.sublist(0, 2)) {
         for (final title in row.titles
             .sublist(0, min(TitlesRow.visibleTitles, row.titles.length - 1))) {

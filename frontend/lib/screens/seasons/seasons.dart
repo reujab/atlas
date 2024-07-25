@@ -18,7 +18,7 @@ import "package:frontend/router.dart";
 class Seasons extends StatefulWidget {
   const Seasons({super.key});
 
-  static List<SeasonData>? seasons;
+  static Future<List<SeasonData>?>? seasons;
 
   @override
   State<Seasons> createState() => _SeasonsState();
@@ -32,9 +32,8 @@ class _SeasonsState extends State<Seasons> {
   final pillScrollController = ScrollController();
 
   int seasonIndex = 0;
-  List<SeasonData> seasons = Seasons.seasons ?? [];
+  List<SeasonData> seasons = [];
 
-  Timer? initTimer;
   Timer? uuidTimer;
 
   SeasonData get season => seasons[seasonIndex];
@@ -69,18 +68,13 @@ class _SeasonsState extends State<Seasons> {
   void initState() {
     super.initState();
 
-    if (seasons.isEmpty) {
-      initTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-        if (Seasons.seasons == null) return;
-        timer.cancel();
-        setState(() {
-          seasons = Seasons.seasons!;
-        });
-        getUUID();
+    Seasons.seasons!.then((s) {
+      if (!mounted || s == null) return;
+      setState(() {
+        seasons = s;
       });
-    } else {
       getUUID();
-    }
+    });
   }
 
   @override
@@ -287,7 +281,6 @@ class _SeasonsState extends State<Seasons> {
   @override
   void dispose() {
     client.close();
-    initTimer?.cancel();
     uuidTimer?.cancel();
     pillScrollController.dispose();
     scrollController.dispose();

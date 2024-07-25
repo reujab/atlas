@@ -18,27 +18,23 @@ import "package:frontend/widgets/poster.dart";
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
 
-  static Map<String, List<RowData>> rows = {};
+  static Map<String, Future<List<RowData>>> rows = {};
   static List<Image> imgCache = [];
 
   final String type;
 
   static Future<void> initRows(String type) async {
     final client = HttpClient();
-    List<dynamic>? json;
-    try {
-      json = await client.getJson("$host/rows/$type");
-    } finally {
-      client.close();
-    }
-    if (json == null) return;
-
-    final myList = await getMyList(type);
-    rows[type] = [];
-    if (myList.isNotEmpty) {
-      rows[type]!.add(RowData(name: "My list", titles: myList));
-    }
-    rows[type]!.addAll(json.map((j) => RowData.fromJson(j)));
+    rows[type] = client.getJson("$host/rows/$type").then((json) async {
+      final myList = await getMyList(type);
+      final List<RowData> rows = [];
+      if (myList.isNotEmpty) {
+        rows.add(RowData(name: "My list", titles: myList));
+      }
+      rows.addAll((json as List<dynamic>).map((j) => RowData.fromJson(j)));
+      return rows;
+    });
+    rows[type]!.whenComplete(() => client.close());
   }
 
   static Future<List<TitleData>> getMyList(String type) async {
@@ -91,19 +87,14 @@ class _TitlesState extends State<Titles> {
   void initState() {
     super.initState();
 
-    if (Titles.rows[widget.type] == null) {
-      timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-        _setFromCache();
-        if (rows != null) timer.cancel();
-      });
-    } else {
-      _setFromCache();
-    }
+    updateRows();
   }
 
-  void _setFromCache() {
-    setState(() {
-      rows = Titles.rows[widget.type];
+  updateRows() {
+    Titles.rows[widget.type]!.then((rows) {
+      setState(() {
+        this.rows = rows;
+      });
     });
   }
 
@@ -201,19 +192,20 @@ class _TitlesState extends State<Titles> {
 
           final myList = await Titles.getMyList(widget.type);
           final myListRow = RowData(name: "My list", titles: myList);
+          final rows = await Titles.rows[widget.type]!;
           if (rows[0].name == "My list") {
             if (myList.isEmpty) {
-              Titles.rows[widget.type]!.removeAt(0);
+              rows.removeAt(0);
             } else {
-              Titles.rows[widget.type]![0] = myListRow;
+              rows[0] = myListRow;
             }
           } else if (myList.isNotEmpty) {
-            Titles.rows[widget.type]!.insert(0, myListRow);
+            rows.insert(0, myListRow);
             rowIndex++;
           } else {
             return;
           }
-          _setFromCache();
+          updateRows();
           scroll();
         });
         break;
