@@ -18,7 +18,7 @@ import "package:frontend/widgets/poster.dart";
 class Titles extends StatefulWidget {
   const Titles({super.key, required this.type});
 
-  static Map<String, List<RowData>> rowsCache = {};
+  static Map<String, List<RowData>> rows = {};
   static List<Image> imgCache = [];
 
   final String type;
@@ -32,7 +32,37 @@ class Titles extends StatefulWidget {
       client.close();
     }
     if (json == null) return;
-    rowsCache[type] = json.map((j) => RowData.fromJson(j)).toList();
+
+    final myList = await getMyList(type);
+    rows[type] = [];
+    if (myList.isNotEmpty) {
+      rows[type]!.add(RowData(name: "My list", titles: myList));
+    }
+    rows[type]!.addAll(json.map((j) => RowData.fromJson(j)));
+  }
+
+  static Future<List<TitleData>> getMyList(String type) async {
+    final rows = await db!.rawQuery("""
+      SELECT id, title, genres, overview, released, trailer, rating, poster
+      FROM my_list
+      WHERE type = ?
+      ORDER BY ts DESC
+    """, [type]);
+    return rows
+        .map((row) => TitleData(
+              id: row["id"] as int,
+              type: type,
+              title: row["title"] as String,
+              genres: (row["genres"] as String).split(","),
+              overview: row["overview"] as String,
+              released: row["released"] == null
+                  ? null
+                  : DateTime.fromMillisecondsSinceEpoch(row["released"] as int),
+              trailer: row["trailer"] as String?,
+              rating: row["rating"] as String?,
+              poster: row["poster"] as String,
+            ))
+        .toList();
   }
 
   @override
@@ -61,7 +91,7 @@ class _TitlesState extends State<Titles> {
   void initState() {
     super.initState();
 
-    if (Titles.rowsCache[widget.type] == null) {
+    if (Titles.rows[widget.type] == null) {
       timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
         _setFromCache();
         if (rows != null) timer.cancel();
@@ -73,7 +103,7 @@ class _TitlesState extends State<Titles> {
 
   void _setFromCache() {
     setState(() {
-      rows = Titles.rowsCache[widget.type];
+      rows = Titles.rows[widget.type];
     });
   }
 
@@ -110,6 +140,7 @@ class _TitlesState extends State<Titles> {
                         children: [
                           for (var i = 0; i < rows.length; i++)
                             TitlesRow(
+                              key: ObjectKey(rows[i]),
                               index: rows[i].index,
                               name: rows[i].name,
                               titles: rows[i].titles,
@@ -163,8 +194,25 @@ class _TitlesState extends State<Titles> {
         router.push("/search");
         break;
       case "Enter":
-        router.push("/title").then((_) {
+        router.push("/title").then((_) async {
           title?.posterKey.currentState?.updatePercent();
+
+          final myList = await Titles.getMyList(widget.type);
+          final myListRow = RowData(name: "My list", titles: myList);
+          if (rows[0].name == "My list") {
+            if (myList.isEmpty) {
+              Titles.rows[widget.type]!.removeAt(0);
+            } else {
+              Titles.rows[widget.type]![0] = myListRow;
+            }
+          } else if (myList.isNotEmpty) {
+            Titles.rows[widget.type]!.insert(0, myListRow);
+            index++;
+          } else {
+            return;
+          }
+          _setFromCache();
+          scroll();
         });
         break;
       case " ":

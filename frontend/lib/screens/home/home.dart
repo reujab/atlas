@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
       Titles.initRows("movie"),
       Titles.initRows("tv"),
     ]);
-    for (final rows in Titles.rowsCache.values) {
+    for (final rows in Titles.rows.values) {
       for (final row in rows.sublist(0, 2)) {
         for (final title in row.titles
             .sublist(0, min(TitlesRow.visibleTitles, row.titles.length - 1))) {

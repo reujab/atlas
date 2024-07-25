@@ -33,10 +33,10 @@ class _TitleDetailsState extends State<TitleDetails> {
   final client = HttpClient();
 
   int index = 0;
-
   String? uuid;
+  bool inMyList = false;
 
-  late final buttons = [
+  late final List<ButtonData> buttons = [
     ButtonData(
       title.type == "tv" ? "View" : "Play",
       icon: FontAwesomeIcons.play,
@@ -63,6 +63,8 @@ class _TitleDetailsState extends State<TitleDetails> {
               },
             )
           ]),
+    ButtonData("Add to list",
+        icon: FontAwesomeIcons.plus, onClick: toggleInMyList),
   ];
 
   @override
@@ -74,6 +76,53 @@ class _TitleDetailsState extends State<TitleDetails> {
     } else {
       getUUID();
     }
+
+    db!.rawQuery("""
+      SELECT EXISTS (
+        SELECT 1
+        FROM my_list
+        WHERE type = ?
+        AND id = ?
+      )
+    """, [title.type, title.id]).then((rows) {
+      inMyList = rows[0].values.first == 1;
+      if (inMyList) {
+        setState(() {
+          buttons.last.icon = FontAwesomeIcons.check;
+        });
+      }
+    });
+  }
+
+  void toggleInMyList() {
+    inMyList = !inMyList;
+
+    if (inMyList) {
+      db!.execute("""
+        INSERT INTO my_list (type, id, title, genres, overview, released, trailer, rating, poster)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      """, [
+        title.type,
+        title.id,
+        title.title,
+        title.genres.join(","),
+        title.overview,
+        title.released?.millisecondsSinceEpoch,
+        title.trailer,
+        title.rating,
+        title.poster
+      ]);
+    } else {
+      db!.execute("""
+        DELETE FROM my_list
+        WHERE type = ?
+        AND id = ?
+      """, [title.type, title.id]);
+    }
+    setState(() {
+      buttons.last.icon =
+          inMyList ? FontAwesomeIcons.check : FontAwesomeIcons.plus;
+    });
   }
 
   Future<void> getSeasons() async {
@@ -229,6 +278,6 @@ class ButtonData {
   ButtonData(this.name, {required this.icon, required this.onClick});
 
   String name;
-  IconData? icon;
+  IconData icon;
   final Function onClick;
 }

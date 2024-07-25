@@ -47,7 +47,6 @@ class _PlayState extends State<Play> {
     if (widget.uuid != null) {
       initStream();
     } else if (widget.trailer != null) {
-      // TODO: remove exclamation point after upgrading to Dart 3.2
       spawnCouple(widget.trailer!);
     }
   }
