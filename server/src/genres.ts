@@ -4,15 +4,26 @@ import sql from "./sql";
 interface Genre {
 	id: number;
 	name: string;
+	types: {
+		movie: boolean;
+		tv: boolean;
+	};
 }
 
 const genreMap: { [id: number]: string } = {};
 const sortedGenres: Genre[] = [];
 (async () => {
-	const rows = await sql`SELECT id::bigint, name FROM genres`;
+	const rows = await sql`SELECT id, name, movie, series FROM genres`;
 	for (const row of rows) {
 		genreMap[row.id] = row.name;
-		sortedGenres.push({ id: row.id, name: row.name });
+		sortedGenres.push({
+			id: row.id,
+			name: row.name,
+			types: {
+				movie: row.movie,
+				tv: row.series,
+			},
+		});
 	}
 	sortedGenres.sort((a, b) => a.name.localeCompare(b.name));
 })();
@@ -28,7 +39,7 @@ export default async function getGenreRows(type: "movie" | "tv"): Promise<Row[]>
 	const rows: Row[] = [];
 
 	await Promise.all(sortedGenres.map(async (genre) => {
-		if (genre.name === "Family") return;
+		if (genre.name === "Family" || !genre.types[type]) return;
 
 		const row = {
 			name: genre.name,
