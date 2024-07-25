@@ -24,12 +24,14 @@ class _WeatherState extends State<Weather> {
   String? icon;
   String? forecast;
 
-  Future<String> getCoords() async {
+  Future<String?> getCoords() async {
     if (Weather.coords != null) return Weather.coords!;
 
-    final loc = (await client.postJson(
+    final json = await client.postJson(
         "https://www.googleapis.com/geolocation/v1/geolocate?key=${Platform.environment["GOOGLE_LOCATION_KEY"]}",
-        {"considerIp": true}))["location"];
+        {"considerIp": true});
+    if (json == null) return null;
+    final loc = json["location"];
     Weather.coords = "${loc["lat"]},${loc["lng"]}";
     return Weather.coords!;
   }
@@ -38,6 +40,7 @@ class _WeatherState extends State<Weather> {
     if (!mounted) return;
 
     final coords = await getCoords();
+    if (coords == null) return;
     final Map<String, dynamic>? meta, json;
     try {
       meta = await client.getJson("https://api.weather.gov/points/$coords");

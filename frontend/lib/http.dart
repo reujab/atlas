@@ -53,7 +53,10 @@ class HttpClient {
     return jsonDecode(utf8.decode(res.bodyBytes));
   }
 
-  Future<T> postJson<T>(String url, Object body) async {
+  Future<T?> postJson<T>(String url, Object body) async {
+    await waitUntilOnline();
+    if (closed) return null;
+
     log.info("Posting to $url");
 
     final start = DateTime.now();

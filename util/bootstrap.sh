@@ -176,7 +176,7 @@ clean-fs() {
 	rm -rf /etc/systemd/system/!(multi-user.target.wants|*.service)
 	rm -rf /etc/xdg/!(weston)
 	rm -rf /usr/!(bin|lib*|local|sbin|share)
-	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|python*|rm|run-parts|strace|su|system*|udev*|weston|wpa*|yt-dlp)
+	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|nm-online|python*|rm|run-parts|strace|su|system*|udev*|weston|wpa*|yt-dlp)
 	rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
 	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time-wait,tpm,update,volatile},usb_modeswitch,x11}*
 	rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sshd|sulogin|wpa*)
