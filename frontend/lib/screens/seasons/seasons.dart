@@ -270,7 +270,13 @@ class _SeasonsState extends State<Seasons> {
       // so update the relevant seasons with the UUID.
       if (json["episode"] != null) return;
       for (final seasonNum in json["seasons"]) {
-        final season = seasons.firstWhere((s) => s.number == seasonNum);
+        // Odd edge case when the torrent contains a season that TMDB does not
+        SeasonData? season;
+        try {
+          season = seasons.firstWhere((s) => s.number == seasonNum);
+        } on StateError catch (_) {
+          continue;
+        }
         for (final episode in season.episodes) {
           episode.uuid = json["uuid"];
         }
