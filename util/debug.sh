@@ -19,7 +19,6 @@ make_server=${make_server:-1}
 . config/server.env
 . config/client.env
 export AUDIO_DEVICE=alsa
-export GOOGLE_LOCATION_KEY
 export PATH="$PWD/overlay/target/debug:$PWD/services:/opt/flutter/bin:$PATH"
 export PORT=8000
 export RUST_BACKTRACE=1

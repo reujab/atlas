@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 import "dart:io";
 
 import "package:cached_network_image/cached_network_image.dart";
@@ -26,14 +27,14 @@ class _WeatherState extends State<Weather> {
 
   Future<String?> getCoords() async {
     if (Weather.coords != null) return Weather.coords!;
-
-    final json = await client.postJson(
-        "https://www.googleapis.com/geolocation/v1/geolocate?key=${Platform.environment["GOOGLE_LOCATION_KEY"]}",
-        {"considerIp": true});
-    if (json == null) return null;
-    final loc = json["location"];
-    Weather.coords = "${loc["lat"]},${loc["lng"]}";
-    return Weather.coords!;
+    // wget is used because dart seems to always use IPv4, which in my tests are
+    // less accurate.
+    final wget = await Process.run("wget", [
+      "-O-",
+      "https://reallyfreegeoip.org/json/",
+    ]);
+    final json = jsonDecode(wget.stdout);
+    return Weather.coords = "${json["latitude"]},${json["longitude"]}";
   }
 
   Future<void> updateWeather() async {
