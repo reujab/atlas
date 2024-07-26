@@ -117,35 +117,37 @@ class _PlayState extends State<Play> {
     return t;
   }
 
-  Future<double> getStartTime() async {
+  Future<String> getStartTime() async {
     final rows = await db!.rawQuery("""
-      SELECT position
+      SELECT percent
       FROM title_progress
       WHERE type = ? AND id = ?
+      -- Use LIKE to compare strings and numbers.
       AND season LIKE ? AND episode LIKE ?
       LIMIT 1
     """, [title.type, title.id, widget.season ?? "-1", widget.episode ?? "-1"]);
-    if (rows.isEmpty) return 0;
-    return rows[0]["position"] as double;
+    if (rows.isEmpty) return "0";
+    final percent = 100.0 * (rows[0]["percent"] as double);
+    final roundedPercent = percent.floor();
+    return "$roundedPercent%";
   }
 
   void updateProgress() {
     final file = File("/tmp/progress");
     try {
-      final progress = file.readAsLinesSync().map(double.parse).toList();
+      final progress = double.parse(file.readAsStringSync());
       db!.execute("""
-        INSERT INTO title_progress (type, id, season, episode, percent, position)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+        INSERT INTO title_progress (type, id, season, episode, percent)
+        VALUES (?1, ?2, ?3, ?4, ?5)
         ON CONFLICT (type, id, season, episode)
         DO UPDATE
-        SET percent = ?5, position = ?6, ts = CURRENT_TIMESTAMP
+        SET percent = ?5, ts = CURRENT_TIMESTAMP
       """, [
         title.type,
         title.id,
         widget.season ?? "-1",
         widget.episode ?? "-1",
-        progress[0],
-        progress[1]
+        progress,
       ]);
     } finally {
       file.delete();

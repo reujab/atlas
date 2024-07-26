@@ -304,10 +304,9 @@ impl SimpleComponent for App {
                 self.duration = duration;
             }
             Msg::Quit => {
-                let percent = self.mpv.position / self.duration;
-                let progress = format!("{percent}\n{}", self.mpv.position);
                 let mut file = File::create("/tmp/progress").unwrap();
-                file.write_all(progress.as_bytes()).unwrap();
+                let percent = self.mpv.position / self.duration;
+                file.write_all(percent.to_string().as_bytes()).unwrap();
                 file.sync_all().unwrap();
                 drop(file);
                 relm4::main_application().quit();

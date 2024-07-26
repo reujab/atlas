@@ -27,7 +27,7 @@ class PosterState extends State<Poster> {
 
   void updatePercent() async {
     final row = await db!.rawQuery("""
-      SELECT percent, position
+      SELECT percent
       FROM title_progress
       WHERE type = ?
       AND id = ?

@@ -44,7 +44,7 @@ class EpisodeState extends State<Episode>
 
   void updatePercent() async {
     final row = await db!.rawQuery("""
-      SELECT percent, position
+      SELECT percent
       FROM title_progress
       WHERE type = 'tv'
       AND id = ?

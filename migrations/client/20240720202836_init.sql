@@ -7,7 +7,6 @@ CREATE TABLE title_progress (
 	episode INT NOT NULL DEFAULT -1,
 
 	percent FLOAT NOT NULL,
-	position FLOAT,
 
 	ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
