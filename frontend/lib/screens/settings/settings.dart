@@ -31,6 +31,7 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return InputListener(
       onKeyDown: onKeyDown,
+      handleNavigation: true,
       child: Background(
         child: Column(
           children: [
@@ -52,12 +53,6 @@ class _SettingsState extends State<Settings> {
 
   void onKeyDown(InputEvent e) {
     switch (e.name) {
-      case "Browser Home":
-        router.go("/home");
-        break;
-      case "Escape":
-        router.pop();
-        break;
       case "Arrow Up":
         if (settingIndex > 0) {
           setState(() {

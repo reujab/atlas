@@ -2,7 +2,8 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
+import "package:frontend/main.dart";
 
 class ErrorBanner extends StatefulWidget {
   const ErrorBanner({super.key});
@@ -71,7 +72,7 @@ class _ErrorBannerState extends State<ErrorBanner> {
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
             color: Color(0xE6F87171),
-            borderRadius: BorderRadius.all(Radius.circular(256)),
+            borderRadius: fullyRounded,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,7 +4,8 @@ import "dart:io";
 import "package:flutter/material.dart" as material;
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import "package:frontend/const.dart";
+import 'package:frontend/ui.dart';
+import "package:frontend/main.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/wifi/network.dart";
 import "package:frontend/widgets/background.dart";
@@ -138,7 +139,7 @@ class _WifiState extends State<Wifi> {
   onKeyDown(InputEvent e) {
     if (connecting) return;
 
-    if (e.name == "Browser Back" || e.name == "Escape") {
+    if (e.name == "Escape") {
       if (selected) {
         setState(() {
           selected = false;
@@ -194,10 +195,8 @@ class _WifiState extends State<Wifi> {
   }
 
   void scroll() {
-    scrollController.animateTo(
-        networkIndex * (Network.height + Network.margin * 2),
-        duration: scrollDuration,
-        curve: Curves.ease);
+    scrollController.animateTo(networkIndex * (itemHeight + itemMargin * 2),
+        duration: scrollDuration, curve: Curves.ease);
   }
 
   void onKey(String key) {

@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/widgets/poster.dart";
 import "package:frontend/title_data.dart";
 
@@ -43,7 +43,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   late final animations = List.generate(
     widget.titles.length,
     (i) => controllers[i].drive(_curve).drive(Tween<double>(
-        begin: 0, end: widget.active && i == widget.titleIndex ? scale : 1)),
+        begin: 0, end: widget.active && i == widget.titleIndex ? 1.1 : 1)),
   );
 
   @override
@@ -65,7 +65,7 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
     }
     if (oldRow.titleIndex != widget.titleIndex ||
         oldRow.active != widget.active) {
-      animate(widget.titleIndex, widget.active ? scale : 1);
+      animate(widget.titleIndex, widget.active ? 1.1 : 1);
     }
   }
 
@@ -87,10 +87,10 @@ class _TitlesRowState extends State<TitlesRow> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final imgWidthScaled = getImgWidthScaled();
-    final imgPadX = imgWidthScaled * (scale - 1) / 2 + shadowRadius;
+    final imgPadX = imgWidthScaled * (1.1 - 1) / 2 + shadowRadius;
     final imgWidth = imgWidthScaled - imgPadX * 2;
     final imgHeight = 450 / 300 * imgWidth;
-    final imgPadY = imgHeight * (scale - 1) / 2 + shadowRadius + 8;
+    final imgPadY = imgHeight * (1.1 - 1) / 2 + shadowRadius + 8;
     final posters = [
       for (int i = 0; i < widget.titles.length; i++)
         Padding(

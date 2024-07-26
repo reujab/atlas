@@ -2,8 +2,9 @@ import "dart:async";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/http.dart";
+import "package:frontend/main.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/screens/titles/row_data.dart";
@@ -25,7 +26,7 @@ class Titles extends StatefulWidget {
 
   static Future<void> initRows(String type) async {
     final client = HttpClient();
-    rows[type] = client.getJson("$host/rows/$type").then((json) async {
+    rows[type] = client.getJson("$server/rows/$type").then((json) async {
       final myList = await getMyList(type);
       final List<RowData> rows = [];
       if (myList.isNotEmpty) {
@@ -86,16 +87,14 @@ class _TitlesState extends State<Titles> {
   @override
   void initState() {
     super.initState();
-
     updateRows();
   }
 
-  updateRows() {
-    Titles.rows[widget.type]!.then((rows) {
-      if (!mounted) return;
-      setState(() {
-        this.rows = rows;
-      });
+  updateRows() async {
+    final rows = await Titles.rows[widget.type]!;
+    if (!mounted) return;
+    setState(() {
+      this.rows = rows;
     });
   }
 
@@ -105,6 +104,7 @@ class _TitlesState extends State<Titles> {
 
     return InputListener(
       onKeyDown: onKeyDown,
+      handleNavigation: true,
       child: Background(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -157,16 +157,6 @@ class _TitlesState extends State<Titles> {
   }
 
   void onKeyDown(InputEvent e) {
-    if (e.name == "Browser Home") {
-      router.go("/home");
-      return;
-    }
-
-    if (e.name == "Escape") {
-      router.pop();
-      return;
-    }
-
     final rows = this.rows, row = this.row;
     if (rows == null || row == null) return;
     switch (e.name) {
@@ -185,6 +175,7 @@ class _TitlesState extends State<Titles> {
             row.titleIndex < row.titles.length - 1 ? row.titleIndex + 1 : 0);
         break;
       case "Browser Search":
+      case " ":
         router.push("/search");
         break;
       case "Enter":
@@ -209,9 +200,6 @@ class _TitlesState extends State<Titles> {
           updateRows();
           scroll();
         });
-        break;
-      case " ":
-        router.push("/search");
         break;
     }
 

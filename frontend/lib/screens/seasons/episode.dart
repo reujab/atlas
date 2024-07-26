@@ -2,8 +2,9 @@ import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/animation_mixin.dart";
+import "package:frontend/main.dart";
 import "package:frontend/screens/seasons/season_data.dart";
 import "package:frontend/widgets/progress_overlay.dart";
 
@@ -37,7 +38,7 @@ class EpisodeState extends State<Episode>
     updatePercent();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      animate(widget.active ? scale : 1);
+      animate(widget.active ? 1.1 : 1);
     });
   }
 
@@ -62,7 +63,7 @@ class EpisodeState extends State<Episode>
   void didUpdateWidget(Episode oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.active != oldWidget.active) {
-      animate(widget.active ? scale : 1);
+      animate(widget.active ? 1.1 : 1);
     }
   }
 
@@ -85,28 +86,33 @@ class EpisodeState extends State<Episode>
         height: Episode.height,
         child: Row(
           children: [
-            ...(widget.episode.still == null
-                ? []
-                : [
-                    // workaround to prevent animation flickering
-                    Transform.scale(
-                      scale: 1.02,
-                      child: SizedBox(
+            /**
+             * Still
+             */
+            widget.episode.still == null
+                ? const SizedBox.shrink()
+                // Workaround flickering during scaling animation.
+                // Doesn't look perfect.
+                : Transform.scale(
+                    scale: 1.02,
+                    child: SizedBox(
+                      width: Episode.imgWidth,
+                      height: Episode.height,
+                      child: ProgressOverlay(
                         width: Episode.imgWidth,
-                        height: Episode.height,
-                        child: ProgressOverlay(
-                          width: Episode.imgWidth,
-                          percent: percent,
-                          child: CachedNetworkImage(
-                            imageUrl:
-                                "https://image.tmdb.org/t/p/w227_and_h127_bestv2${widget.episode.still}",
-                          ),
+                        percent: percent,
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              "https://image.tmdb.org/t/p/w227_and_h127_bestv2${widget.episode.still}",
                         ),
                       ),
                     ),
-                  ]),
+                  ),
             const SizedBox(width: 48),
             Expanded(
+              /**
+               * Episode name
+               */
               child: RichText(
                 overflow: TextOverflow.fade,
                 text: TextSpan(
@@ -127,22 +133,23 @@ class EpisodeState extends State<Episode>
                 // softWrap: true,
               ),
             ),
-            ...(widget.active
-                ? [
-                    widget.episode.uuid == null &&
-                            widget.episode.unavailable == false
-                        ? const SpinKitRipple(
-                            color: Colors.black,
-                            size: Episode.height * 0.5,
-                          )
-                        : FaIcon(
-                            widget.episode.unavailable
-                                ? FontAwesomeIcons.ban
-                                : FontAwesomeIcons.play,
-                            size: Episode.height * 0.5,
-                          ),
-                  ]
-                : []),
+            /**
+             * Loading/play
+             */
+            widget.active
+                ? widget.episode.uuid == null &&
+                        widget.episode.unavailable == false
+                    ? const SpinKitRipple(
+                        color: Colors.black,
+                        size: Episode.height * 0.5,
+                      )
+                    : FaIcon(
+                        widget.episode.unavailable
+                            ? FontAwesomeIcons.ban
+                            : FontAwesomeIcons.play,
+                        size: Episode.height * 0.5,
+                      )
+                : const SizedBox.shrink(),
             const SizedBox(width: 48),
           ],
         ),

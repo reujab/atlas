@@ -2,14 +2,9 @@ import "package:flutter/widgets.dart";
 import "package:frontend/screens/home/date.dart";
 import "package:frontend/screens/home/weather.dart";
 
-class HomeInfo extends StatefulWidget {
+class HomeInfo extends StatelessWidget {
   const HomeInfo({super.key});
 
-  @override
-  State<HomeInfo> createState() => _HomeInfoState();
-}
-
-class _HomeInfoState extends State<HomeInfo> {
   @override
   Widget build(BuildContext context) {
     return Align(

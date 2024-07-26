@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/router.dart";
 import "package:frontend/widgets/error_banner.dart";
 

@@ -1,12 +1,24 @@
 import "package:flutter/material.dart" as material;
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import "package:frontend/const.dart";
+import 'package:frontend/ui.dart';
 import "package:frontend/widgets/cursor.dart";
 
-class Network extends StatefulWidget {
-  static const double margin = 29.0, height = 128.0;
+class NetworkData {
+  NetworkData({
+    required this.mac,
+    required this.name,
+    required this.secure,
+    required this.strength,
+  });
 
+  String mac;
+  String name;
+  bool secure;
+  int strength;
+}
+
+class Network extends StatelessWidget {
   const Network(
     this.network, {
     super.key,
@@ -27,25 +39,20 @@ class Network extends StatefulWidget {
   final bool known;
 
   @override
-  State<Network> createState() => _NetworkState();
-}
-
-class _NetworkState extends State<Network> {
-  @override
   Widget build(BuildContext context) {
     var transform = Matrix4.identity();
-    if (widget.active) {
+    if (active) {
       transform.scale(1.1, 1.1);
     }
-    if (widget.hidden) {
+    if (hidden) {
       transform.translate(0.0, MediaQuery.of(context).size.height * 2);
     }
-    if (widget.selected) {
+    if (selected) {
       transform.scale(1.1, 1.1);
     }
 
     IconData strengthIcon;
-    final strength = widget.network.strength;
+    final strength = network.strength;
     if (strength >= 75) {
       strengthIcon = material.Icons.network_wifi_3_bar;
     } else if (strength >= 67) {
@@ -57,22 +64,21 @@ class _NetworkState extends State<Network> {
     }
 
     return AnimatedContainer(
-      duration: scaleDuration,
-      transform: transform,
+      clipBehavior: Clip.antiAlias,
       curve: Curves.ease,
+      duration: scaleDuration,
+      margin: itemMarginInset,
+      transform: transform,
       transformAlignment: FractionalOffset.center,
       decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(Network.margin)),
+        borderRadius: itemRadius,
         boxShadow: boxShadow,
         color: Colors.white,
       ),
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.symmetric(
-          horizontal: mainPadX, vertical: Network.margin),
       child: Column(
         children: [
           SizedBox(
-            height: Network.height,
+            height: itemHeight,
             child: Row(
               children: [
                 const SizedBox(width: 48),
@@ -85,9 +91,9 @@ class _NetworkState extends State<Network> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: widget.network.name.isNotEmpty
-                              ? widget.network.name
-                              : widget.network.mac,
+                          text: network.name.isNotEmpty
+                              ? network.name
+                              : network.mac,
                           style: const TextStyle(color: Colors.black),
                         ),
                       ],
@@ -99,7 +105,7 @@ class _NetworkState extends State<Network> {
                 /**
                  * Icons
                  */
-                widget.connecting
+                connecting
                     ? const Padding(
                         padding: EdgeInsets.only(right: 24),
                         child: SpinKitRipple(color: Colors.black, size: 56),
@@ -110,12 +116,12 @@ class _NetworkState extends State<Network> {
                     padding: const EdgeInsets.all(8),
                     child: Icon(strengthIcon, size: 56),
                   ),
-                  widget.network.secure
+                  network.secure
                       ? Positioned(
                           bottom: 10,
                           right: 4,
                           child: Icon(
-                            widget.known
+                            known
                                 ? material.Icons.vpn_key
                                 : material.Icons.lock,
                             size: 20,
@@ -133,7 +139,7 @@ class _NetworkState extends State<Network> {
             duration: scaleDuration,
             curve: Curves.ease,
             child: Container(
-              child: widget.selected
+              child: selected
                   ? Padding(
                       padding: const EdgeInsets.only(
                         left: 48,
@@ -143,12 +149,12 @@ class _NetworkState extends State<Network> {
                       child: Row(
                         children: [
                           Text(
-                            "*" * widget.passwordLength,
+                            "*" * passwordLength,
                             style: const TextStyle(
                                 color: Colors.black, fontSize: 42),
                           ),
                           Cursor(
-                            blinking: widget.selected && !widget.connecting,
+                            blinking: selected && !connecting,
                             size: 42,
                           ),
                         ],
@@ -161,18 +167,4 @@ class _NetworkState extends State<Network> {
       ),
     );
   }
-}
-
-class NetworkData {
-  NetworkData({
-    required this.mac,
-    required this.name,
-    required this.secure,
-    required this.strength,
-  });
-
-  String mac;
-  String name;
-  bool secure;
-  int strength;
 }

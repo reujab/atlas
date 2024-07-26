@@ -3,9 +3,10 @@ import "dart:convert";
 
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
 import "package:frontend/http.dart";
+import "package:frontend/main.dart";
 import "package:frontend/router.dart";
+import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/season_data.dart";
 import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/screens/titles/titles_row.dart";
@@ -17,6 +18,14 @@ import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/overview.dart";
 import "package:frontend/widgets/poster.dart";
 import "package:intl/intl.dart";
+
+class ButtonData {
+  ButtonData(this.name, {required this.icon, required this.onClick});
+
+  String name;
+  IconData icon;
+  final Function onClick;
+}
 
 class TitleDetails extends StatefulWidget {
   static TitleData? title;
@@ -64,8 +73,11 @@ class _TitleDetailsState extends State<TitleDetails> {
               },
             )
           ]),
-    ButtonData("Add to list",
-        icon: FontAwesomeIcons.plus, onClick: toggleInMyList),
+    ButtonData(
+      "Add to list",
+      icon: FontAwesomeIcons.plus,
+      onClick: toggleInMyList,
+    ),
   ];
 
   @override
@@ -78,21 +90,71 @@ class _TitleDetailsState extends State<TitleDetails> {
       getUUID();
     }
 
-    db!.rawQuery("""
+    setInMyList();
+  }
+
+  void getSeasons() {
+    Seasons.seasons?.then((seasons) {
+      if (seasons == null) return;
+      for (final season in seasons) {
+        season.scrollController.dispose();
+      }
+    });
+    Seasons.seasons = client.getJson("$server/seasons/${title.id}").then(
+        (json) => (json as List<dynamic>?)
+            ?.map((j) => SeasonData.fromJson(j))
+            .toList());
+  }
+
+  Future<void> getUUID() async {
+    Map<String, dynamic> json;
+    try {
+      final cleanTitle = title.title.replaceAll(nonSearchableChars, "");
+      final encodedTitle =
+          Uri.encodeComponent("$cleanTitle ${title.released?.year ?? ""}")
+              .trimRight();
+      var res = await client.get("$server/get-uuid/movie/$encodedTitle");
+      if (res == null) return;
+      if (res.statusCode == 404) {
+        _setState(() {
+          buttons[0].name = "Unavailable";
+          buttons[0].icon = FontAwesomeIcons.faceSadTear;
+        });
+        return;
+      }
+      json = jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (err) {
+      _setState(() {
+        buttons[0].name = "Error";
+        buttons[0].icon = FontAwesomeIcons.bug;
+      });
+      rethrow;
+    }
+
+    _setState(() {
+      uuid = json["uuid"];
+    });
+  }
+
+  _setState(Function() cb) {
+    if (mounted) setState(cb);
+  }
+
+  void setInMyList() async {
+    final rows = await db!.rawQuery("""
       SELECT EXISTS (
         SELECT 1
         FROM my_list
         WHERE type = ?
         AND id = ?
       )
-    """, [title.type, title.id]).then((rows) {
-      inMyList = rows[0].values.first == 1;
-      if (inMyList) {
-        setState(() {
-          buttons.last.icon = FontAwesomeIcons.check;
-        });
-      }
-    });
+    """, [title.type, title.id]);
+    inMyList = rows[0].values.first == 1;
+    if (inMyList) {
+      _setState(() {
+        buttons.last.icon = FontAwesomeIcons.check;
+      });
+    }
   }
 
   void toggleInMyList() {
@@ -126,51 +188,6 @@ class _TitleDetailsState extends State<TitleDetails> {
     });
   }
 
-  void getSeasons() {
-    Seasons.seasons?.then((seasons) {
-      if (seasons == null) return;
-      for (final season in seasons) {
-        season.scrollController.dispose();
-      }
-    });
-    Seasons.seasons = client.getJson("$host/seasons/${title.id}").then((json) =>
-        (json as List<dynamic>?)?.map((j) => SeasonData.fromJson(j)).toList());
-  }
-
-  Future<void> getUUID() async {
-    Map<String, dynamic> json;
-    try {
-      final cleanTitle = title.title.replaceAll(nonSearchableChars, "");
-      final encodedTitle =
-          Uri.encodeComponent("$cleanTitle ${title.released?.year ?? ""}")
-              .trimRight();
-      var res = await client.get("$host/get-uuid/movie/$encodedTitle");
-      if (res == null) return;
-      if (res.statusCode == 404) {
-        _setState(() {
-          buttons[0].name = "Unavailable";
-          buttons[0].icon = FontAwesomeIcons.faceSadTear;
-        });
-        return;
-      }
-      json = jsonDecode(utf8.decode(res.bodyBytes));
-    } catch (err) {
-      _setState(() {
-        buttons[0].name = "Error";
-        buttons[0].icon = FontAwesomeIcons.bug;
-      });
-      rethrow;
-    }
-
-    _setState(() {
-      uuid = json["uuid"];
-    });
-  }
-
-  _setState(Function() cb) {
-    if (mounted) setState(cb);
-  }
-
   @override
   Widget build(BuildContext context) {
     final released = title.released == null
@@ -179,6 +196,7 @@ class _TitleDetailsState extends State<TitleDetails> {
 
     return InputListener(
       onKeyDown: onKeyDown,
+      handleNavigation: true,
       child: Background(
         child: Column(
           children: [
@@ -255,12 +273,6 @@ class _TitleDetailsState extends State<TitleDetails> {
       case "Browser Search":
         router.push("/search");
         break;
-      case "Browser Home":
-        router.go("/home");
-        break;
-      case "Escape":
-        router.pop();
-        break;
     }
   }
 
@@ -269,12 +281,4 @@ class _TitleDetailsState extends State<TitleDetails> {
     client.close();
     super.dispose();
   }
-}
-
-class ButtonData {
-  ButtonData(this.name, {required this.icon, required this.onClick});
-
-  String name;
-  IconData icon;
-  final Function onClick;
 }

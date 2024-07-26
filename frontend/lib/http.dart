@@ -1,8 +1,11 @@
 import "dart:convert";
+import "dart:io";
 
-import "package:frontend/const.dart";
+import "package:frontend/main.dart";
 import "package:frontend/net.dart";
 import "package:http/http.dart" as http;
+
+final server = Platform.environment["SERVER"]!;
 
 class HttpClient {
   static const maxTries = 3;

@@ -4,8 +4,10 @@ import "dart:convert";
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/http.dart";
+import "package:frontend/main.dart";
+import "package:frontend/screens/search/search.dart";
 import "package:frontend/widgets/background.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/screens/seasons/episode.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
@@ -81,6 +83,7 @@ class _SeasonsState extends State<Seasons> {
   Widget build(BuildContext context) {
     return InputListener(
       onKeyDown: onKeyDown,
+      handleNavigation: true,
       child: Background(
         padding: 0,
         child: Column(children: [
@@ -177,7 +180,7 @@ class _SeasonsState extends State<Seasons> {
         if (episode.uuid != null) {
           router
               .push(
-                  "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&title=${episode.name}")
+                  "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&ep_name=${episode.name}")
               .then((_) {
             for (final episode in season.episodes) {
               episode.key.currentState?.updatePercent();
@@ -187,12 +190,6 @@ class _SeasonsState extends State<Seasons> {
         break;
       case "Browser Search":
         router.push("/search");
-        break;
-      case "Browser Home":
-        router.go("/home");
-        break;
-      case "Escape":
-        router.pop();
         break;
     }
   }
@@ -254,7 +251,7 @@ class _SeasonsState extends State<Seasons> {
     final cleanTitle =
         Uri.encodeComponent(title.title.replaceAll(nonSearchableChars, ""));
     final res = await client.get(
-        "$host/get-uuid/tv/$cleanTitle?s=${season.number}&e=${episode.number}");
+        "$server/get-uuid/tv/$cleanTitle?s=${season.number}&e=${episode.number}");
     if (!mounted || res == null) return;
     if (res.statusCode == 404) {
       setState(() {

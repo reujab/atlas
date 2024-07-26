@@ -2,7 +2,7 @@ import "dart:async";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/http.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/search/result.dart";
@@ -13,6 +13,8 @@ import "package:frontend/widgets/cursor.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
 import "package:frontend/widgets/keyboard.dart";
+
+final nonSearchableChars = RegExp(r"[^a-zA-Z0-9 ]");
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -31,7 +33,7 @@ class _SearchState extends State<Search> {
   List<TitleData> results = [];
   int resultIndex = 0;
 
-  int get visibleResults =>
+  int get visibleResultsNum =>
       query.isEmpty ? 0 : min(results.length, keyboardActive ? 2 : 5);
 
   @override
@@ -45,6 +47,9 @@ class _SearchState extends State<Search> {
             children: [
               const Header("Search"),
               const SizedBox(height: 16),
+              /**
+               * Results
+               */
               Container(
                 decoration: const BoxDecoration(
                   boxShadow: boxShadow,
@@ -67,7 +72,8 @@ class _SearchState extends State<Search> {
                   AnimatedContainer(
                     duration: scaleDuration,
                     curve: Curves.ease,
-                    height: visibleResults * (Result.height + Result.topMargin),
+                    height:
+                        visibleResultsNum * (Result.height + Result.topMargin),
                     child: Wrap(children: [
                       for (int i = 0; i < results.length; i++)
                         Result(
@@ -81,13 +87,16 @@ class _SearchState extends State<Search> {
             ],
           ),
         ),
+        /**
+         * Keyboard
+         */
         Positioned(
           bottom: 0,
           left: 0,
           right: 0,
           child: Keyboard(
             active: keyboardActive,
-            onKey: onKey,
+            onKey: onKeyboardKey,
             onSubmit: hideKeyboard,
             inputEvent: inputEvent,
             onExit: hideKeyboard,
@@ -103,10 +112,6 @@ class _SearchState extends State<Search> {
       return;
     }
 
-    setState(() {
-      inputEvent = e;
-    });
-
     if (e.name == "Escape") {
       if (keyboardActive) {
         router.pop();
@@ -118,7 +123,12 @@ class _SearchState extends State<Search> {
       return;
     }
 
-    if (keyboardActive) return;
+    if (keyboardActive) {
+      setState(() {
+        inputEvent = e;
+      });
+      return;
+    }
 
     switch (e.name) {
       case "Arrow Up":
@@ -129,7 +139,7 @@ class _SearchState extends State<Search> {
         }
         break;
       case "Arrow Down":
-        if (resultIndex < visibleResults - 1) {
+        if (resultIndex < visibleResultsNum - 1) {
           setState(() {
             resultIndex++;
           });
@@ -148,7 +158,7 @@ class _SearchState extends State<Search> {
     }
   }
 
-  void onKey(String char) {
+  void onKeyboardKey(String char) {
     final wasEmpty = query.isEmpty;
 
     setState(() {
@@ -188,8 +198,8 @@ class _SearchState extends State<Search> {
     final cleanQuery =
         Uri.encodeComponent(query.replaceAll(nonSearchableChars, ""));
     final List<dynamic>? json = await client
-        .getJson("$host/search/$cleanQuery?blacklist=${blacklist.join(",")}");
-    if (json == null) return;
+        .getJson("$server/search/$cleanQuery?blacklist=${blacklist.join(",")}");
+    if (!mounted || json == null) return;
     cache[query] = json.map((j) => TitleData.fromJson(j)).toList();
     setState(() {
       results = cache[query]!;
@@ -200,7 +210,7 @@ class _SearchState extends State<Search> {
     if (query.isEmpty || results.isEmpty) return;
 
     setState(() {
-      resultIndex = min(visibleResults - 1, 1);
+      resultIndex = min(visibleResultsNum - 1, 1);
       keyboardActive = false;
     });
   }

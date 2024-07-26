@@ -1,7 +1,8 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
+import "package:frontend/main.dart";
 import "package:frontend/title_data.dart";
 import "package:frontend/widgets/progress_overlay.dart";
 

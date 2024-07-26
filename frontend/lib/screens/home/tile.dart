@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import 'package:frontend/ui.dart';
 import "package:frontend/screens/home/home.dart";
 import "package:frontend/animation_mixin.dart";
 
@@ -18,14 +18,14 @@ class _TileState extends State<Tile>
   @override
   void initState() {
     super.initState();
-    animate(widget.active ? scale : 1);
+    animate(widget.active ? 1.1 : 1);
   }
 
   @override
   void didUpdateWidget(Tile oldTile) {
     super.didUpdateWidget(oldTile);
     if (oldTile.active != widget.active) {
-      animate(widget.active ? scale : 1);
+      animate(widget.active ? 1.1 : 1);
     }
   }
 

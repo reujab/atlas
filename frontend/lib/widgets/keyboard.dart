@@ -4,9 +4,10 @@ import "dart:math";
 import "package:flutter/material.dart" show Icon, Icons;
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/animation_mixin.dart";
 import "package:frontend/widgets/input_listener.dart";
+import "package:frontend/widgets/keyboard_key.dart";
 
 class Keyboard extends StatefulWidget {
   const Keyboard({
@@ -33,7 +34,14 @@ class Keyboard extends StatefulWidget {
 class _KeyboardState extends State<Keyboard>
     with TickerProviderStateMixin, AnimationMixin {
   static const rows = 3;
-  static const height = rows * (_Key.size + _Key.margin * 2);
+  static const height = rows * (KeyboardKey.size + KeyboardKey.margin * 2);
+
+  int page = 0;
+  int x = 0;
+  int y = 0;
+  dynamic depressed;
+  Timer? depressedTimer;
+  bool caps = false;
 
   late final keyboard = [
     [
@@ -47,19 +55,13 @@ class _KeyboardState extends State<Keyboard>
       [swap, "|", ".", ",", "?", "!", "^", "%", "#"],
     ],
   ];
-  int page = 0;
-  int x = 0;
-  int y = 0;
-  dynamic depressed;
-  Timer? depressedTimer;
-  bool caps = false;
 
-  void _animate() => animate(widget.active ? 0 : height + _Key.margin);
+  void _animate() => animate(widget.active ? 0 : height + KeyboardKey.margin);
 
   @override
   void initState() {
     super.initState();
-    animate(widget.active ? 128 : height + _Key.margin,
+    animate(widget.active ? 128 : height + KeyboardKey.margin,
         duration: Duration.zero);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animate();
@@ -78,30 +80,27 @@ class _KeyboardState extends State<Keyboard>
 
   @override
   Widget build(BuildContext context) {
-    return InputListener(
-      onKeyDown: onKeyDown,
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(0, animation.value - _Key.margin),
-          child: child,
-        ),
-        child: Column(children: [
-          for (int i = 0; i < keyboard[page].length; i++)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (int j = 0; j < keyboard[page][i].length; j++)
-                  _Key(
-                    active: i == y && j == x,
-                    depressed: depressed == keyboard[page][i][j],
-                    border: caps && keyboard[page][i][j] == shift,
-                    child: getKeyWidget(keyboard[page][i][j]),
-                  ),
-              ],
-            )
-        ]),
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, animation.value - KeyboardKey.margin),
+        child: child,
       ),
+      child: Column(children: [
+        for (int i = 0; i < keyboard[page].length; i++)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (int j = 0; j < keyboard[page][i].length; j++)
+                KeyboardKey(
+                  active: i == y && j == x,
+                  depressed: depressed == keyboard[page][i][j],
+                  border: caps && keyboard[page][i][j] == shift,
+                  child: getKeyWidget(keyboard[page][i][j]),
+                ),
+            ],
+          )
+      ]),
     );
   }
 
@@ -234,76 +233,5 @@ class _KeyboardState extends State<Keyboard>
     setState(() {
       page = 1 - page;
     });
-  }
-}
-
-class _Key extends StatefulWidget {
-  const _Key({
-    required this.active,
-    required this.depressed,
-    required this.border,
-    required this.child,
-  });
-
-  static const size = 112.0;
-  static const margin = 16.0;
-
-  final bool active;
-  final bool depressed;
-  final bool border;
-  final Widget child;
-
-  @override
-  State<_Key> createState() => _KeyState();
-}
-
-class _KeyState extends State<_Key>
-    with TickerProviderStateMixin, AnimationMixin {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      animate(widget.active ? 1.2 : 1);
-    });
-  }
-
-  @override
-  void didUpdateWidget(_Key oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.active != oldWidget.active ||
-        widget.depressed != oldWidget.depressed) {
-      animate(
-        widget.depressed
-            ? 0.8
-            : widget.active
-                ? 1.2
-                : 1,
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: animation,
-      filterQuality: FilterQuality.medium,
-      child: AnimatedContainer(
-        width: _Key.size,
-        height: _Key.size,
-        alignment: Alignment.center,
-        margin: const EdgeInsets.all(_Key.margin),
-        duration: scaleDuration,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(24)),
-          boxShadow: boxShadow,
-          color: Colors.white,
-          border: widget.border
-              ? Border.all(color: const Color(0xFF93c5fd), width: 5)
-              : null,
-        ),
-        child: widget.child,
-      ),
-    );
   }
 }

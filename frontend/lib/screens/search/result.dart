@@ -1,9 +1,9 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/title_data.dart";
 
-class Result extends StatefulWidget {
+class Result extends StatelessWidget {
   const Result(this.title, {super.key, required this.active});
 
   static const height = 128.0, topMargin = 16.0;
@@ -11,11 +11,6 @@ class Result extends StatefulWidget {
   final TitleData title;
   final bool active;
 
-  @override
-  State<Result> createState() => _ResultState();
-}
-
-class _ResultState extends State<Result> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -25,20 +20,20 @@ class _ResultState extends State<Result> {
         AnimatedContainer(
           duration: scaleDuration,
           curve: Curves.ease,
-          width: widget.active ? Result.topMargin * 2 : 0,
+          width: active ? Result.topMargin * 2 : 0,
         ),
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(24)),
           child: CachedNetworkImage(
             imageUrl:
-                "https://image.tmdb.org/t/p/w300_and_h450_bestv2${widget.title.poster}",
+                "https://image.tmdb.org/t/p/w300_and_h450_bestv2${title.poster}",
             width: 300.0 / 450.0 * Result.height,
           ),
         ),
         const SizedBox(width: Result.topMargin),
         Expanded(
           child: Text(
-            widget.title.title,
+            title.title,
             style: const TextStyle(
               fontSize: 48,
               color: Colors.black,
@@ -47,7 +42,7 @@ class _ResultState extends State<Result> {
           ),
         ),
         Text(
-          widget.title.released?.year.toString() ?? "",
+          title.released?.year.toString() ?? "",
           style: const TextStyle(fontSize: 48, color: Colors.gray),
         ),
       ]),

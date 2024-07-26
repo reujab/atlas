@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 
 class Overview extends StatelessWidget {
   const Overview({

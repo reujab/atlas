@@ -2,9 +2,21 @@ import "dart:io";
 
 import "package:flutter/widgets.dart";
 import "package:frontend/app.dart";
-import "package:frontend/const.dart";
 import "package:logging/logging.dart";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
+
+final log = Logger("atlas");
+
+final isInitialized =
+    Process.runSync("nmcli", ["-t", "-f=NAME", "connection", "show"])
+        .stdout
+        .toString()
+        .trim()
+        .split("\n")
+        .where((name) => name != "lo")
+        .isNotEmpty;
+
+Database? db;
 
 main() async {
   sqfliteFfiInit();

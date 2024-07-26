@@ -1,8 +1,4 @@
-import "dart:io";
-
 import "package:flutter/widgets.dart";
-import "package:logging/logging.dart";
-import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
 class Colors {
   static const transparent = Color(0x00000000);
@@ -17,7 +13,12 @@ const scaleDuration = Duration(milliseconds: 500);
 
 const mainPadX = 192.0;
 
-const scale = 1.1;
+const fullyRounded = BorderRadius.all(Radius.circular(1024));
+
+const itemHeight = 128.0, itemMargin = 29.0;
+const itemRadius = BorderRadius.all(Radius.circular(itemMargin));
+const itemMarginInset =
+    EdgeInsets.symmetric(horizontal: mainPadX, vertical: 29);
 
 const shadowRadius = 3.0;
 const boxShadow = [
@@ -34,20 +35,3 @@ const lightBoxShadow = [
     spreadRadius: shadowRadius,
   ),
 ];
-
-final host = Platform.environment["SERVER"]!;
-
-final log = Logger("atlas");
-
-final nonSearchableChars = RegExp(r"[^a-zA-Z0-9 ]");
-
-final isInitialized =
-    Process.runSync("nmcli", ["-t", "-f=NAME", "connection", "show"])
-        .stdout
-        .toString()
-        .trim()
-        .split("\n")
-        .where((name) => name != "lo")
-        .isNotEmpty;
-
-Database? db;

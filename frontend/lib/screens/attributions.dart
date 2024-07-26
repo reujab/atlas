@@ -1,5 +1,4 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/router.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/input_listener.dart";
@@ -9,9 +8,9 @@ class Attributions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InputListener(
-      onKeyDown: onKeyDown,
-      child: const Background(
+    return const InputListener(
+      handleNavigation: true,
+      child: Background(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -23,9 +22,5 @@ class Attributions extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void onKeyDown(InputEvent e) {
-    if (e.name == "Escape") router.pop();
   }
 }

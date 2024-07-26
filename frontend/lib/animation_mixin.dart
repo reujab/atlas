@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 
 // This mixin will cause the animation to always start in an initial state (1),
 // which means the user will always see an animation when navigating to a new

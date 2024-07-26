@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 
 class Header extends StatelessWidget {
   const Header(this.title, {super.key, this.search = false, this.back = true});
@@ -20,12 +20,13 @@ class Header extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ...(back
-            ? const [
-                FaIcon(FontAwesomeIcons.arrowLeft,
-                    size: 56, color: Colors.white)
-              ]
-            : []),
+        back
+            ? const FaIcon(
+                FontAwesomeIcons.arrowLeft,
+                size: 56,
+                color: Colors.white,
+              )
+            : const SizedBox.shrink(),
         const SizedBox(width: 32),
         const Text("", style: TextStyle(height: 1.35, fontSize: 96)),
         Expanded(

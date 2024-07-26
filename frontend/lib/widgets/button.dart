@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/animation_mixin.dart";
 
 class Button extends StatefulWidget {
@@ -27,14 +27,14 @@ class _ButtonState extends State<Button>
   @override
   void initState() {
     super.initState();
-    animate(widget.active ? scale : 1);
+    animate(widget.active ? 1.1 : 1);
   }
 
   @override
   void didUpdateWidget(Button oldButton) {
     super.didUpdateWidget(oldButton);
     if (oldButton.active != widget.active) {
-      animate(widget.active ? scale : 1);
+      animate(widget.active ? 1.1 : 1);
     }
   }
 
@@ -46,7 +46,7 @@ class _ButtonState extends State<Button>
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(1024)),
+          borderRadius: fullyRounded,
           boxShadow: boxShadow,
         ),
         padding: const EdgeInsets.all(42),

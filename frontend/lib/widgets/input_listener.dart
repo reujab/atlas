@@ -2,15 +2,20 @@ import "dart:async";
 
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
+import "package:frontend/router.dart";
 
 class InputListener extends StatefulWidget {
-  const InputListener(
-      {super.key, required this.child, required this.onKeyDown});
+  const InputListener({
+    super.key,
+    required this.child,
+    this.onKeyDown,
+    this.handleNavigation = false,
+  });
 
   final Widget child;
-
-  final Function(InputEvent e) onKeyDown;
+  final Function(InputEvent e)? onKeyDown;
+  final bool handleNavigation;
 
   @override
   State<InputListener> createState() => _InputListenerState();
@@ -26,12 +31,12 @@ class _InputListenerState extends State<InputListener> {
     return KeyboardListener(
       focusNode: focusNode,
       autofocus: true,
-      onKeyEvent: _onKeyEvent,
+      onKeyEvent: onKeyEvent,
       child: widget.child,
     );
   }
 
-  void _onKeyEvent(KeyEvent event) {
+  void onKeyEvent(KeyEvent event) {
     if (event is KeyRepeatEvent) return;
 
     timer?.cancel();
@@ -44,7 +49,7 @@ class _InputListenerState extends State<InputListener> {
     // keys that change the route
     if (key.startsWith("Arrow") || key == "Backspace") {
       timer = Timer.periodic(scrollDuration, (_) {
-        widget.onKeyDown(InputEvent(
+        handleInput(InputEvent(
           name: key,
           character: event.character,
           time: DateTime.now(),
@@ -52,11 +57,24 @@ class _InputListenerState extends State<InputListener> {
       });
     }
 
-    widget.onKeyDown(InputEvent(
+    handleInput(InputEvent(
       name: key == "Browser Back" ? "Escape" : key,
       character: event.character,
       time: DateTime.now(),
     ));
+  }
+
+  void handleInput(InputEvent event) {
+    if (widget.handleNavigation) {
+      if (event.name == "Browser Home") {
+        router.go("/home");
+        return;
+      } else if (event.name == "Escape") {
+        router.pop();
+        return;
+      }
+    }
+    if (widget.onKeyDown != null) widget.onKeyDown!(event);
   }
 
   @override

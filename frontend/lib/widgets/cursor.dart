@@ -1,7 +1,7 @@
 import "dart:async";
 
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 
 class Cursor extends StatefulWidget {
   const Cursor({super.key, this.blinking = true, this.size = 72.0});

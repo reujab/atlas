@@ -11,6 +11,18 @@ import "package:frontend/screens/titles/titles.dart";
 import "package:frontend/screens/titles/titles_row.dart";
 import "package:frontend/widgets/input_listener.dart";
 
+class TileData {
+  const TileData({
+    required this.name,
+    required this.img,
+    required this.onClick,
+  });
+
+  final String name;
+  final AssetImage img;
+  final Function onClick;
+}
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -20,6 +32,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   static const version = String.fromEnvironment("ATLAS_VERSION");
+
+  int tileIndex = 0;
+  String? localIP;
 
   static final tiles = [
     TileData(
@@ -58,15 +73,11 @@ class _HomeState extends State<Home> {
     ),
   ];
 
-  int tileIndex = 0;
-
-  String? localIP;
-
   @override
   void initState() {
     super.initState();
     precacheRows();
-    Timer.periodic(const Duration(days: 1), (timer) => precacheRows());
+    Timer.periodic(const Duration(days: 1), (_) => precacheRows());
     net.waitUntilOnline().then((_) {
       setState(() {
         localIP = net.localIP;
@@ -181,13 +192,4 @@ class _HomeState extends State<Home> {
       tileIndex = i;
     });
   }
-}
-
-class TileData {
-  const TileData(
-      {required this.name, required this.img, required this.onClick});
-
-  final String name;
-  final AssetImage img;
-  final Function onClick;
 }

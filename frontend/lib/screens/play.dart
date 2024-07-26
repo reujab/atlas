@@ -2,9 +2,10 @@ import "dart:io";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
+import "package:frontend/main.dart";
 import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/widgets/background.dart";
-import "package:frontend/const.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/http.dart";
 import "package:frontend/widgets/input_listener.dart";
@@ -19,15 +20,15 @@ class Play extends StatefulWidget {
     this.season,
     this.episode,
     this.trailer,
-    this.title,
+    this.epName,
   });
 
   final String? uuid;
   final String? season;
   final String? episode;
+  final String? epName;
 
   final String? trailer;
-  final String? title;
 
   @override
   State<Play> createState() => _PlayState();
@@ -54,21 +55,19 @@ class _PlayState extends State<Play> {
   Future<void> initStream() async {
     try {
       stream = await client.getJson(
-          "$host/init/${widget.uuid}${widget.season == null ? "" : "?s=${widget.season!}&e=${widget.episode}"}");
+          "$server/init/${widget.uuid}${widget.season == null ? "" : "?s=${widget.season!}&e=${widget.episode}"}");
       if (!mounted || stream == null) return;
     } catch (err) {
       pop();
       rethrow;
     }
 
-    spawnCouple("$host${stream!["video"]}");
+    spawnCouple("$server${stream!["video"]}");
   }
 
   Future<void> spawnCouple(String url) async {
+    final overlayTitle = getTitle();
     final startTime = await getStartTime();
-    final episode = widget.season == null
-        ? ""
-        : " S${widget.season.toString().padLeft(2, "0")}E${widget.episode.toString().padLeft(2, "0")} ${widget.title}";
     final List<String> mpvOpts = [
       "mpv",
       "--audio-device=${Platform.environment["AUDIO_DEVICE"]!}",
@@ -86,7 +85,7 @@ class _PlayState extends State<Play> {
     ];
     final List<String> overlayOpts = [
       "atlas-overlay",
-      "--title=${title.title}$episode",
+      "--title=$overlayTitle",
       ...(widget.uuid == null ? [] : ["--uuid=${widget.uuid}"]),
       "---",
     ];
@@ -100,8 +99,37 @@ class _PlayState extends State<Play> {
     pop();
     if (exitCode != 0) throw "Couple exit code: $exitCode";
 
-    // Update movie/episode progress.
-    if (widget.uuid == null) return;
+    if (widget.uuid != null) {
+      updateProgress();
+      updateSeriesProgress();
+    }
+  }
+
+  String getTitle() {
+    String t = title.title;
+    if (widget.uuid == null) {
+      t += " Trailer";
+    } else if (widget.season != null) {
+      final season = widget.season.toString().padLeft(2, "0");
+      final episode = widget.episode.toString().padLeft(2, "0");
+      t += " S${season}E$episode ${widget.epName}";
+    }
+    return t;
+  }
+
+  Future<double> getStartTime() async {
+    final rows = await db!.rawQuery("""
+      SELECT position
+      FROM title_progress
+      WHERE type = ? AND id = ?
+      AND season LIKE ? AND episode LIKE ?
+      LIMIT 1
+    """, [title.type, title.id, widget.season ?? "-1", widget.episode ?? "-1"]);
+    if (rows.isEmpty) return 0;
+    return rows[0]["position"] as double;
+  }
+
+  void updateProgress() {
     final file = File("/tmp/progress");
     try {
       final progress = file.readAsLinesSync().map(double.parse).toList();
@@ -122,49 +150,41 @@ class _PlayState extends State<Play> {
     } finally {
       file.delete();
     }
-
-    // Update series progress.
-    if (title.type == "tv") {
-      final seasons = await Seasons.seasons!;
-      if (seasons == null) return;
-      int totalEpisodes = 0;
-      int currentEpisode = 0;
-      for (final season in seasons) {
-        for (final episode in season.episodes) {
-          totalEpisodes++;
-          if (season.number.toString() == widget.season &&
-              episode.number.toString() == widget.episode) {
-            currentEpisode = totalEpisodes;
-          }
-        }
-      }
-      final seriesPercent = currentEpisode / totalEpisodes;
-      db!.execute("""
-        INSERT INTO title_progress (type, id, percent)
-        VALUES ('tv', ?1, ?2)
-        ON CONFLICT (type, id, season, episode)
-        DO UPDATE
-        SET percent = ?2, ts = CURRENT_TIMESTAMP
-      """, [title.id, seriesPercent]);
-    }
   }
 
-  Future<double> getStartTime() async {
-    final rows = await db!.rawQuery("""
-      SELECT position
-      FROM title_progress
-      WHERE type = ? AND id = ?
-      AND season LIKE ? AND episode LIKE ?
-      LIMIT 1
-    """, [title.type, title.id, widget.season ?? "-1", widget.episode ?? "-1"]);
-    if (rows.isEmpty) return 0;
-    return rows[0]["position"] as double;
+  Future<void> updateSeriesProgress() async {
+    if (title.type != "tv") return;
+    final seasons = await Seasons.seasons!;
+    if (seasons == null) return;
+    int totalEpisodes = 0;
+    int currentEpisode = 0;
+    for (final season in seasons) {
+      for (final episode in season.episodes) {
+        totalEpisodes++;
+        if (season.number.toString() == widget.season &&
+            episode.number.toString() == widget.episode) {
+          currentEpisode = totalEpisodes;
+        }
+      }
+    }
+    final seriesPercent = currentEpisode / totalEpisodes;
+    db!.execute("""
+      INSERT INTO title_progress (type, id, percent)
+      VALUES ('tv', ?1, ?2)
+      ON CONFLICT (type, id, season, episode)
+      DO UPDATE
+      SET percent = ?2, ts = CURRENT_TIMESTAMP
+    """, [title.id, seriesPercent]);
+  }
+
+  void pop() {
+    if (router.location.startsWith("/play")) router.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return InputListener(
-      onKeyDown: onKeyDown,
+      handleNavigation: true,
       child: Background(
         child: Column(
           children: [
@@ -176,15 +196,6 @@ class _PlayState extends State<Play> {
         ),
       ),
     );
-  }
-
-  void onKeyDown(InputEvent e) {
-    if (e.name == "Browser Home") router.go("/home");
-    if (e.name == "Escape") router.pop();
-  }
-
-  void pop() {
-    if (router.location.startsWith("/play")) router.pop();
   }
 
   @override

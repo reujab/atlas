@@ -4,7 +4,7 @@ import "dart:io";
 
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
-import "package:frontend/const.dart";
+import 'package:frontend/ui.dart';
 import "package:frontend/http.dart";
 
 class Weather extends StatefulWidget {
@@ -25,34 +25,25 @@ class _WeatherState extends State<Weather> {
   String? icon;
   String? forecast;
 
-  Future<String?> getCoords() async {
-    if (Weather.coords != null) return Weather.coords!;
-    // wget is used because dart seems to always use IPv4, which in my tests are
-    // less accurate.
-    final wget = await Process.run("wget", [
-      "-O-",
-      "https://reallyfreegeoip.org/json/",
-    ]);
-    final json = jsonDecode(wget.stdout);
-    return Weather.coords = "${json["latitude"]},${json["longitude"]}";
+  @override
+  void initState() {
+    super.initState();
+    updateWeather();
   }
 
   Future<void> updateWeather() async {
-    if (!mounted) return;
-
     final coords = await getCoords();
-    if (coords == null) return;
+    if (!mounted || coords == null) return;
     final Map<String, dynamic>? meta, json;
     try {
       meta = await client.getJson("https://api.weather.gov/points/$coords");
       if (meta == null) return;
       json = await client.getJson(meta["properties"]["forecast"]);
-      if (json == null) return;
+      if (json == null || !mounted) return;
     } catch (err) {
       Timer(const Duration(seconds: 1), updateWeather);
       throw "Failed to get forecast: $err";
     }
-    if (!mounted) return;
 
     final weather = json["properties"]["periods"][0];
     setState(() {
@@ -67,10 +58,16 @@ class _WeatherState extends State<Weather> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    updateWeather();
+  Future<String?> getCoords() async {
+    if (Weather.coords != null) return Weather.coords!;
+    // wget is used because dart seems to always use IPv4, which in my tests are
+    // less accurate.
+    final wget = await Process.run("wget", [
+      "-O-",
+      "https://reallyfreegeoip.org/json/",
+    ]);
+    final json = jsonDecode(wget.stdout);
+    return Weather.coords = "${json["latitude"]},${json["longitude"]}";
   }
 
   @override
