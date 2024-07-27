@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
+import "package:frontend/net.dart";
 import "package:frontend/ui.dart";
 import "package:frontend/http.dart";
 
@@ -60,6 +61,7 @@ class _WeatherState extends State<Weather> {
 
   Future<String?> getCoords() async {
     if (Weather.coords != null) return Weather.coords!;
+    await waitUntilOnline();
     // wget is used because dart seems to always use IPv4, which in my tests are
     // less accurate.
     final wget = await Process.run("wget", [
