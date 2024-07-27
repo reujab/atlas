@@ -3,6 +3,7 @@ import "dart:io";
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/main.dart";
+import "package:frontend/screens/audio.dart";
 import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/ui.dart";
@@ -136,7 +137,7 @@ class _PlayState extends State<Play> {
 
   static Future<String> getAudioDevice() async {
     try {
-      return await File("/var/local/audio-device").readAsString();
+      return await File(AudioDevice.path).readAsString();
     } on PathNotFoundException catch (_) {
       return "auto";
     }

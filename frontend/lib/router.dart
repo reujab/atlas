@@ -6,6 +6,7 @@ import "package:frontend/screens/home/home.dart";
 import "package:frontend/screens/play.dart";
 import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/seasons.dart";
+import "package:frontend/screens/server.dart";
 import "package:frontend/screens/settings.dart";
 import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/screens/titles/titles.dart";
@@ -61,6 +62,10 @@ final router = GoRouter(
       pageBuilder: _getPageBuilder((_) => const Audio()),
     ),
     GoRoute(
+      path: "/server",
+      pageBuilder: _getPageBuilder((_) => const Server()),
+    ),
+    GoRoute(
       path: "/attributions",
       pageBuilder: _getPageBuilder((_) => const Attributions()),
     ),
@@ -68,16 +73,26 @@ final router = GoRouter(
 );
 
 CustomTransitionPage<Page> Function(BuildContext, GoRouterState)
-    _getPageBuilder(Widget Function(GoRouterState) cb) {
+    _getPageBuilder(Widget Function(GoRouterState) cb, {modal = false}) {
   return (context, state) {
     return CustomTransitionPage(
+      fullscreenDialog: modal,
+      opaque: !modal,
       key: state.pageKey,
       child: cb(state),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-          child: child,
-        );
+        return modal
+            ? ScaleTransition(
+                // opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                scale:
+                    CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              )
+            : FadeTransition(
+                opacity:
+                    CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              );
       },
     );
   };

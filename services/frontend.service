@@ -10,7 +10,7 @@ ExecStart=/opt/frontend/frontend
 Restart=always
 RestartSec=1
 
-EnvironmentFile=/opt/frontend/env
+Environment=DATABASE_URL=sqlite:///var/local/atlas.db
 Environment=GTK_A11Y=none
 Environment=HOME=/root
 Environment=PATH=/usr/local/bin:/sbin:/bin

@@ -23,6 +23,10 @@ app.disable("x-powered-by");
 
 app.use(morgan("dev"));
 
+app.get("/version", (req: Request, res: Response) => {
+	res.end("0.0.0");
+});
+
 app.get("/rows/:type(movie|tv)", async (req: Request, res: Response) => {
 	try {
 		const rows = await getRows(req.params.type as "movie" | "tv");

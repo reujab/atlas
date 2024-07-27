@@ -2,12 +2,15 @@ import "dart:io";
 
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:frontend/main.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/header.dart";
 import "package:frontend/widgets/scrollable_list.dart";
 
 class AudioDevice {
-  AudioDevice({required this.id, required this.name});
+  const AudioDevice({required this.id, required this.name});
+
+  static const path = "$localPath/audio-device";
 
   final String id;
   final String name;
@@ -33,7 +36,7 @@ class _AudioState extends State<Audio> {
 
   void initDevices() async {
     try {
-      currentDevice = await File("/var/local/audio-device").readAsString();
+      currentDevice = await File(AudioDevice.path).readAsString();
     } on PathNotFoundException catch (_) {}
 
     final cmd = await Process.run("mpv", ["--audio-device=help"]);
@@ -84,7 +87,7 @@ class _AudioState extends State<Audio> {
     setState(() {
       currentDevice = devices[index].id;
     });
-    File("/var/local/audio-device").writeAsString(currentDevice);
+    File(AudioDevice.path).writeAsString(currentDevice);
     playChime();
   }
 

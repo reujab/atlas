@@ -2,12 +2,13 @@ import "dart:async";
 import "dart:math";
 
 import "package:flutter/widgets.dart";
-import "package:frontend/ui.dart";
 import "package:frontend/http.dart";
+import "package:frontend/main.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/search/result.dart";
-import "package:frontend/title_data.dart";
 import "package:frontend/screens/title_details/title_details.dart";
+import "package:frontend/title_data.dart";
+import "package:frontend/ui.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/widgets/cursor.dart";
 import "package:frontend/widgets/header.dart";

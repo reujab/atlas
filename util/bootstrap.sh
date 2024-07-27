@@ -7,6 +7,7 @@ if [[ $BOOTSTRAP != 1 ]]; then
 fi
 set -x
 
+export LOCAL=/var/local
 export DEBIAN_FRONTEND=noninteractive
 export PATH=$HOME/flutter/bin:$HOME/.cargo/bin:$PATH
 
@@ -52,7 +53,7 @@ install-rust() {
 install-frontend() { (
 	cd atlas/frontend
 	flutter pub get
-	flutter build linux --dart-define=ATLAS_VERSION=0.0.0 --release -v
+	flutter build linux --dart-define={ATLAS_VERSION=0.0.0,LOCAL_PATH=$LOCAL} --release -v
 	mv build/linux/*/release/bundle /opt/frontend
 ) }
 
@@ -86,8 +87,6 @@ install-dracut() {
 
 # After install-frontend
 install-config() {
-	cp atlas/config/client.env /opt/frontend/env
-
 	cp -r atlas/migrations/client /opt/frontend/migrations
 
 	mkdir -p /etc/xdg/weston
@@ -131,7 +130,7 @@ initrd /initrd.img
 EOF
 	cat > /etc/fstab << EOF
 PARTLABEL=root	/	squashfs	defaults	0 1
-PARTLABEL=local	/var/local	ext4	defaults	0 2
+PARTLABEL=local	$LOCAL	ext4	defaults	0 2
 EOF
 
 	passwd --stdin <<< atlas
@@ -146,7 +145,7 @@ ID=debian
 EOF
 
 	[[ $ATLAS_DEBUG = 1 ]] && cat > /etc/ssh/sshd_config << EOF
-AuthorizedKeysFile /var/local/authorized_keys
+AuthorizedKeysFile $LOCAL/authorized_keys
 PermitRootLogin yes
 EOF
 
@@ -205,7 +204,7 @@ install-busybox() {
 persist-files() {
 	# Remember network configurations
 	rmdir /etc/NetworkManager/system-connections
-	ln -s /var/local/system-connections /etc/NetworkManager/
+	ln -s $LOCAL/system-connections /etc/NetworkManager/
 
 	ln -s /tmp /root
 }

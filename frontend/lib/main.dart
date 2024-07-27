@@ -5,23 +5,23 @@ import "package:frontend/app.dart";
 import "package:logging/logging.dart";
 import "package:sqflite_common_ffi/sqflite_ffi.dart";
 
+const localPath = String.fromEnvironment("LOCAL_PATH");
+
 final log = Logger("atlas");
 
-final isInitialized =
-    Process.runSync("nmcli", ["-t", "-f=NAME", "connection", "show"])
-        .stdout
-        .toString()
-        .trim()
-        .split("\n")
-        .where((name) => name != "lo")
-        .isNotEmpty;
-
 Database? db;
+String? server;
+
+bool get isInitialized => server != null;
 
 main() async {
+  print("localPath $localPath");
   sqfliteFfiInit();
-  db = await databaseFactoryFfi.openDatabase(
-      Platform.environment["DATABASE_URL"]!.replaceFirst("sqlite://", ""));
+  db = await databaseFactoryFfi.openDatabase("$localPath/atlas.db");
+
+  try {
+    server = File("$localPath/server").readAsStringSync();
+  } on PathNotFoundException catch (_) {}
 
   Paint.enableDithering = true;
   Logger.root.level = Level.ALL;

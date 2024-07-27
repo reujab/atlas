@@ -1,11 +1,8 @@
 import "dart:convert";
-import "dart:io";
 
 import "package:frontend/main.dart";
 import "package:frontend/net.dart";
 import "package:http/http.dart" as http;
-
-final server = Platform.environment["SERVER"]!;
 
 class HttpClient {
   static const maxTries = 3;
@@ -53,40 +50,7 @@ class HttpClient {
     if (res.statusCode != 200) {
       throw "Error ${res.statusCode}: ${res.reasonPhrase}";
     }
-    return jsonDecode(utf8.decode(res.bodyBytes));
-  }
-
-  Future<T?> postJson<T>(String url, Object body) async {
-    await waitUntilOnline();
-    if (closed) return null;
-
-    log.info("Posting to $url");
-
-    final start = DateTime.now();
-
-    http.Response res;
-    Object? error;
-    final encodedBody = json.encode(body);
-    for (int i = 0; i < maxTries; i++) {
-      try {
-        res = await http.post(Uri.parse(url),
-            headers: {"Content-Type": "application/json"}, body: encodedBody);
-      } catch (err) {
-        error = err;
-        log.shout("Unable to connect to $url: $err");
-        await Future.delayed(const Duration(milliseconds: 500));
-        continue;
-      }
-
-      final replyMs = DateTime.now().difference(start).inMilliseconds;
-      log.info("Got reply in ${replyMs}ms");
-
-      if (res.statusCode != 200) throw "Error ${res.statusCode}";
-
-      return jsonDecode(utf8.decode(res.bodyBytes));
-    }
-
-    throw error!;
+    return jsonDecode(utf8.decode(res.bodyBytes)) as T;
   }
 
   void close() {

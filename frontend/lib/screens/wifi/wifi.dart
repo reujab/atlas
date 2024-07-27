@@ -243,7 +243,7 @@ class _WifiState extends State<Wifi> {
     if (nmcli.exitCode != 0) {
       throw "NetworkManager exit code: ${nmcli.exitCode}";
     }
-    router.go("/home");
+    router.go(isInitialized ? "/home" : "/server");
   }
 
   Future<ProcessResult> forget(String ssid) async {

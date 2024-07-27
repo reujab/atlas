@@ -29,6 +29,11 @@ class Settings extends StatelessWidget {
       path: "/audio",
     ),
     SettingData(
+      name: "Server",
+      icon: FontAwesomeIcons.server,
+      path: "/server",
+    ),
+    SettingData(
       name: "Attributions",
       icon: FontAwesomeIcons.info,
       path: "/attributions",
