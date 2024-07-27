@@ -5,7 +5,7 @@ import "package:frontend/screens/home/home.dart";
 import "package:frontend/screens/play.dart";
 import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/seasons.dart";
-import "package:frontend/screens/settings/settings.dart";
+import "package:frontend/screens/settings.dart";
 import "package:frontend/screens/title_details/title_details.dart";
 import "package:frontend/screens/titles/titles.dart";
 import "package:frontend/screens/wifi/wifi.dart";

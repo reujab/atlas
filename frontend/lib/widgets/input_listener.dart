@@ -8,12 +8,12 @@ import "package:frontend/router.dart";
 class InputListener extends StatefulWidget {
   const InputListener({
     super.key,
-    required this.child,
     this.onKeyDown,
+    this.child,
     this.handleNavigation = false,
   });
 
-  final Widget child;
+  final Widget? child;
   final Function(InputEvent e)? onKeyDown;
   final bool handleNavigation;
 
@@ -32,7 +32,7 @@ class _InputListenerState extends State<InputListener> {
       focusNode: focusNode,
       autofocus: true,
       onKeyEvent: onKeyEvent,
-      child: widget.child,
+      child: widget.child ?? const SizedBox.shrink(),
     );
   }
 
