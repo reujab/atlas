@@ -83,6 +83,11 @@ class _HomeState extends State<Home> {
         localIP = net.localIP;
       });
     });
+
+    // Update background each minute
+    Timer.periodic(const Duration(minutes: 1), (_) {
+      setState(() {});
+    });
   }
 
   Future<void> precacheRows() async {
