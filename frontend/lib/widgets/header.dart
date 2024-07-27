@@ -35,7 +35,6 @@ class Header extends StatelessWidget {
             child: Text(
               title,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 height: 1.35,
                 fontSize: title.length >= 28 ? 72 : 96,

@@ -80,13 +80,11 @@ class _ErrorBannerState extends State<ErrorBanner> {
               Text(
                 title.isEmpty ? "Error" : title,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
               Text(
                 description,
                 style: const TextStyle(fontSize: 24),
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

@@ -2,7 +2,9 @@ import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/router.dart";
 import "package:frontend/ui.dart";
-import "package:frontend/widgets/list_screen.dart";
+import "package:frontend/widgets/background.dart";
+import "package:frontend/widgets/header.dart";
+import "package:frontend/widgets/scrollable_list.dart";
 
 class SettingData {
   const SettingData({
@@ -16,44 +18,48 @@ class SettingData {
   final String path;
 }
 
-class Settings extends ListScreen<SettingData> {
+class Settings extends StatelessWidget {
   const Settings({super.key});
 
-  @override
-  get title => "Settings";
+  static const settings = [
+    SettingData(name: "Wi-Fi", icon: FontAwesomeIcons.wifi, path: "/wifi"),
+    SettingData(
+      name: "Audio device",
+      icon: FontAwesomeIcons.volumeHigh,
+      path: "/audio",
+    ),
+    SettingData(
+      name: "Attributions",
+      icon: FontAwesomeIcons.info,
+      path: "/attributions",
+    ),
+  ];
 
   @override
-  get items => const [
-        SettingData(name: "Wi-Fi", icon: FontAwesomeIcons.wifi, path: "/wifi"),
-        SettingData(
-          name: "Audio device",
-          icon: FontAwesomeIcons.volumeHigh,
-          path: "/audio",
-        ),
-        SettingData(
-          name: "Attributions",
-          icon: FontAwesomeIcons.info,
-          path: "/attributions",
-        ),
-      ];
-
-  @override
-  Widget builder(item, bool active) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-          children: [
-            Icon(item.icon, size: 48),
-            const SizedBox(width: 50),
-            Text(
-              item.name,
-              style: const TextStyle(color: Colors.black),
+  Widget build(BuildContext context) {
+    return Background(
+      child: Column(
+        children: [
+          const Header("Settings"),
+          ScrollableList(
+            items: settings,
+            builder: (setting, _) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Row(
+                children: [
+                  Icon(setting.icon, size: 48),
+                  const SizedBox(width: 50),
+                  Text(
+                    setting.name,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      );
-
-  @override
-  onSelect(int index) {
-    router.push(items[index].path);
+            onSelect: (index) => router.push(settings[index].path),
+          ),
+        ],
+      ),
+    );
   }
 }
