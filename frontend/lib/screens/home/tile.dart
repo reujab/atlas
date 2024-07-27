@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import 'package:frontend/ui.dart';
+import "package:frontend/ui.dart";
 import "package:frontend/screens/home/home.dart";
 import "package:frontend/animation_mixin.dart";
 

@@ -20,13 +20,13 @@ class ProgressOverlay extends StatelessWidget {
         child,
         Positioned(
           bottom: 0,
-          left: 0,
+          left: -0.5,
           child: Container(
             height: 8,
             width: width * percent,
             decoration: BoxDecoration(
               color: Colors.red,
-              borderRadius: percent == 0
+              borderRadius: percent == 1
                   ? BorderRadius.zero
                   : const BorderRadius.only(
                       topRight: Radius.circular(4),

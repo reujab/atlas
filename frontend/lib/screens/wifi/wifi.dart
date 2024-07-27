@@ -4,7 +4,7 @@ import "dart:io";
 import "package:flutter/material.dart" as material;
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
-import 'package:frontend/ui.dart';
+import "package:frontend/ui.dart";
 import "package:frontend/main.dart";
 import "package:frontend/router.dart";
 import "package:frontend/screens/wifi/network.dart";

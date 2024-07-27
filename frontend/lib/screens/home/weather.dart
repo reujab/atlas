@@ -4,7 +4,7 @@ import "dart:io";
 
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/widgets.dart";
-import 'package:frontend/ui.dart';
+import "package:frontend/ui.dart";
 import "package:frontend/http.dart";
 
 class Weather extends StatefulWidget {
