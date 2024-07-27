@@ -62,6 +62,23 @@ class Titles extends StatefulWidget {
         .toList();
   }
 
+  static Future<void> updateMyList(String type) async {
+    final myList = await Titles.getMyList(type);
+    final myListRow = RowData(name: "My list", titles: myList);
+    final rows = await Titles.rows[type]!;
+    if (rows[0].name == "My list") {
+      if (myList.isEmpty) {
+        rows.removeAt(0);
+      } else {
+        rows[0] = myListRow;
+      }
+    } else if (myList.isNotEmpty) {
+      rows.insert(0, myListRow);
+    } else {
+      return;
+    }
+  }
+
   @override
   State<Titles> createState() => _TitlesState();
 }
@@ -90,9 +107,16 @@ class _TitlesState extends State<Titles> {
     updateRows();
   }
 
-  updateRows() async {
+  Future<void> updateRows({int? originalRows}) async {
     final rows = await Titles.rows[widget.type]!;
     if (!mounted) return;
+    if (originalRows != null && rows.length != originalRows) {
+      setState(() {
+        rowIndex += rows.length - originalRows;
+        if (rowIndex < 0) rowIndex = 0;
+      });
+      scroll();
+    }
     setState(() {
       this.rows = rows;
     });
@@ -156,7 +180,7 @@ class _TitlesState extends State<Titles> {
     );
   }
 
-  void onKeyDown(InputEvent e) {
+  Future<void> onKeyDown(InputEvent e) async {
     final rows = this.rows, row = this.row;
     if (rows == null || row == null) return;
     switch (e.name) {
@@ -176,30 +200,14 @@ class _TitlesState extends State<Titles> {
         break;
       case "Browser Search":
       case " ":
-        router.push("/search");
+        final originalRows = rows.length;
+        await router.push("/search");
+        update(originalRows);
         break;
       case "Enter":
-        router.push("/title").then((_) async {
-          title?.posterKey.currentState?.updatePercent();
-
-          final myList = await Titles.getMyList(widget.type);
-          final myListRow = RowData(name: "My list", titles: myList);
-          final rows = await Titles.rows[widget.type]!;
-          if (rows[0].name == "My list") {
-            if (myList.isEmpty) {
-              rows.removeAt(0);
-            } else {
-              rows[0] = myListRow;
-            }
-          } else if (myList.isNotEmpty) {
-            rows.insert(0, myListRow);
-            rowIndex++;
-          } else {
-            return;
-          }
-          updateRows();
-          scroll();
-        });
+        final originalRows = rows.length;
+        await router.push("/title");
+        update(originalRows);
         break;
     }
 
@@ -225,6 +233,11 @@ class _TitlesState extends State<Titles> {
       duration: scrollDuration,
       curve: Curves.ease,
     );
+  }
+
+  Future<void> update(int originalRows) async {
+    await updateRows(originalRows: originalRows);
+    title?.posterKey.currentState?.updatePercent();
   }
 
   @override

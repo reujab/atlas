@@ -9,6 +9,7 @@ import "package:frontend/router.dart";
 import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/season_data.dart";
 import "package:frontend/screens/seasons/seasons.dart";
+import "package:frontend/screens/titles/titles.dart";
 import "package:frontend/screens/titles/titles_row.dart";
 import "package:frontend/title_data.dart";
 import "package:frontend/widgets/background.dart";
@@ -186,6 +187,8 @@ class _TitleDetailsState extends State<TitleDetails> {
       buttons.last.icon =
           inMyList ? FontAwesomeIcons.check : FontAwesomeIcons.plus;
     });
+
+    Titles.updateMyList(title.type);
   }
 
   @override
