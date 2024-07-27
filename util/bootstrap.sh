@@ -70,9 +70,15 @@ install-sqlx() {
 	mv ~/.cargo/bin/sqlx /usr/local/bin
 }
 
+# After install-rust
+install-tzupdate() {
+	cargo install tzupdate
+	mv ~/.cargo/bin/tzupdate /usr/local/bin
+}
+
 # After install-build-deps
 install-runtime-deps() {
-	apt-get install -y evtest firmware-iwlwifi firmware-linux-free file \
+	apt-get install -y chrony evtest firmware-iwlwifi firmware-linux-free file \
 		fonts-{cantarell,noto{,-cjk,-extra}} libgtk-3-0 libgtk-4-1 linux-image-amd64 mpv \
 		network-manager weston yt-dlp > /dev/null
 	[[ $ATLAS_DEBUG = 1 ]] && apt-get install -y openssh-server strace > /dev/null
@@ -112,7 +118,7 @@ remove-packages() {
 # After remove-packages
 configure-system() {
 	systemctl daemon-reload
-	systemctl enable NetworkManager frontend resetd weston
+	systemctl enable NetworkManager frontend resetd tzupdate weston
 
 	# This logs the root user in on boot, creating the dbus runtime, allowing weston to use
 	# $XDG_RUNTIME_DIR on boot. This is equivalent to running `loginctl enable-linger root`.
@@ -173,15 +179,15 @@ clean-fs() {
 	cd /
 
 	rm -rf /!(bin|dev|etc|lib*|opt|proc|run|sbin|sys|tmp|usr|var)
-	rm -rf /etc/!(NetworkManager|alternatives|ca-certificates*|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|ld.so.cache|libnl*|local*|machine-id|magic*|mime*|net*|os-release|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssh|ssl|sys*|timezone|udev|vulkan|wpa*|xdg|*tab)
+	rm -rf /etc/!(NetworkManager|alternatives|ca-certificates*|chrony|dbus*|dconf|default|dhcp|fonts|gl*|group|host*|ifplugd|iproute2|ld.so.cache|libnl*|local*|machine-id|magic*|mime*|net*|os-release|pam*|passwd|resolv.conf|security|services|*shadow|shells|ssh|ssl|sys*|timezone|udev|vulkan|wpa*|xdg|*tab)
 	rm -rf /etc/alternatives/!(*.db|*.so*)
 	rm -rf /etc/systemd/system/!(multi-user.target.wants|*.service)
 	rm -rf /etc/xdg/!(weston)
 	rm -rf /usr/!(bin|lib*|local|sbin|share)
-	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|nm-online|python*|rm|run-parts|strace|su|system*|udev*|weston|wpa*|yt-dlp)
+	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|nm-online|python*|rm|run-parts|strace|su|system*|time*|udev*|weston|wpa*|yt-dlp)
 	rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
-	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time-wait,tpm,update,volatile},usb_modeswitch,x11}*
-	rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sshd|sulogin|wpa*)
+	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time,tpm,update,volatile},usb_modeswitch,x11}*
+	rm -rf /usr/sbin/!(NetworkManager|agetty|chronyd|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sshd|sulogin|wpa*)
 	rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|sounds|systemd|vulkan|weston|zoneinfo)
 	rm -rf /usr/share/X11/!(xkb)
 	rm -rf /usr/share/icons/!(Adwaita)
@@ -207,6 +213,11 @@ persist-files() {
 	ln -s $LOCAL/system-connections /etc/NetworkManager/
 
 	ln -s /tmp /root
+	ln -s /tmp /var/log
+
+	ln -sf /var/local/localtime /etc/localtime
+
+	ln -s /var/local/chrony /var/lib/chrony
 }
 
 # After install-busybox
@@ -273,6 +284,7 @@ wait
 concurrently install-frontend
 concurrently install-overlay
 concurrently install-sqlx
+concurrently install-tzupdate
 concurrently install-runtime-deps
 wait
 

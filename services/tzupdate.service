@@ -1,0 +1,11 @@
+[Unit]
+Description=Time zone update
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=tzupdate.sh
+Environment=PATH=/usr/local/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target
