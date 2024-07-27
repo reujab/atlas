@@ -92,6 +92,9 @@ install-config() {
 
 	mkdir -p /etc/xdg/weston
 	cp atlas/config/weston.ini /etc/xdg/weston
+
+	mkdir /usr/share/sounds
+	cp atlas/config/*.ogg /usr/share/sounds
 }
 
 # After install-runtime-deps
@@ -180,7 +183,7 @@ clean-fs() {
 	rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
 	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time-wait,tpm,update,volatile},usb_modeswitch,x11}*
 	rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sshd|sulogin|wpa*)
-	rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|systemd|vulkan|weston|zoneinfo)
+	rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|sounds|systemd|vulkan|weston|zoneinfo)
 	rm -rf /usr/share/X11/!(xkb)
 	rm -rf /usr/share/icons/!(Adwaita)
 	rm -rf /usr/share/icons/Adwaita/!(icon-theme.cache|scalable)

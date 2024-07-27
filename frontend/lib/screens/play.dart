@@ -68,9 +68,10 @@ class _PlayState extends State<Play> {
   Future<void> spawnCouple(String url) async {
     final overlayTitle = getTitle();
     final startTime = await getStartTime();
+    final audioDevice = await getAudioDevice();
     final List<String> mpvOpts = [
       "mpv",
-      "--audio-device=${Platform.environment["AUDIO_DEVICE"]!}",
+      "--audio-device=$audioDevice",
       "--fullscreen",
       "--hwdec=vaapi",
       "--input-ipc-server=/tmp/mpv",
@@ -131,6 +132,14 @@ class _PlayState extends State<Play> {
     if (percent == 100) return "0";
     final roundedPercent = percent.floor();
     return "$roundedPercent%";
+  }
+
+  static Future<String> getAudioDevice() async {
+    try {
+      return await File("/var/local/audio-device").readAsString();
+    } on PathNotFoundException catch (_) {
+      return "auto";
+    }
   }
 
   void updateProgress() {

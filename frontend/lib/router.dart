@@ -1,6 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:frontend/main.dart";
 import "package:frontend/screens/attributions.dart";
+import "package:frontend/screens/audio.dart";
 import "package:frontend/screens/home/home.dart";
 import "package:frontend/screens/play.dart";
 import "package:frontend/screens/search/search.dart";
@@ -54,6 +55,10 @@ final router = GoRouter(
     GoRoute(
       path: "/settings",
       pageBuilder: _getPageBuilder((_) => const Settings()),
+    ),
+    GoRoute(
+      path: "/audio",
+      pageBuilder: _getPageBuilder((_) => const Audio()),
     ),
     GoRoute(
       path: "/attributions",

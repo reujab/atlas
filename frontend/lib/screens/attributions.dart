@@ -18,6 +18,7 @@ class Attributions extends StatelessWidget {
             SizedBox(height: 29),
             Text("Pawel Czerwinski @pawel_czerwinski - Backgrounds"),
             Text("flaticon.com @FreePik - Home Screen Icons"),
+            Text("UNIVERSFIELD - Chime"),
           ],
         ),
       ),
