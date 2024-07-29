@@ -17,14 +17,16 @@ import "package:frontend/screens/title_details/title_details.dart";
 class Play extends StatefulWidget {
   const Play({
     super.key,
-    this.uuid,
+    this.type,
+    this.id,
     this.season,
     this.episode,
     this.trailer,
     this.epName,
   });
 
-  final String? uuid;
+  final String? type;
+  final String? id;
   final String? season;
   final String? episode;
   final String? epName;
@@ -46,30 +48,23 @@ class _PlayState extends State<Play> {
   void initState() {
     super.initState();
 
-    if (widget.uuid != null) {
-      initStream();
+    if (widget.type != null && widget.id != null) {
+      String url = "$server/${widget.type}/${widget.id}";
+      if (widget.season != null && widget.episode != null) {
+        url += "/${widget.season}/${widget.episode}";
+      }
+      url += "/stream";
+      spawnCouple(url);
     } else if (widget.trailer != null) {
       spawnCouple(widget.trailer!);
     }
-  }
-
-  Future<void> initStream() async {
-    try {
-      stream = await client.getJson(
-          "$server/init/${widget.uuid}${widget.season == null ? "" : "?s=${widget.season!}&e=${widget.episode}"}");
-      if (!mounted || stream == null) return;
-    } catch (err) {
-      pop();
-      rethrow;
-    }
-
-    spawnCouple("$server${stream!["video"]}");
   }
 
   Future<void> spawnCouple(String url) async {
     final overlayTitle = getTitle();
     final startTime = await getStartTime();
     final audioDevice = await getAudioDevice();
+    final keepaliveUrl = widget.trailer == null ? "$url/keepalive" : null;
     final List<String> mpvOpts = [
       "mpv",
       "--audio-device=$audioDevice",
@@ -81,14 +76,14 @@ class _PlayState extends State<Play> {
       "--start=$startTime",
       "--vo=gpu",
       "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
-      ...(stream?["subs"] == null ? [] : ["--sub-file=${stream!["subs"]}"]),
+      ...(widget.trailer == null ? ["--sub-file=$url/subs"] : []),
       url,
       "---",
     ];
     final List<String> overlayOpts = [
       "atlas-overlay",
       "--title=$overlayTitle",
-      ...(widget.uuid == null ? [] : ["--uuid=${widget.uuid}"]),
+      ...(keepaliveUrl == null ? [] : ["--keepalive=$keepaliveUrl"]),
       "---",
     ];
     couple = await Process.start(
@@ -101,7 +96,7 @@ class _PlayState extends State<Play> {
     pop();
     if (exitCode != 0) throw "Couple exit code: $exitCode";
 
-    if (widget.uuid != null) {
+    if (widget.trailer == null) {
       updateProgress();
       updateSeriesProgress();
     }
@@ -109,12 +104,12 @@ class _PlayState extends State<Play> {
 
   String getTitle() {
     String t = title.title;
-    if (widget.uuid == null) {
-      t += " Trailer";
-    } else if (widget.season != null) {
+    if (widget.trailer == null) {
       final season = widget.season.toString().padLeft(2, "0");
       final episode = widget.episode.toString().padLeft(2, "0");
       t += " S${season}E$episode ${widget.epName}";
+    } else if (widget.season != null) {
+      t += " Trailer";
     }
     return t;
   }

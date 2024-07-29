@@ -1,11 +1,9 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:flutter/widgets.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:frontend/http.dart";
 import "package:frontend/main.dart";
-import "package:frontend/screens/search/search.dart";
 import "package:frontend/widgets/background.dart";
 import "package:frontend/ui.dart";
 import "package:frontend/screens/seasons/episode.dart";
@@ -36,7 +34,7 @@ class _SeasonsState extends State<Seasons> {
   int seasonIndex = 0;
   List<SeasonData> seasons = [];
 
-  Timer? uuidTimer;
+  Timer? availableTimer;
 
   SeasonData get season => seasons[seasonIndex];
   EpisodeData get episode => season.episodes[season.episodeIndex];
@@ -75,7 +73,33 @@ class _SeasonsState extends State<Seasons> {
       setState(() {
         seasons = s;
       });
-      getUUID();
+      getIsAvailable();
+    });
+  }
+
+  void getIsAvailable() {
+    availableTimer?.cancel();
+    // Prevent spamming requests while scrolling.
+    availableTimer = Timer(const Duration(seconds: 1), _getIsAvailable);
+  }
+
+  Future<void> _getIsAvailable() async {
+    final episode = this.episode;
+    if (episode.available != null) return;
+
+    bool? available;
+    try {
+      available = await client.getJson(
+          "$server/tv/${title.id}/${season.number}/${episode.number}/available.json");
+    } catch (err) {
+      setState(() {
+        episode.available = false;
+      });
+      rethrow;
+    }
+    if (!mounted || available == null) return;
+    setState(() {
+      episode.available = available;
     });
   }
 
@@ -177,16 +201,15 @@ class _SeasonsState extends State<Seasons> {
         if (seasonIndex < seasons.length - 1) setIndex(seasonIndex + 1);
         break;
       case "Enter":
-        if (episode.uuid != null) {
-          router
-              .push(
-                  "/play?uuid=${episode.uuid}&s=${season.number}&e=${episode.number}&ep_name=${episode.name}")
-              .then((_) {
-            for (final episode in season.episodes) {
-              episode.key.currentState?.updatePercent();
-            }
-          });
-        }
+        if (episode.available != true) break;
+        router
+            .push(
+                "/play?type=tv&id=${title.id}&s=${season.number}&e=${episode.number}&ep_name=${episode.name}")
+            .then((_) {
+          for (final episode in season.episodes) {
+            episode.key.currentState?.updatePercent();
+          }
+        });
         break;
       case "Browser Search":
         router.push("/search");
@@ -199,7 +222,7 @@ class _SeasonsState extends State<Seasons> {
       seasonIndex = i;
     });
     scrollX();
-    getUUID();
+    getIsAvailable();
   }
 
   void setEpisodeIndex(int i) {
@@ -207,7 +230,7 @@ class _SeasonsState extends State<Seasons> {
       seasons[seasonIndex].episodeIndex = i;
     });
     scrollY();
-    getUUID();
+    getIsAvailable();
   }
 
   void scrollX() {
@@ -237,54 +260,10 @@ class _SeasonsState extends State<Seasons> {
         .animateTo(y, duration: scrollDuration, curve: Curves.ease);
   }
 
-  void getUUID() {
-    uuidTimer?.cancel();
-    // Only actually get the UUID after 1 second of hovering to prevent spamming
-    // requests while scrolling.
-    uuidTimer = Timer(const Duration(seconds: 1), _getUUID);
-  }
-
-  Future<void> _getUUID() async {
-    final episode = this.episode;
-    if (episode.uuid != null || episode.unavailable) return;
-
-    final cleanTitle =
-        Uri.encodeComponent(title.title.replaceAll(nonSearchableChars, ""));
-    final res = await client.get(
-        "$server/get-uuid/tv/$cleanTitle?s=${season.number}&e=${episode.number}");
-    if (!mounted || res == null) return;
-    if (res.statusCode == 404) {
-      setState(() {
-        episode.unavailable = true;
-      });
-      return;
-    }
-
-    final Map<String, dynamic> json = jsonDecode(utf8.decode(res.bodyBytes));
-    setState(() {
-      episode.uuid = json["uuid"];
-      // If `json["episode"] == null`, this uuid refers to one or more seasons,
-      // so update the relevant seasons with the UUID.
-      if (json["episode"] != null) return;
-      for (final seasonNum in json["seasons"]) {
-        // Odd edge case when the torrent contains a season that TMDB does not
-        SeasonData? season;
-        try {
-          season = seasons.firstWhere((s) => s.number == seasonNum);
-        } on StateError catch (_) {
-          continue;
-        }
-        for (final episode in season.episodes) {
-          episode.uuid = json["uuid"];
-        }
-      }
-    });
-  }
-
   @override
   void dispose() {
     client.close();
-    uuidTimer?.cancel();
+    availableTimer?.cancel();
     pillScrollController.dispose();
     scrollController.dispose();
     super.dispose();

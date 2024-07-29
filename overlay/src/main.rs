@@ -29,7 +29,7 @@ struct Args {
     #[arg(long)]
     title: String,
     #[arg(long)]
-    uuid: Option<String>,
+    keepalive: Option<String>,
 }
 
 pub(crate) struct App {
@@ -344,8 +344,8 @@ fn main() {
     .init();
 
     let args = Args::parse();
-    if let Some(uuid) = args.uuid {
-        thread::spawn(move || keepalive_worker::keepalive(&uuid));
+    if let Some(keepalive) = args.keepalive {
+        thread::spawn(move || keepalive_worker::keepalive(&keepalive));
     }
 
     info!("Connecting to mpv");

@@ -1,7 +1,7 @@
 import cheerio from "cheerio";
 import http from "http";
 import { SocksProxyAgent } from "socks-proxy-agent";
-import get from "../get";
+import get from "./get";
 import parseName from "./parse_name";
 
 export interface Source {
@@ -18,17 +18,24 @@ export interface Source {
 	getMagnet: () => Promise<string>;
 }
 
-export default async function searchMagnets(query: string, type: "movie" | "tv"): Promise<Source[]> {
+export default async function findSources(query: string, type: "movie" | "tv"): Promise<Source[]> {
 	query = encodeURIComponent(query.replace(/['"]/g, "").replace(/\./g, " "));
 	let sources = (await Promise.allSettled([searchPB(query, type), search1337x(query, type)]))
 		// DEBUG
-		.map((p) => { p.status !== "fulfilled" && console.log("p", p); return p; })
+		.map((p) => {
+			p.status !== "fulfilled" && console.log("p", p);
+			return p;
+		})
 		.filter((p) => p.status === "fulfilled")
 		.map((p: any) => p.value)
 		.flat();
 
 	function simplify(s: string): string {
-		return decodeURIComponent(s).replace(/\.|\(/g, " ").split(" ")[0].toLowerCase().replace(/[^a-z0-9]+/g, "");
+		return decodeURIComponent(s)
+			.replace(/\.|\(/g, " ")
+			.split(" ")[0]
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "");
 	}
 	sources = sources.filter((source) => {
 		if (source.seeders < 5) {
@@ -65,11 +72,13 @@ export default async function searchMagnets(query: string, type: "movie" | "tv")
 
 		source.score = score;
 
-		const parsed = parseName(name);
-		if (!parsed) {
-			console.log("Source doesn't match", source.name);
+		if (type == "tv") {
+			const parsed = parseName(name);
+			if (!parsed) {
+				console.log("Source doesn't match", source.name);
+			}
+			Object.assign(source, parsed);
 		}
-		Object.assign(source, parsed);
 	}
 	sources = sources.sort((a, b) => b.score - a.score);
 	return sources;
@@ -82,63 +91,75 @@ function searchPB(query: string, type?: string): Promise<Source[]> {
 	function parseSources(sources: any): Source[] {
 		return sources.map((source: any) => ({
 			source: "PB",
-			// eslint-disable-next-line require-await
 			name: source.name,
 			seeders: Number(source.seeders),
 			leechers: Number(source.leechers),
 			size: Number(source.size),
-			getMagnet: async () => `magnet:?xt=urn:btih:${source.info_hash}&dn=${encodeURIComponent(source.name)}&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.bittor.pw%3A1337%2Fannounce&tr=udp%3A%2F%2Fpublic.popcorn-tracker.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337%2Fannounce`,
+			seasons: null,
+			episode: null,
+			getMagnet: async () =>
+				`magnet:?xt=urn:btih:${source.info_hash}&dn=${encodeURIComponent(
+					source.name,
+				)}&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.bittor.pw%3A1337%2Fannounce&tr=udp%3A%2F%2Fpublic.popcorn-tracker.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337%2Fannounce`,
 		}));
 	}
 
 	return new Promise((resolve, reject) => {
-		get(`https://apibay.org/${path}`).then((res) => {
-			res.json().then((sources: any) => {
-				resolve(parseSources(sources));
-			}).catch((err: any) => {
-				console.error("Error getting json:", err);
-				reject(err);
-			});
-		}).catch((err: any) => {
-			console.error("PB error:", err);
-			const agent = new SocksProxyAgent({
-				hostname: "localhost",
-				port: 9050,
-			});
-			const req = http.get(
-				`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
-				{ agent },
-				(res) => {
-					console.log("Connected to onion");
-
-					let data = "";
-					res.on("data", (chunk) => {
-						data += chunk;
+		get(`https://apibay.org/${path}`)
+			.then((res) => {
+				res
+					.json()
+					.then((sources: any) => {
+						resolve(parseSources(sources));
+					})
+					.catch((err: any) => {
+						console.error("Error getting json:", err);
+						reject(err);
 					});
-					res.on("end", () => {
-						try {
-							resolve(parseSources(JSON.parse(data)));
-						} catch (err) {
-							console.log("%O", data);
-							console.error("Error parsing json:", err);
-							reject(err);
-						}
-					});
-				}
-			);
+			})
+			.catch((err: any) => {
+				console.error("PB error:", err);
+				const agent = new SocksProxyAgent({
+					hostname: "localhost",
+					port: 9050,
+				});
+				const req = http.get(
+					`http://piratebayo3klnzokct3wt5yyxb2vpebbuyjl7m623iaxmqhsd52coid.onion/${path}`,
+					{ agent },
+					(res) => {
+						console.log("Connected to onion");
 
-			req.on("error", (err) => {
-				console.error("Socks error:", err);
-				reject(err);
+						let data = "";
+						res.on("data", (chunk) => {
+							data += chunk;
+						});
+						res.on("end", () => {
+							try {
+								resolve(parseSources(JSON.parse(data)));
+							} catch (err) {
+								console.log("%O", data);
+								console.error("Error parsing json:", err);
+								reject(err);
+							}
+						});
+					},
+				);
+
+				req.on("error", (err) => {
+					console.error("Socks error:", err);
+					reject(err);
+				});
 			});
-		});
 	});
 }
 
 async function search1337x(query: string, type: "movie" | "tv"): Promise<Source[]> {
-	const path = type === "movie"
-		? `category-search/${query}/Movies/1/`
-		: type === "tv" ? `category-search/${query}/TV/1/` : `search/${query}/1/`;
+	const path =
+		type === "movie"
+			? `category-search/${query}/Movies/1/`
+			: type === "tv"
+			? `category-search/${query}/TV/1/`
+			: `search/${query}/1/`;
 	const res = await get(`https://1337x.to/${path}`);
 	const html = await res.text();
 	const $ = cheerio.load(html);

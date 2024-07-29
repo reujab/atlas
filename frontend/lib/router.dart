@@ -45,7 +45,8 @@ final router = GoRouter(
       path: "/play",
       pageBuilder: _getPageBuilder(
         (state) => Play(
-          uuid: state.queryParams["uuid"],
+          type: state.queryParams["type"],
+          id: state.queryParams["id"],
           trailer: state.queryParams["trailer"],
           season: state.queryParams["s"],
           episode: state.queryParams["e"],

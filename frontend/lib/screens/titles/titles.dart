@@ -26,7 +26,7 @@ class Titles extends StatefulWidget {
 
   static Future<void> initRows(String type) async {
     final client = HttpClient();
-    rows[type] = client.getJson("$server/rows/$type").then((json) async {
+    rows[type] = client.getJson("$server/$type/rows.json").then((json) async {
       final myList = await getMyList(type);
       final List<RowData> rows = [];
       if (myList.isNotEmpty) {
@@ -205,13 +205,12 @@ class _TitlesState extends State<Titles> {
         update(originalRows);
         break;
       case "Enter":
+        TitleDetails.title = title;
         final originalRows = rows.length;
         await router.push("/title");
         update(originalRows);
         break;
     }
-
-    TitleDetails.title = title;
   }
 
   void setIndex(int i) {

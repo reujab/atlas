@@ -45,9 +45,7 @@ class EpisodeData {
   final key = GlobalKey<EpisodeState>();
 
   @JsonKey(includeFromJson: false)
-  String? uuid;
-  @JsonKey(includeFromJson: false)
-  bool unavailable = false;
+  bool? available;
 
   factory EpisodeData.fromJson(Map<String, dynamic> json) =>
       _$EpisodeDataFromJson(json);

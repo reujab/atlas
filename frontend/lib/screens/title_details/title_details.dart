@@ -1,12 +1,10 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:flutter/widgets.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:frontend/http.dart";
 import "package:frontend/main.dart";
 import "package:frontend/router.dart";
-import "package:frontend/screens/search/search.dart";
 import "package:frontend/screens/seasons/season_data.dart";
 import "package:frontend/screens/seasons/seasons.dart";
 import "package:frontend/screens/titles/titles.dart";
@@ -44,8 +42,8 @@ class _TitleDetailsState extends State<TitleDetails> {
   final client = HttpClient();
 
   int buttonIndex = 0;
-  String? uuid;
   bool inMyList = false;
+  bool? movieIsAvailable;
 
   late final List<ButtonData> buttons = [
     ButtonData(
@@ -56,8 +54,8 @@ class _TitleDetailsState extends State<TitleDetails> {
           router.push("/seasons").then((_) {
             poster.currentState?.updatePercent();
           });
-        } else if (uuid != null) {
-          router.push("/play?uuid=$uuid").then((_) {
+        } else if (movieIsAvailable == true) {
+          router.push("/play?type=movie&id=${title.id}").then((_) {
             poster.currentState?.updatePercent();
           });
         }
@@ -85,60 +83,12 @@ class _TitleDetailsState extends State<TitleDetails> {
   void initState() {
     super.initState();
 
-    if (title.type == "tv") {
-      getSeasons();
-    } else {
-      getUUID();
-    }
-
     setInMyList();
-  }
-
-  void getSeasons() {
-    Seasons.seasons?.then((seasons) {
-      if (seasons == null) return;
-      for (final season in seasons) {
-        season.scrollController.dispose();
-      }
-    });
-    Seasons.seasons = client.getJson("$server/seasons/${title.id}").then(
-        (json) => (json as List<dynamic>?)
-            ?.map((j) => SeasonData.fromJson(j))
-            .toList());
-  }
-
-  Future<void> getUUID() async {
-    Map<String, dynamic> json;
-    try {
-      final cleanTitle = title.title.replaceAll(nonSearchableChars, "");
-      final encodedTitle =
-          Uri.encodeComponent("$cleanTitle ${title.released?.year ?? ""}")
-              .trimRight();
-      var res = await client.get("$server/get-uuid/movie/$encodedTitle");
-      if (res == null) return;
-      if (res.statusCode == 404) {
-        _setState(() {
-          buttons[0].name = "Unavailable";
-          buttons[0].icon = FontAwesomeIcons.faceSadTear;
-        });
-        return;
-      }
-      json = jsonDecode(utf8.decode(res.bodyBytes));
-    } catch (err) {
-      _setState(() {
-        buttons[0].name = "Error";
-        buttons[0].icon = FontAwesomeIcons.bug;
-      });
-      rethrow;
+    if (title.type == "movie") {
+      setMovieIsAvailable();
+    } else {
+      getSeasons();
     }
-
-    _setState(() {
-      uuid = json["uuid"];
-    });
-  }
-
-  _setState(Function() cb) {
-    if (mounted) setState(cb);
   }
 
   void setInMyList() async {
@@ -152,43 +102,42 @@ class _TitleDetailsState extends State<TitleDetails> {
     """, [title.type, title.id]);
     inMyList = rows[0].values.first == 1;
     if (inMyList) {
-      _setState(() {
+      setState(() {
         buttons.last.icon = FontAwesomeIcons.check;
       });
     }
   }
 
-  void toggleInMyList() {
-    inMyList = !inMyList;
-
-    if (inMyList) {
-      db!.execute("""
-        INSERT INTO my_list (type, id, title, genres, overview, released, trailer, rating, poster)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-      """, [
-        title.type,
-        title.id,
-        title.title,
-        title.genres.join(","),
-        title.overview,
-        title.released?.millisecondsSinceEpoch,
-        title.trailer,
-        title.rating,
-        title.poster
-      ]);
-    } else {
-      db!.execute("""
-        DELETE FROM my_list
-        WHERE type = ?
-        AND id = ?
-      """, [title.type, title.id]);
+  Future<void> setMovieIsAvailable() async {
+    bool? available;
+    try {
+      available =
+          await client.getJson("$server/movie/${title.id}/available.json");
+    } catch (err) {
+      if (!mounted) rethrow;
+      setState(() {
+        movieIsAvailable = false;
+        buttons[0].icon = FontAwesomeIcons.bug;
+        buttons[0].name = "Error";
+      });
+      rethrow;
     }
+    if (!mounted || available == null) return;
     setState(() {
-      buttons.last.icon =
-          inMyList ? FontAwesomeIcons.check : FontAwesomeIcons.plus;
+      movieIsAvailable = available;
     });
+  }
 
-    Titles.updateMyList(title.type);
+  void getSeasons() {
+    Seasons.seasons?.then((seasons) {
+      if (seasons == null) return;
+      for (final season in seasons) {
+        season.scrollController.dispose();
+      }
+    });
+    Seasons.seasons = client
+        .getJson<List<dynamic>>("$server/tv/${title.id}/seasons.json")
+        .then((json) => json?.map((j) => SeasonData.fromJson(j)).toList());
   }
 
   @override
@@ -242,8 +191,7 @@ class _TitleDetailsState extends State<TitleDetails> {
                     active: i == buttonIndex,
                     loading: title.type == "movie" &&
                         i == 0 &&
-                        uuid == null &&
-                        buttons[i].icon == FontAwesomeIcons.play,
+                        movieIsAvailable == null,
                   ),
               ],
             ),
@@ -277,6 +225,39 @@ class _TitleDetailsState extends State<TitleDetails> {
         router.push("/search");
         break;
     }
+  }
+
+  void toggleInMyList() {
+    inMyList = !inMyList;
+
+    if (inMyList) {
+      db!.execute("""
+        INSERT INTO my_list (type, id, title, genres, overview, released, trailer, rating, poster)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      """, [
+        title.type,
+        title.id,
+        title.title,
+        title.genres.join(","),
+        title.overview,
+        title.released?.millisecondsSinceEpoch,
+        title.trailer,
+        title.rating,
+        title.poster
+      ]);
+    } else {
+      db!.execute("""
+        DELETE FROM my_list
+        WHERE type = ?
+        AND id = ?
+      """, [title.type, title.id]);
+    }
+    setState(() {
+      buttons.last.icon =
+          inMyList ? FontAwesomeIcons.check : FontAwesomeIcons.plus;
+    });
+
+    Titles.updateMyList(title.type);
   }
 
   @override

@@ -137,16 +137,15 @@ class EpisodeState extends State<Episode>
              * Loading/play
              */
             widget.active
-                ? widget.episode.uuid == null &&
-                        widget.episode.unavailable == false
+                ? widget.episode.available == null
                     ? const SpinKitRipple(
                         color: Colors.black,
                         size: Episode.height * 0.5,
                       )
                     : FaIcon(
-                        widget.episode.unavailable
-                            ? FontAwesomeIcons.ban
-                            : FontAwesomeIcons.play,
+                        widget.episode.available == true
+                            ? FontAwesomeIcons.play
+                            : FontAwesomeIcons.ban,
                         size: Episode.height * 0.5,
                       )
                 : const SizedBox.shrink(),

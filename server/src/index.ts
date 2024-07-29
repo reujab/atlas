@@ -1,12 +1,10 @@
 import express, { Request, Response } from "express";
 import morgan from "morgan";
-import getUUID from "./magnet/get_uuid";
+import StreamManager from "./StreamManager";
+import handleAvailable from "./is_available";
 import getRows from "./rows";
 import searchTitles from "./search_titles";
 import { dneError, getSeasons } from "./seasons";
-import initStream from "./stream/init";
-import { keepalive } from "./stream/keepalive";
-import { proxy } from "./stream/proxy";
 
 if (!process.env.DATABASE_URL || !process.env.TMDB_KEY) {
 	console.error("Error: both $DATABASE_URL and $TMDB_KEY must be set.");
@@ -17,8 +15,6 @@ export const port = Number(process.env.PORT || 8000);
 
 const app = express();
 
-const uuidParam = ":uuid([a-z0-9-]{36})";
-
 app.disable("x-powered-by");
 
 app.use(morgan("dev"));
@@ -27,7 +23,7 @@ app.get("/version", (req: Request, res: Response) => {
 	res.end("0.0.0");
 });
 
-app.get("/rows/:type(movie|tv)", async (req: Request, res: Response) => {
+app.get("/:type(movie|tv)/rows.json", async (req: Request, res: Response) => {
 	try {
 		const rows = await getRows(req.params.type as "movie" | "tv");
 		res.header("Cache-Control", "public, max-age=86400");
@@ -38,7 +34,7 @@ app.get("/rows/:type(movie|tv)", async (req: Request, res: Response) => {
 	}
 });
 
-app.get("/seasons/:id(\\d{1,8})", async (req: Request, res: Response) => {
+app.get("/tv/:id(\\d{1,8})/seasons.json", async (req: Request, res: Response) => {
 	try {
 		const seasons = await getSeasons(req.params.id);
 		res.header("Cache-Control", "public, max-age=86400");
@@ -53,17 +49,17 @@ app.get("/seasons/:id(\\d{1,8})", async (req: Request, res: Response) => {
 	}
 });
 
-app.get("/search/:query", validateQuery, async (req: Request, res: Response) => {
+app.get("/search.json", validateQuery, async (req: Request, res: Response) => {
 	try {
 		const blacklist = req.query.blacklist ? String(req.query.blacklist).split(",") : [];
 
-		const is_invalid_blacklist = blacklist.find((id: string) => Number.isNaN(Number(id)));
-		if (is_invalid_blacklist) {
+		const isInvalidBlacklist = blacklist.find((id: string) => Number.isNaN(Number(id)));
+		if (isInvalidBlacklist) {
 			res.status(400).end();
 			return;
 		}
 
-		const titles = await searchTitles(req.params.query, blacklist);
+		const titles = await searchTitles(req.query.q as string, blacklist);
 		res.header("Cache-Control", "public, max-age=86400");
 		res.json(titles);
 	} catch (err) {
@@ -72,23 +68,17 @@ app.get("/search/:query", validateQuery, async (req: Request, res: Response) => 
 	}
 });
 
-app.get("/get-uuid/:type(movie|tv)/:query", validateQuery, (req: Request, res: Response) => {
-	getUUID(req, res).catch((err) => {
-		console.error("Error getting UUID:", err);
-		res.status(500).end();
-	});
-});
+app.get("/movie/:id(\\d{1,8})/available.json", handleAvailable.bind(this, "movie"));
+app.get(
+	"/tv/:id(\\d{1,8})/:s(\\d{1,2})/:e(\\d{1,2})/available.json",
+	handleAvailable.bind(this, "tv"),
+);
 
-app.get(`/init/${uuidParam}`, (req: Request, res: Response) => {
-	initStream(req, res).catch((err) => {
-		console.error("Error initializing stream:", err);
-		res.status(500).end();
-	});
-})
-
-app.get(`/keepalive/${uuidParam}`, keepalive);
-
-app.use(`/stream/${uuidParam}/`, proxy);
+app.use("/movie/:id(\\d{1,8})/stream", StreamManager.handleConnection.bind(this, "movie"));
+app.use(
+	"/tv/:id(\\d{1,8})/:s(\\d{1,2})/:e(\\d{1,2})/stream",
+	StreamManager.handleConnection.bind(this, "tv"),
+);
 
 app.listen(port, () => {
 	console.log("Listening to port", port);
@@ -97,15 +87,8 @@ app.listen(port, () => {
 // Use middleware to validate query rather than route parameter regex because the parameter regex
 // does not decode the URI and is very buggy with capture groups.
 // The route would match but `req.params.query` would only contain the last character of the match.
-// Upgrading to Express v5 did not fix the issue.
-//
-// Considering the issues I've had with Express's routing, I will consider switching to another
-// framework, or better yet, rewriting in Go using anacrolix/torrent.
-// Unfortunately when I benchmarked the two libraries in early 2023, WebTorrent performed much,
-// much better than anacrolix/torrent, so that rewrite may have to wait. This workaround will do
-// for now.
 function validateQuery(req: Request, res: Response, next: Function): void {
-	if (/^[a-z0-9 ]{1,128}$/i.test(req.params.query)) {
+	if (typeof req.query.q == "string" && /^[a-z0-9 ]{1,128}$/i.test(req.query.q)) {
 		next();
 	} else {
 		res.status(400).end();

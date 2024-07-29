@@ -1,5 +1,4 @@
 use std::{
-    fs,
     thread::sleep,
     time::{Duration, Instant},
 };
@@ -7,10 +6,7 @@ use std::{
 use log::{debug, error};
 use reqwest::blocking::Client;
 
-pub fn keepalive(uuid: &str) {
-    let local_path = std::env::var("LOCAL_PATH").unwrap();
-    let server = fs::read_to_string(format!("{local_path}/server")).unwrap();
-    let url = format!("{server}/keepalive/{uuid}");
+pub fn keepalive(url: &str) {
     let mut builder = Client::builder();
     // If https is being used, force HTTP/2 and set TCP keepalive to 10 seconds.
     // This allows debugging on localhost.
@@ -25,7 +21,7 @@ pub fn keepalive(uuid: &str) {
         let start = Instant::now();
 
         debug!("HEAD {url}");
-        let res = match client.head(&url).send() {
+        let res = match client.head(url).send() {
             Err(err) => {
                 error!("Failed to send keepalive, retrying: {err}");
                 sleep(Duration::from_millis(100));
