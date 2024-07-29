@@ -26,7 +26,8 @@ export TMDB_KEY
 ) &
 
 if [[ $SERVER = *localhost* ]]; then
-	gnome-terminal -- sh -ec '
+	[[ $1 = --no-frontend ]] && opts=(--wait)
+	gnome-terminal "${opts[@]}" -- sh -ec '
 		trap read ERR
 		echo $$ > /tmp/server.pid
 		cd server
@@ -36,12 +37,10 @@ if [[ $SERVER = *localhost* ]]; then
 	'
 fi
 
-if [[ "$1" != "--no-frontend" ]]; then
-	sqlx database create
-	sqlx migrate run --source=migrations/client
-	printf %s "$SERVER" > /tmp/server
+sqlx database create
+sqlx migrate run --source=migrations/client
+printf %s "$SERVER" > /tmp/server
 
-	cd frontend
-	flutter pub get
-	flutter run --dart-define={ATLAS_VERSION=DEBUG,LOCAL_PATH=/tmp}
-fi
+cd frontend
+flutter pub get
+flutter run --dart-define={ATLAS_VERSION=DEBUG,LOCAL_PATH=/tmp}
