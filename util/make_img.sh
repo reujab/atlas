@@ -82,7 +82,7 @@ sudo rsync -a --exclude={.dart_tool,.flutter*,.git,build,ephemeral,node_modules,
 
 # Install Atlas.
 sudo chroot root bash -e << EOF
-ATLAS_DEBUG=$ATLAS_DEBUG ATLAS_FS=$ALTAS_FS BOOTSTRAP=1 ~/atlas/util/bootstrap.sh
+ATLAS_DEBUG=$ATLAS_DEBUG ATLAS_FS=$ATLAS_FS BOOTSTRAP=1 ~/atlas/util/bootstrap.sh
 EOF
 
 unmount-filesystems

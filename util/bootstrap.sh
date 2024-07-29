@@ -184,16 +184,13 @@ clean-fs() {
 	rm -rf /etc/systemd/system/!(multi-user.target.wants|*.service)
 	rm -rf /etc/xdg/!(weston)
 	rm -rf /usr/!(bin|lib*|local|sbin|share)
-	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|nm-online|python*|rm|run-parts|strace|su|system*|time*|udev*|weston|wpa*|yt-dlp)
+	rm -rf /usr/bin/!(bash|busybox|dbus*|evtest|file|find|findmnt|hostname|journalctl|kmod|ldd|login*|mpv|nmcli|nm-online|python*|rm|run-parts|strace|su|system*|time*|udev*|weston|wpa*|yt-dlp)
 	rm -rf /usr/lib/!(NetworkManager|dbus*|file|firmware|ifupdown|locale|mime|modules|pam.d|python*|systemd|udev|*-linux-gnu)
 	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time-wait,tpm,update,volatile},usb_modeswitch,x11}*
-	rm -rf /usr/sbin/!(NetworkManager|agetty|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sgdisk|sshd|sulogin|wpa*)
-	rm -rf /usr/lib/systemd/system/{ModemManager,NetworkManager-,apparmor,capsule,crypt,dbus-,dpkg,fstrim,if,initrd,kmod,ldconfig,modprobe,networking,nm,pam,polkit,procps,quota,rc,seatd,system-,systemd-{ask,backlight,battery,binfmt,boot,bsod,confext,creds,firstboot,fsck-root,growfs,hostnamed,hwdb,init,kexec,localed,machine,modules,network,pcr,pstore,quota,random,remount,rfkill,storage,sys,time,tpm,update,volatile},usb_modeswitch,x11}*
-	rm -rf /usr/sbin/!(NetworkManager|agetty|chronyd|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sshd|sulogin|wpa*)
+	rm -rf /usr/sbin/!(NetworkManager|agetty|chronyd|dhc*|fsck|getty|if*|init|ip|iucode*|mod*|pam*|reboot|sgdisk|sshd|sulogin|wpa*)
 	rm -rf /usr/share/!(X11|alsa|ca-certificates|common-licenses|dbus*|dns|dri*|ffmpeg|file|font*|gl*|icons|libdrm|locale|mime|misc|pam*|sounds|systemd|vulkan|weston|zoneinfo)
 	rm -rf /usr/share/X11/!(xkb)
 	rm -rf /usr/share/icons/!(Adwaita)
-	rm -rf /usr/share/icons/Adwaita/!(icon-theme.cache|scalable)
 	rm -rf /var/!(lib|local|lock|run|tmp)
 	rm -rf /var/lib/!(dbus|dhcp|NetworkManager|pam|systemd)
 
@@ -214,7 +211,12 @@ persist-files() {
 	rmdir /etc/NetworkManager/system-connections
 	ln -s $LOCAL/system-connections /etc/NetworkManager/
 
-	ln -s /tmp /root
+	if [[ $ATLAS_FS = ext ]]; then
+		mkdir /root
+	else
+		ln -s /tmp /root
+	fi
+
 	ln -s /tmp /var/log
 
 	ln -sf /var/local/localtime /etc/localtime
@@ -222,7 +224,7 @@ persist-files() {
 	ln -s /var/local/chrony /var/lib/chrony
 }
 
-# After install-busybox
+# After install-busybox, persist-files
 remove-unused-libraries() {
 	scanned=()
 
@@ -238,10 +240,11 @@ remove-unused-libraries() {
 
 	find /usr/lib -type f -regextype awk -regex '.*\.so(\.|$).*' |
 	grep -ivE '\/dri\/|mesa|NetworkManager|pam|python|weston|vdpau|vk|vulk' |
-	grep -ivE 'libdrm|libedit|libelf|libgl|libigdgmm|libllvm|libpciaccess|libseat|libsensors|libsqlite|libxcb|libxshm|libz3' |
+	grep -ivE 'libdrm|libedit|libelf|libgl|libigdgmm|libllvm|libpciaccess|libpixbufloader-svg|libseat|libsensors|libsqlite|libxcb|libxshm|libz3' |
 	while read -r object; do
 		object=$(readlink -f "$object")
 		hasItem "$object" "${scanned[@]}" || (
+			echo Removing "$object"
 			if [[ $ATLAS_FS = ext ]]; then
 				mkdir -p "/root/$(dirname "$object")"
 				mv "$object" "/root/$object"
