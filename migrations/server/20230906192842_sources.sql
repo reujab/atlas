@@ -1,17 +1,18 @@
 CREATE TABLE sources (
-	type type,
-	id INT,
-	priority INT,
+	magnet TEXT PRIMARY KEY,
+
+	type type NOT NULL,
+	id INT NOT NULL,
 
 	seasons INT[],
-	-- If `episode` is null and `type` is 'tv', this source contains every episode.
+	-- If `episode` is NULL and `type` is 'tv', this source contains every episode.
 	episode INT,
-	magnet TEXT NOT NULL,
-	ts TIMESTAMP NOT NULL DEFAULT NOW(),
 
-	PRIMARY KEY(type, id, priority)
+	score FLOAT NOT NULL,
+	defunct BOOLEAN NOT NULL DEFAULT FALSE,
+	ts TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX sources_priority ON sources (priority DESC);
+CREATE INDEX sources_score ON sources (score DESC);
 
 CREATE INDEX sources_ts ON sources (ts ASC);

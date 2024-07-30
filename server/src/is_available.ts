@@ -40,6 +40,7 @@ async function isAvailable(
 			AND id = ${id}
 			AND (seasons IS NULL OR ${season} = ANY(seasons))
 			AND (episode IS NULL OR episode = ${episode})
+			AND NOT defunct
 		)
 	`;
 	if (exists[0].exists) return true;
@@ -61,7 +62,6 @@ async function isAvailable(
 	}
 
 	searches = searches.flatMap((query) => {
-		console.log(title.released, title.released?.getFullYear());
 		if (type === "movie") {
 			return title.released ? `${query} ${title.released.getFullYear()}` : query;
 		}
@@ -105,10 +105,12 @@ async function isAvailable(
 	await sql.begin(async (trans) => {
 		await Promise.all(
 			candidates.map((source, i) => {
-				console.log(type, id, -i, source.seasons, source.episode, source.magnet);
 				return trans`
-					INSERT INTO sources (type, id, priority, seasons, episode, magnet)
-					VALUES (${type}, ${id}, ${-i}, ${source.seasons}, ${source.episode}, ${source.magnet})
+					INSERT INTO sources (magnet, type, id, seasons, episode, score)
+					VALUES (${source.magnet}, ${type}, ${id}, ${source.seasons}, ${source.episode}, ${source.score})
+					ON CONFLICT (magnet)
+					DO UPDATE
+					SET ts = now()
 				`;
 			}),
 		);

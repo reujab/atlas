@@ -37,12 +37,15 @@ export default class StreamManager {
 
 		return (StreamManager.startingStreams[key] = new Promise<null | Stream>(
 			async (resolve, reject) => {
+				console.log("Creating new stream");
+
 				const sources = await sql`
-					SELECT priority, magnet, seasons, episode FROM sources
+					SELECT magnet, seasons, episode FROM sources
 					WHERE type = ${type} AND id = ${id}
 					AND (seasons IS NULL OR ${season} = ANY(seasons))
 					AND (episode IS NULL OR episode = ${episode})
-					ORDER BY priority DESC
+					AND NOT defunct
+					ORDER BY score DESC
 					LIMIT 3
 				`;
 				if (!sources.length) return resolve(null);
@@ -58,10 +61,9 @@ export default class StreamManager {
 					} catch (err) {
 						console.error("Failed to init stream:", err);
 						await sql`
-							DELETE FROM sources
-							WHERE type = ${type}
-							AND id = ${id}
-							AND priority = ${source.priority}
+							UPDATE sources
+							SET defunct = TRUE
+							WHERE magnet = ${source.magnet}
 						`;
 						if (i == sources.length - 1) return reject(err);
 

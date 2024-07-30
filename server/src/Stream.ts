@@ -193,3 +193,8 @@ export default class Stream extends EventEmitter {
 		this.removeAllListeners();
 	}
 }
+
+setInterval(() => {
+	if (!webtorrent.torrents.length) return;
+	console.log("DL:", webtorrent.downloadSpeed, "UP:", webtorrent.uploadSpeed);
+}, 10_000);

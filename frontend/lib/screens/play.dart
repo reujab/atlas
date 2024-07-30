@@ -77,7 +77,7 @@ class _PlayState extends State<Play> {
       "--vo=gpu",
       "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
       ...(widget.trailer == null ? ["--sub-file=$url/subs"] : []),
-      url,
+      "$url/",
       "---",
     ];
     final List<String> overlayOpts = [
