@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+
+[[ $1 = remove ]] || exit 0
+
+systemctl stop atlas-server tmdbd
+systemctl disable atlas-server tmdbd
+
+su postgres -c 'dropdb atlas; dropuser atlas'
+userdel atlas

@@ -1,20 +1,8 @@
 #!/bin/bash -e
-set -o pipefail
 
-if [[ ! $1 ]]; then
-	echo "Usage: $0 <output>"
-	exit 1
-fi
-
-reqd_cmds=(bootctl debootstrap sgdisk mkfs.fat mkfs.ext4 rsync mksquashfs)
-for cmd in "${reqd_cmds[@]}"; do
-	which "$cmd" &> /dev/null || missing_cmds+=("$cmd")
-done
-if (( ${#missing_cmds[@]} )); then
-	echo Missing tools: "${missing_cmds[@]}" 1>&2
-	exit 1
-fi
-set -x
+. "$(dirname "$0")/common.sh"
+usage "<output>"
+require bootctl debootstrap sgdisk mkfs.fat mkfs.ext4 rsync mksquashfs
 
 unmount-filesystems() {
 	sudo umount mnt || true
@@ -42,7 +30,7 @@ trap cleanup EXIT
 ) &
 sudo_loop_pid=$!
 
-src=$(readlink -f -- "$(dirname -- "$0")/..")
+src=$(readlink -f "$(dirname "$0")/..")
 tmp=$(mkdir -p ~/.cache && mktemp -dp ~/.cache)
 
 cd "$tmp"

@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL || !process.env.TMDB_KEY) {
 	process.exit(1);
 }
 
-export const port = Number(process.env.PORT || 8000);
+export const port = Number(process.env.PORT || 1400);
 
 const app = express();
 

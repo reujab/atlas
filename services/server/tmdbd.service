@@ -6,11 +6,10 @@ After=network-online.target postgresql.service
 Type=exec
 User=atlas
 Group=atlas
-WorkingDirectory=/home/atlas
-ExecStart=/home/atlas/atlas/tmdbd/target/release/tmdbd
+EnvironmentFile=/etc/atlas.env
+ExecStart=tmdbd
 Restart=always
 RuntimeMaxSec=86400
-EnvironmentFile=/home/atlas/atlas/config/server.env
 
 [Install]
 WantedBy=multi-user.target

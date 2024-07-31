@@ -31,8 +31,8 @@ add-sources() {
 }
 
 install-services() {
-	cp atlas/services/*.sh /usr/local/bin
-	cp atlas/services/*.service /etc/systemd/system
+	cp atlas/services/client/*.sh /usr/local/bin
+	cp atlas/services/client/*.service /etc/systemd/system
 }
 
 install-build-deps() {

@@ -1,0 +1,49 @@
+#!/bin/bash -e
+
+. /usr/share/debconf/confmodule
+db_input high atlas-server/nginx || true
+db_go
+db_get atlas-server/nginx
+if [[ $RET = true ]]; then
+	db_input high atlas-server/internal-port || true
+	db_input high atlas-server/external-port || true
+	db_input high atlas-server/https-hostname || true
+	db_input high atlas-server/key || true
+	db_go
+fi
+db_get atlas-server/internal-port
+internal_port=$RET
+db_get atlas-server/external-port
+external_port=$RET
+db_get atlas-server/https-hostname
+https_hostname=$RET
+db_get atlas-server/key
+key=$RET
+set -x
+
+systemctl daemon-reload
+systemctl start postgresql
+
+id atlas || useradd -Mrs/bin/bash -d/ atlas
+su postgres -c "createuser -d atlas" || true
+
+su atlas -- -ex << EOF
+createdb atlas || true
+psql -c "ALTER USER atlas PASSWORD 'atlas';"
+
+. /etc/atlas.env
+export DATABASE_URL
+/usr/lib/atlas/sqlx migrate run --source=/usr/share/atlas/migrations
+EOF
+
+sed -i "s/1400/$internal_port/" /etc/atlas.env
+
+cp /usr/share/atlas/nginx.conf.template /etc/nginx/sites-enabled/atlas
+if [[ ! $https_hostname ]]; then
+	sed -i -e '/ssl_/ s/\w/# \0/' -e 's/ http2 ssl//' /etc/nginx/sites-enabled/atlas
+fi
+sed -i -e "s/\$INTERNAL_PORT/$internal_port/" -e "s/\$EXTERNAL_PORT/$external_port/" \
+	-e "s/\$HTTPS_HOST/$https_hostname/" -e "s/\$KEY/$key/" /etc/nginx/sites-enabled/atlas
+if pidof nginx; then systemctl reload nginx; fi
+
+if pidof tmdbd; then systemctl restart atlas-server tmdbd; fi

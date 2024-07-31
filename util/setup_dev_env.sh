@@ -1,28 +1,18 @@
 #!/bin/bash -e
 
-reqd_cmds=(cargo psql sqlx)
-for cmd in "${reqd_cmds[@]}"; do
-	which "$cmd" &> /dev/null || missing_cmds+=("$cmd")
-done
-if (( ${#missing_cmds[@]} )); then
-	echo Missing tools: "${missing_cmds[@]}" 1>&2
-	exit 1
-fi
-set -x
-
-if ! pidof postgres > /dev/null; then
-	echo PostgresQL must be running. 1>&2
-	exit 1
-fi
-
-db=postgres://localhost/atlas
-
-cd "$(readlink -f -- "$(dirname -- "$0")/..")"
+. "$(dirname "$0")/common.sh"
+usage
+require-server-env
+require cargo psql sqlx
 
 if ! sudo test -d /var/lib/postgres/data; then
 	sudo -u postgres initdb --locale=C.UTF-8 --encoding=UTF8 -D /var/lib/postgres/data
 	sudo -u postgres createuser -s "$USER"
 fi
+
+pidof postgres > /dev/null || systemctl start postgresql
+
+db=postgres://localhost/atlas
 
 createdb atlas || true
 

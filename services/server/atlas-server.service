@@ -6,8 +6,8 @@ After=postgresql.service
 Type=exec
 User=atlas
 Group=atlas
-WorkingDirectory=/home/atlas/atlas/server
-ExecStart=/home/atlas/atlas/server/start.sh
+EnvironmentFile=/etc/atlas.env
+ExecStart=node --enable-source-maps /usr/share/nodejs/atlas-server
 Restart=always
 
 [Install]

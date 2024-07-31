@@ -1,0 +1,26 @@
+Template: atlas-server/nginx
+Type: boolean
+Default: false
+Description: Will you be using nginx?
+
+Template: atlas-server/internal-port
+Type: string
+Default: 1400
+Description: What port should the backend run on?
+ This port should not be forwarded.
+
+Template: atlas-server/external-port
+Type: string
+Default: 443
+Description: What port should nginx use?
+
+Template: atlas-server/https-hostname
+Type: string
+Description: Enter the hostname used for Let's Encrypt certificates.
+ Leave blank to disable HTTPS.
+
+Template: atlas-server/key
+Type: string
+Default: secret-key
+Description: What is the key to the server?
+ The backend will be available at https://frontend:port/key

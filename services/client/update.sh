@@ -7,22 +7,24 @@
 # 4. Trigger an immediate reboot with `echo b > /proc/sysrq-trigger`
 # TODO: test
 
-# Unmount writable file systems
-umount -R /boot
 umount /var/local
 
 live_env=/dev/shm/root
-files=(/bin/busybox /bin/dd /bin/sync /lib/libc.so.6 /lib64/ld-linux-x86-64.so.2)
+files=(/bin/{busybox,dd,sync} /lib/lib{c,gcc_s,m,popt,stdc++,resolv,uuid}.so* /lib64/ld-linux-x86-64.so.2)
 for file in "${files[@]}"; do
 	dir=$(dirname "$file")
 	mkdir -p "$live_env$dir"
 	cp {,$live_env}"$file"
 done
 
-root_dev=$(findmnt --raw -o TARGET,SOURCE | grep '/ ' | cut -d' ' -f2)
-chroot $live_env busybox sh << EOF
-dd if=atlas.img of=$root_dev
-sync
+root_dev=$(findmnt --raw -o TARGET,SOURCE | grep '^/ ' | cut -d' ' -f2)
+chroot $live_env busybox sh -e << EOF
+main() {
+	dd if=atlas.img of=$root_dev bs=64K status=progress
+	sgdisk -e $root_dev
+	sgdisk -n 0:1GiB:0 -t 0:8300 -c 0:local $root_dev
+	sync
+	echo b > /proc/sysrq-trigger
+}
+main
 EOF
-
-echo b > /proc/sysrq-trigger
