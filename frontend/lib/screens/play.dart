@@ -64,7 +64,6 @@ class _PlayState extends State<Play> {
     final overlayTitle = getTitle();
     final startTime = await getStartTime();
     final audioDevice = await getAudioDevice();
-    final keepaliveUrl = widget.trailer == null ? "$url/keepalive" : null;
     final List<String> mpvOpts = [
       "mpv",
       "--audio-device=$audioDevice",
@@ -77,13 +76,13 @@ class _PlayState extends State<Play> {
       "--vo=gpu",
       "--ytdl-format=bestvideo[height<=?720][fps<=?30][vcodec!=?vp9]+bestaudio/best",
       ...(widget.trailer == null ? ["--sub-file=$url/subs"] : []),
-      "$url/",
+      widget.trailer == null ? "$url/" : url,
       "---",
     ];
     final List<String> overlayOpts = [
       "atlas-overlay",
       "--title=$overlayTitle",
-      ...(keepaliveUrl == null ? [] : ["--keepalive=$keepaliveUrl"]),
+      ...(widget.trailer == null ? ["--keepalive=$url/keepalive"] : []),
       "---",
     ];
     couple = await Process.start(
