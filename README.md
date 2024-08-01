@@ -13,6 +13,16 @@ Atlas is a Linux distribution and application that allows users to browse and wa
 - Configure Wi-Fi network and audio device
 - USB remote support (Rii MX3)
 
+## Testing
+
+If you'd like to test Atlas without installing anything, you can simply run two scripts.
+
+```sh
+git clone --depth=1 https://github.com/reujab/atlas
+atlas/util/setup_dev_env.sh
+atlas/util/debug.sh
+```
+
 ## Installing
 
 Atlas consists of a server and a client. They can be theoretically be installed on the same system, but for lower power systems such as the Raspberry Pi, this is not recommended.
@@ -44,7 +54,7 @@ sudo systemctl start atlas-server tmdbd
 sudo systemctl enable atlas-server tmdbd
 ```
 
-This will start populating the database with titles. Be patient, the server won't be ready for a couple hours.
+This will start populating the database with titles. Be patient; the server won't be ready for a couple of hours.
 
 If you enabled nginx support while installing, be sure to install nginx: `sudo apt install nginx`.
 
