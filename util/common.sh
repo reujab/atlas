@@ -27,7 +27,7 @@ require() {
 }
 
 require-server-env() {
-	if [[ ! -d config/server.env ]]; then
+	if [[ ! -f config/server.env ]]; then
 		panic "You must copy config/{server.env.default => server.env} and set the variables."
 	fi
 }

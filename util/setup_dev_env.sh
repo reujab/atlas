@@ -7,10 +7,11 @@ require cargo psql sqlx
 
 if ! sudo test -d /var/lib/postgres/data; then
 	sudo -u postgres initdb --locale=C.UTF-8 --encoding=UTF8 -D /var/lib/postgres/data
-	sudo -u postgres createuser -s "$USER"
 fi
 
-pidof postgres > /dev/null || systemctl start postgresql
+pidof postgres > /dev/null || sudo systemctl start postgresql
+
+sudo -u postgres createuser -s "$USER" || true
 
 db=postgres://localhost/atlas
 
@@ -28,4 +29,3 @@ fi
 export TMDB_KEY
 cd tmdbd
 DATABASE_URL=$db cargo run
-

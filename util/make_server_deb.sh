@@ -39,4 +39,6 @@ cp services/server/*.service "$build/usr/lib/systemd/system"
 cp -r server/dist "$build/usr/share/nodejs/atlas-server"
 cp -r server/node_modules "$build/usr/share/nodejs/atlas-server"
 
-dpkg-deb --build "$build" "$out/atlas-server_0.0.0-0_amd64.deb"
+version=$(sed -n 2p config/DEBIAN/control | cut -d' ' -f2)
+arch=$(dpkg --print-architecture || echo unknown)
+dpkg-deb --build "$build" "$out/atlas-server_${version}_$arch.deb"

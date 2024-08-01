@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+[[ $1 ]] && out=$(readlink -f "$1")
 . "$(dirname "$0")/common.sh"
 usage "<output>"
 require bootctl debootstrap sgdisk mkfs.fat mkfs.ext4 rsync mksquashfs
@@ -30,8 +31,8 @@ trap cleanup EXIT
 ) &
 sudo_loop_pid=$!
 
-src=$(readlink -f "$(dirname "$0")/..")
-tmp=$(mkdir -p ~/.cache && mktemp -dp ~/.cache)
+src=$PWD
+tmp=$(mktemp -dp "$(dirname "$out")")
 
 cd "$tmp"
 
@@ -126,7 +127,7 @@ sudo bootctl install --image=atlas.img || {
 	sudo umount root/efi
 }
 
-mv atlas.img "$1"
+mv atlas.img "$out"
 
 sudo rm -rf "$tmp"
 
