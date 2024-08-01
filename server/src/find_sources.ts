@@ -184,8 +184,8 @@ async function search1337x(query: string, type: "movie" | "tv"): Promise<Source[
 }
 
 function parseSize(size: string): number {
-	const dens = ["KB", "MB", "GB"];
-	const [num, den] = size.split(" ");
-	const multiplier = 1000 ** (dens.indexOf(den) + 1);
+	const sizeUnits = ["KB", "MB", "GB"];
+	const [num, unit] = size.split(" ");
+	const multiplier = 1000 ** (sizeUnits.indexOf(unit) + 1);
 	return Number(num.replace(/,/g, "")) * multiplier;
 }

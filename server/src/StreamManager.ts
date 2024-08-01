@@ -28,12 +28,14 @@ export default class StreamManager {
 		season: null | number,
 		episode: null | number,
 	): Promise<null | Stream> {
-		let stream = StreamManager.startedStreams.find((s) => s.has(type, id, season, episode));
-		if (stream) return new Promise((resolve) => resolve(stream!));
+		const startedStream = StreamManager.startedStreams.find((stream) =>
+			stream.has(type, id, season, episode),
+		);
+		if (startedStream) return new Promise((resolve) => resolve(startedStream));
 
 		const key = `${type}:${id}:${season}:${episode}`;
-		const promise = StreamManager.startingStreams[key];
-		if (promise) return promise;
+		const startingStream = StreamManager.startingStreams[key];
+		if (startingStream) return startingStream;
 
 		return (StreamManager.startingStreams[key] = new Promise<null | Stream>(
 			async (resolve, reject) => {
@@ -53,7 +55,7 @@ export default class StreamManager {
 				for (let i = 0; i < sources.length; i++) {
 					const source = sources[i];
 					const port = StreamManager.assignPort();
-					stream = new Stream(port, type, id, source.seasons, source.episode, source.magnet);
+					const stream = new Stream(port, type, id, source.seasons, source.episode, source.magnet);
 
 					const start = Date.now();
 					try {
@@ -73,7 +75,7 @@ export default class StreamManager {
 					console.log("Connected in %ss", ((Date.now() - start) / 1000).toFixed(2));
 					StreamManager.startedStreams.push(stream);
 					stream.on("destroy", () => {
-						const index = StreamManager.startedStreams.indexOf(stream!);
+						const index = StreamManager.startedStreams.indexOf(stream);
 						if (index == -1) console.error("Cannot remove stream: Stream not found.");
 						else StreamManager.startedStreams.splice(index, 1);
 						StreamManager.unassignPort(port);
