@@ -125,6 +125,10 @@ class _TitleDetailsState extends State<TitleDetails> {
     if (!mounted || available == null) return;
     setState(() {
       movieIsAvailable = available;
+      if (available == false) {
+        buttons[0].icon = FontAwesomeIcons.faceSadTear;
+        buttons[0].name = "Unavailable";
+      }
     });
   }
 
