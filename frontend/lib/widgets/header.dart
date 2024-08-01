@@ -37,7 +37,7 @@ class Header extends StatelessWidget {
               maxLines: 1,
               style: TextStyle(
                 height: 1.35,
-                fontSize: title.length >= 28 ? 72 : 96,
+                fontSize: title.length < 28 ? 96 : title.length < 42 ? 72 : 56,
                 fontWeight: FontWeight.w200,
               ),
             ),
