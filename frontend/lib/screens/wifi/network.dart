@@ -54,8 +54,10 @@ class Network extends StatelessWidget {
     IconData strengthIcon;
     final strength = network.strength;
     if (strength >= 75) {
-      strengthIcon = material.Icons.network_wifi_3_bar;
+      strengthIcon = material.Icons.network_wifi;
     } else if (strength >= 67) {
+      strengthIcon = material.Icons.network_wifi_3_bar;
+    } else if (strength >= 50) {
       strengthIcon = material.Icons.network_wifi_2_bar;
     } else if (strength >= 33) {
       strengthIcon = material.Icons.network_wifi_1_bar;
