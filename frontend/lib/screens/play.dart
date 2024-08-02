@@ -103,11 +103,11 @@ class _PlayState extends State<Play> {
 
   String getTitle() {
     String t = title.title;
-    if (widget.trailer == null) {
+    if (widget.type == "tv") {
       final season = widget.season.toString().padLeft(2, "0");
       final episode = widget.episode.toString().padLeft(2, "0");
       t += " S${season}E$episode ${widget.epName}";
-    } else if (widget.season != null) {
+    } else if (widget.trailer != null) {
       t += " Trailer";
     }
     return t;
