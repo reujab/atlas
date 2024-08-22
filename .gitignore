@@ -3,3 +3,4 @@ dist
 http
 node_modules
 target
+*.deb
