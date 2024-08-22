@@ -1,11 +1,10 @@
 #!/bin/bash -e
 
 # Set $out before changing directory.
-out=$(readlink -f "$1")
+out=$PWD
 
 . "$(dirname "$0")/common.sh"
-usage "<output directory>"
-[[ -d "$out" ]] || panic "Error: $out is not a directory"
+usage
 require cargo dpkg-deb npm sqlx
 
 cd server
@@ -39,6 +38,7 @@ cp services/server/*.service "$build/usr/lib/systemd/system"
 cp -r server/dist "$build/usr/share/nodejs/atlas-server"
 cp -r server/node_modules "$build/usr/share/nodejs/atlas-server"
 
-version=$(sed -n 2p config/DEBIAN/control | cut -d' ' -f2)
-arch=$(dpkg --print-architecture || echo unknown)
-dpkg-deb --build "$build" "$out/atlas-server_${version}_$arch.deb"
+dpkg-deb --build "$build" "$out"
+
+cd server
+npm i
