@@ -41,6 +41,7 @@ class _SeasonsState extends State<Seasons> {
 
   late final ScrollController scrollController = ScrollController(
     onAttach: (_) async {
+      // Scroll to last watched episode.
       final rows = await db!.rawQuery("""
         SELECT season, episode
         FROM title_progress
