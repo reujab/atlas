@@ -16,7 +16,6 @@ trap cleanup EXIT
 . config/server.env
 export DATABASE_URL=sqlite:///tmp/atlas.db
 export PATH="$PWD/overlay/target/debug:$PWD/services/client:/opt/flutter/bin:$PATH"
-export PORT=1400
 export RUST_BACKTRACE=1
 export SERVER=${SERVER:-http://localhost:$PORT}
 export TMDB_KEY

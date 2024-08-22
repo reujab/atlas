@@ -1,0 +1,10 @@
+[Unit]
+Description=Atlas VPN
+ConditionPathExists=/etc/atlas-vpn.ovpn
+
+[Service]
+ExecStart=openvpn --config /etc/atlas-vpn.ovpn --dev tun0 --route-nopull
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

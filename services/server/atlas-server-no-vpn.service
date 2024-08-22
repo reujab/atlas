@@ -1,0 +1,14 @@
+[Unit]
+Description=Atlas backend
+After=postgresql.service
+
+[Service]
+Type=exec
+User=atlas
+Group=atlas
+EnvironmentFile=/etc/atlas.env
+ExecStart=node --enable-source-maps /usr/share/nodejs/atlas-server -mall -p $BACKEND_PORT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

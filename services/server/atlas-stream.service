@@ -1,0 +1,15 @@
+[Unit]
+Description=Atlas streaming backend
+After=postgresql.service
+PartOf=atlas-vpn.service
+
+[Service]
+Type=exec
+User=atlas-streamer
+Group=atlas-streamer
+EnvironmentFile=/etc/atlas.env
+ExecStart=node --enable-source-maps /usr/share/nodejs/atlas-server -mstream -p $STREAM_PORT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

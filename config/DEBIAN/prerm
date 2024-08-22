@@ -1,9 +1,12 @@
 #!/bin/bash -ex
 
+systemctl stop atlas-server-no-vpn atlas-backend atlas-stream atlas-vpn atlas-vpn-config tmdbd
+
 [[ $1 = remove ]] || exit 0
 
-systemctl stop atlas-server tmdbd
 systemctl disable atlas-server tmdbd
 
 su postgres -c 'dropdb atlas; dropuser atlas'
 userdel atlas
+
+rm -f /etc/systemd/network/10-atlas-streamer.network

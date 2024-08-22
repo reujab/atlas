@@ -3,9 +3,9 @@ Version: 0.0.0-0
 Section: httpd
 Priority: optional
 Architecture: amd64
-Depends: node-cheerio (>= 1.0.0~rc~12), node-cheerio (<< 2.0.0), node-express (>= 4.0.0),
- node-express (<< 6.0.0), node-morgan (>= 1.0.0), node-morgan (<< 2.0.0), nodejs (>= 18.0.0),
- postgresql, tor
-Recommends: nginx, certbot
+Depends: node-commander (>= 9.0.0), node-commander (<< 13.0.0), node-cheerio (>= 1.0.0~rc~12),
+ node-cheerio (<< 2.0.0), node-express (>= 4.0.0), node-express (<< 6.0.0), node-morgan (>= 1.0.0),
+ node-morgan (<< 2.0.0), nodejs (>= 18.0.0), postgresql, tor
+Recommends: nginx, certbot, systemd-resolved
 Maintainer: Christopher Knight <reujab@gmail.com>
 Description: Atlas server

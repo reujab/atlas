@@ -1,26 +1,36 @@
+Template: atlas-server/vpn-dns
+Type: string
+Description: What is the DNS server for the VPN?
+ Leave blank to disable the VPN.
+
 Template: atlas-server/nginx
 Type: boolean
 Default: false
 Description: Will you be using nginx?
 
-Template: atlas-server/internal-port
+Template: atlas-server/backend-port
 Type: string
 Default: 1400
 Description: What port should the backend run on?
  This port should not be forwarded.
+
+Template: atlas-server/stream-port
+Type: string
+Default: 1401
+Description: What port should the streaming backend run on?
+ This port should not be forwarded. The following 1000 ports should be open.
+ If you are not using a VPN, this should be the same as the backend port.
 
 Template: atlas-server/external-port
 Type: string
 Default: 443
 Description: What port should nginx use?
 
-Template: atlas-server/https-hostname
+Template: atlas-server/server-name
 Type: string
-Description: Enter the hostname used for Let's Encrypt certificates.
- Leave blank to disable HTTPS.
+Description: What is the nginx server_name (host)?
 
-Template: atlas-server/key
+Template: atlas-server/cert-dir
 Type: string
-Default: secret-key
-Description: What is the key to the server?
- The backend will be available at https://frontend:port/key
+Description: Enter the directory containing the Let's Encrypt certificates.
+ Leave blank to disable HTTPS.
