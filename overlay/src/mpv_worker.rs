@@ -12,8 +12,8 @@ use std::{
 };
 
 #[derive(Serialize)]
-struct Command {
-    pub command: Vec<Value>,
+struct Command<'a> {
+    pub command: &'a Vec<Value>,
 }
 
 #[derive(Deserialize)]
@@ -63,7 +63,7 @@ pub(crate) fn start(sender: ComponentSender<super::App>, mutex: Arc<Mutex<UnixSt
 }
 
 pub(crate) fn send_command(
-    command: Vec<Value>,
+    command: &Vec<Value>,
     stream: &mut UnixStream,
 ) -> Result<serde_json::Value, String> {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
@@ -103,7 +103,7 @@ pub(crate) fn get_property(
     stream: &mut UnixStream,
 ) -> Result<serde_json::Value, String> {
     debug!("getting property: {}", property);
-    return send_command(vec!["get_property".into(), property.into()], stream);
+    return send_command(&vec!["get_property".into(), property.into()], stream);
 }
 
 pub(crate) fn wait_for_event(stream: &UnixStream, event: &str) {

@@ -363,7 +363,7 @@ fn main() {
     mpv_worker::wait_for_event(&stream, "file-loaded");
     info!("File loaded. Waiting for playback");
     send_command(
-        vec!["set_property".into(), "pause".into(), false.into()],
+        &vec!["set_property".into(), "pause".into(), false.into()],
         &mut stream,
     )
     .unwrap();
