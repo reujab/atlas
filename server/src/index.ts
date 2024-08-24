@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import { program } from "commander";
 import express, { Request, Response } from "express";
 import morgan from "morgan";
@@ -96,7 +95,7 @@ if (["all", "stream"].includes(opts.mode)) {
 
 	// DEBUG
 	app.get("/stream/ip", async (req, res) => {
-		res.end(execSync("curl icanhazip.com").toString());
+		res.end(await (await fetch("https://icanhazip.com")).text());
 	});
 }
 
