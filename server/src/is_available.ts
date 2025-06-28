@@ -19,7 +19,6 @@ export default async function handle(
 		res.status(500).end();
 		return;
 	}
-	res.header("Cache-Control", "public, max-age=86400");
 	res.json(available);
 }
 
