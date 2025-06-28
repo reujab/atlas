@@ -305,7 +305,7 @@ impl SimpleComponent for App {
             }
             Msg::Quit => {
                 let mut file = File::create("/tmp/progress").unwrap();
-                let mut percent = self.mpv.position / self.duration;
+                let mut percent = self.mpv.position.max(0.0) / self.duration;
                 if percent > 0.95 {
                     percent = 1.0;
                 }
