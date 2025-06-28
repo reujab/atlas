@@ -151,7 +151,7 @@ export default class Stream extends EventEmitter {
 			? files.find((f) => {
 					const parsed = parseName(f.name);
 					return parsed.seasons.includes(Number(season)) && parsed.episode === Number(episode);
-			  })
+				})
 			: files.find((f) => /\.(?:mp4|avi|mkv)$/.test(f.name));
 		return file;
 	}
@@ -196,5 +196,11 @@ export default class Stream extends EventEmitter {
 
 setInterval(() => {
 	if (!webtorrent.torrents.length) return;
-	console.log("DL:", webtorrent.downloadSpeed, "UP:", webtorrent.uploadSpeed);
+	console.log(
+		"DL:",
+		Math.floor(webtorrent.downloadSpeed).toLocaleString(),
+		"B/s; UP:",
+		Math.floor(webtorrent.uploadSpeed).toLocaleString(),
+		"B/s",
+	);
 }, 10_000);
