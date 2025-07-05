@@ -53,7 +53,7 @@ if [[ ! $CERT_DIR ]]; then
 fi
 envsubst < /etc/nginx/sites-enabled/atlas > /tmp/nginx.conf
 mv /tmp/nginx.conf /etc/nginx/sites-enabled/atlas
-if pidof nginx; then systemctl reload nginx; fi
+if pidof nginx; then systemctl reload nginx || echo Failed to reload nginx; fi
 
 if pidof tmdbd; then systemctl restart atlas-server tmdbd; fi
 
